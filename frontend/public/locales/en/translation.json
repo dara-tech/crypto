@@ -3,7 +3,7 @@
   "login": "Login",
   "home": "Home",
   "register": "Register",
-  "profile": "Profile",
+  "Profile": "Profile",
   "settings": "Settings",
   "schools": "Schools",
   "companies": "Companies",
@@ -14,5 +14,84 @@
   "language": "Language",
   "english": "English",
   "khmer": "Khmer",
-  "dashboard": "Dashboard"
+  "dashboard": "Dashboard",
+  "update_profile": "Profile Settings",
+  "General Info": "General Info",
+  "Security": "Security",
+  "saving": "Saving...",
+  "saveChanges": "Save Changes",
+  "form": {
+    "name": "Name",
+    "email": "Email",
+    "enterName": "Enter your name",
+    "enterEmail": "Enter your email"
+  },
+  "profile": {
+    "title": "Profile",
+    "changePassword": "Change Password",
+    "currentPassword": "Current Password",
+    "newPassword": "New Password",
+    "confirmPassword": "Confirm Password",
+    "updatePassword": "Update Password",
+    "settings": "Profile Settings"
+  },
+  "menu": {
+    "title": "Menu",
+    "admin": "Admin Dashboard",
+    "open": "Open main menu"
+  },
+  "auth": {
+    "logout": "Logout"
+  },
+  "appName": "KH HARA",
+  "contactPage": {
+    "title": "Contact Us",
+    "subtitle": "Get in touch with our team",
+    "form": {
+      "name": "Your Name",
+      "email": "Email Address",
+      "subject": "Subject",
+      "message": "Your Message",
+      "submit": "Send Message",
+      "sending": "Sending...",
+      "success": "Thank you for your message! We'll get back to you soon.",
+      "error": "Failed to send message. Please try again later.",
+      "validation": {
+        "required": "This field is required",
+        "email": "Please enter a valid email address"
+      }
+    },
+    "info": {
+      "title": "Contact Information",
+      "address": "123 Street Name, City, Country",
+      "phone": "+855 12 345 678",
+      "email": "info@khhara.com",
+      "hours": "Mon - Fri: 9:00 - 18:00"
+    },
+    "social": {
+      "title": "Follow Us",
+      "facebook": "Facebook",
+      "twitter": "Twitter",
+      "instagram": "Instagram",
+      "linkedin": "LinkedIn"
+    }
+  },
+  "company": {
+    "editTitle": "Edit Company",
+    "backToCompanies": "← Back to Companies",
+    "companyNameRequired": "Company name is required",
+    "updateCompany": "Update Company",
+    "updating": "Updating...",
+    "cancel": "Cancel",
+    "sections": {
+      "logo": "Company Logo",
+      "basicInfo": "Basic Information",
+      "contactInfo": "Contact Information",
+      "socialMedia": "Social Media"
+    },
+    "errors": {
+      "fetchFailed": "Failed to fetch company details",
+      "updateFailed": "Failed to update company"
+    }
+  }
 }

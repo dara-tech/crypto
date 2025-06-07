@@ -5,7 +5,9 @@ import mongoose from 'mongoose';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import authRoutes from './routes/authRoutes.js'; // Ensure .js extension is used
-import schoolRoutes from './routes/schoolRoutes.js'; // Ensure .js extension is used
+import schoolRoutes from './routes/schoolRoutes.js';
+import companyRoute from './routes/companyRoutes.js'
+ // Ensure .js extension is used
 dotenv.config();
 
 const app = express();
@@ -33,6 +35,7 @@ app.use((req, res, next) => {
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/schools', schoolRoutes);
+app.use('/api/companies', companyRoute);
 // Connect MongoDB
 mongoose.connect(process.env.MONGO_URI)
   .then(() => {

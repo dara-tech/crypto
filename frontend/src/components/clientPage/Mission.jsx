@@ -1,11 +1,12 @@
 import React, { useEffect } from 'react'
-import useSchools from '../../hooks/useSchools'
+import useCompanies from '../../hooks/useCompanies'
 import { Link } from 'react-router-dom'
+
 const Mission = () => {
-  const { schools, loading, error, getSchools } = useSchools()
+  const { companies, loading, error, getCompanies } = useCompanies()
 
   useEffect(() => {
-    getSchools()
+    getCompanies()
   }, [])
 
   if (loading) {
@@ -50,35 +51,35 @@ const Mission = () => {
     )
   }
 
-  const school = schools[0] // Assuming we want to display the first school
+  const company = companies[0] // Assuming we want to display the first company
 
   return (
     <div className="flex flex-col">
       {/* Banner Section */}
       <div className="relative h-[400px] w-full">
-        {school?.missionImage ? (
+        {company?.missionImage ? (
           <img
-            src={school.missionImage}
-            alt="School Banner"
+            src={company.missionImage}
+            alt="Company Banner"
             className="w-full h-full object-cover"
           />
-        ) : school?.heroImages?.[0] && (
+        ) : company?.heroImages?.[0] && (
           <img
-            src={school.heroImages[0]}
-            alt="School Banner"
+            src={company.heroImages[0]}
+            alt="Company Banner"
             className="w-full h-full object-cover"
           />
         )}
         <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-white p-4">
-          <h1 className="text-5xl font-bold mb-4 text-center">{school?.name}</h1>
-          {school?.logo && (
+          <h1 className="text-5xl font-bold mb-4 text-center">{company?.name}</h1>
+          {company?.logo && (
             <img
-              src={school.logo}
-              alt={`${school.name} logo`}
+              src={company.logo}
+              alt={`${company.name} logo`}
               className="w-24 h-24 object-contain mb-4"
             />
           )}
-          <p className="text-xl max-w-3xl text-center px-4">{school?.mission}</p>
+          <p className="text-xl max-w-3xl text-center px-4">{company?.mission}</p>
         </div>
       </div>
 
@@ -88,30 +89,30 @@ const Mission = () => {
           <div className="card-body bg-base-100">
             <Link to="/about">
               <div className="card-body cursor-pointer hover:scale-105 transition-all duration-300">
-              {school?.aboutImage && (
+              {company?.aboutImage && (
                 <img
-                  src={school.missionImage}
+                  src={company.missionImage}
                   alt="Mission"
                   className="w-full h-48 object-cover rounded-lg mb-4"
                 />
               )}
                 <h3 className="card-title text-2xl font-bold mb-4">About</h3>
-                <p className="text-base-content/70">{school?.about}</p>
+                <p className="text-base-content/70">{company?.about}</p>
               </div>
             </Link>
           </div>
           <div className="card-body bg-base-100">
             <Link to="/vision">
               <div className="card-body cursor-pointer hover:scale-105 transition-all duration-300">
-              {school?.visionImage && (
+              {company?.visionImage && (
                 <img
-                  src={school.visionImage}
+                  src={company.visionImage}
                   alt="Vision"
                   className="w-full h-48 object-cover rounded-lg mb-4"
                 />
               )}
               <h3 className="card-title text-2xl font-bold mb-4">Vision</h3>
-                <p className="text-base-content/70">{school?.vision}</p>
+                <p className="text-base-content/70">{company?.vision}</p>
               </div>
             </Link>
           </div>

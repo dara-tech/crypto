@@ -1,13 +1,13 @@
 import React, { useEffect } from 'react'
 import { FaFacebook, FaInstagram, FaYoutube, FaLinkedin } from 'react-icons/fa'
 import { MdLocationOn, MdPhone, MdEmail } from 'react-icons/md'
-import useSchools from '../../hooks/useSchools'
+import useCompanies from '../../hooks/useCompanies'
 
 const Footer = () => {
-  const { schools, loading, error, getSchools } = useSchools()
+  const { companies, loading, error, getCompanies } = useCompanies()
 
   useEffect(() => {
-    getSchools()
+    getCompanies()
   }, [])
 
   if (loading) {
@@ -43,25 +43,25 @@ const Footer = () => {
     )
   }
 
-  const school = schools[0]
+  const company = companies[0]
 
   return (
     <footer className="bg-base-200 text-base-content">
       <div className="container mx-auto p-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* School Info */}
+          {/* Company Info */}
           <div>
             <div className="flex items-center gap-4 mb-4">
-              {school?.logo && (
+              {company?.logo && (
                 <img 
-                  src={school.logo} 
-                  alt={school.name}
+                  src={company.logo} 
+                  alt={company.name}
                   className="w-12 h-12 object-contain"
                 />
               )}
-              <h3 className="font-bold text-lg">{school?.name}</h3>
+              <h3 className="font-bold text-lg">{company?.name}</h3>
             </div>
-            <p className="text-base-content/70">{school?.about}</p>
+            <p className="text-base-content/70">{company?.about}</p>
           </div>
 
           {/* Contact Info */}
@@ -70,15 +70,15 @@ const Footer = () => {
             <div className="space-y-3">
               <div className="flex items-center gap-2">
                 <MdLocationOn className="text-primary" />
-                <span>{school?.contact?.address}</span>
+                <span>{company?.contact?.address}</span>
               </div>
               <div className="flex items-center gap-2">
                 <MdPhone className="text-primary" />
-                <span>{school?.contact?.phone}</span>
+                <span>{company?.contact?.phone}</span>
               </div>
               <div className="flex items-center gap-2">
                 <MdEmail className="text-primary" />
-                <span>{school?.contact?.email}</span>
+                <span>{company?.contact?.email}</span>
               </div>
             </div>
           </div>
@@ -87,26 +87,26 @@ const Footer = () => {
           <div>
             <h4 className="font-bold text-lg mb-4">Follow Us</h4>
             <div className="flex gap-4">
-              {school?.socialMedia?.facebook && (
-                <a href={school.socialMedia.facebook} target="_blank" rel="noopener noreferrer" 
+              {company?.socialMedia?.facebook && (
+                <a href={company.socialMedia.facebook} target="_blank" rel="noopener noreferrer" 
                    className="hover:text-primary transition-colors">
                   <FaFacebook size={24} />
                 </a>
               )}
-              {school?.socialMedia?.instagram && (
-                <a href={school.socialMedia.instagram} target="_blank" rel="noopener noreferrer"
+              {company?.socialMedia?.instagram && (
+                <a href={company.socialMedia.instagram} target="_blank" rel="noopener noreferrer"
                    className="hover:text-primary transition-colors">
                   <FaInstagram size={24} />
                 </a>
               )}
-              {school?.socialMedia?.youtube && (
-                <a href={school.socialMedia.youtube} target="_blank" rel="noopener noreferrer"
+              {company?.socialMedia?.youtube && (
+                <a href={company.socialMedia.youtube} target="_blank" rel="noopener noreferrer"
                    className="hover:text-primary transition-colors">
                   <FaYoutube size={24} />
                 </a>
               )}
-              {school?.socialMedia?.linkedin && (
-                <a href={school.socialMedia.linkedin} target="_blank" rel="noopener noreferrer"
+              {company?.socialMedia?.linkedin && (
+                <a href={company.socialMedia.linkedin} target="_blank" rel="noopener noreferrer"
                    className="hover:text-primary transition-colors">
                   <FaLinkedin size={24} />
                 </a>
@@ -116,7 +116,7 @@ const Footer = () => {
         </div>
 
         <div className="border-t border-base-300 mt-8 pt-8 text-center">
-          <p>© {new Date().getFullYear()} {school?.name}. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} {company?.name}. All rights reserved.</p>
         </div>
       </div>
     </footer>

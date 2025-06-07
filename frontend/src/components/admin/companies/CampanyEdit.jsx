@@ -1,18 +1,19 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { FaSchool, FaPen, FaPhoneAlt, FaGlobe } from "react-icons/fa";
-import useSchools from "../../../hooks/useSchools";
+import { FaBuilding, FaPen, FaPhoneAlt, FaGlobe } from "react-icons/fa";
+import useCompanies from "../../../hooks/useCompanies";
 import LogoUpload from "./edit/LogoUpload";
 import BasicInfo from "./edit/BasicInfo";
 import ContactInfo from "./edit/ContactInfo";
 import SocialMedia from "./edit/SocialMedia";
 import FormSection from "./edit/FormSection";
-import { toast } from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 
-const SchoolEdit = () => {
+const CampanyEdit = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { getSchool, updateSchool } = useSchools();
+  const { t } = useTranslation();
+  const { getCompany, updateCompany } = useCompanies();
 
   const [formData, setFormData] = useState({
     name: "",
@@ -51,53 +52,53 @@ const SchoolEdit = () => {
   });
 
   useEffect(() => {
-    const fetchSchool = async () => {
+    const fetchCompany = async () => {
       try {
-        const schoolData = await getSchool(id);
-        if (schoolData) {
+        const companyData = await getCompany(id);
+        if (companyData) {
           setFormData({
             ...formData,
-            name: schoolData.name || "",
-            logo: schoolData.logo || "",
-            about: schoolData.about || "",
-            aboutImage: schoolData.aboutImage || "",
-            mission: schoolData.mission || "",
-            missionImage: schoolData.missionImage || "",
-            vision: schoolData.vision || "",
-            visionImage: schoolData.visionImage || "",
+            name: companyData.name || "",
+            logo: companyData.logo || "",
+            about: companyData.about || "",
+            aboutImage: companyData.aboutImage || "",
+            mission: companyData.mission || "",
+            missionImage: companyData.missionImage || "",
+            vision: companyData.vision || "",
+            visionImage: companyData.visionImage || "",
             contact: {
-              address: schoolData.contact?.address || "",
-              phone: schoolData.contact?.phone || "",
-              email: schoolData.contact?.email || "",
-              mapLocation: schoolData.contact?.mapLocation || ""
+              address: companyData.contact?.address || "",
+              phone: companyData.contact?.phone || "",
+              email: companyData.contact?.email || "",
+              mapLocation: companyData.contact?.mapLocation || ""
             },
             socialMedia: {
-              facebook: schoolData.socialMedia?.facebook || "",
-              instagram: schoolData.socialMedia?.instagram || "",
-              youtube: schoolData.socialMedia?.youtube || "",
-              linkedin: schoolData.socialMedia?.linkedin || ""
+              facebook: companyData.socialMedia?.facebook || "",
+              instagram: companyData.socialMedia?.instagram || "",
+              youtube: companyData.socialMedia?.youtube || "",
+              linkedin: companyData.socialMedia?.linkedin || ""
             },
-            heroImages: schoolData.heroImages || [],
-            programsOffered: schoolData.programsOffered || [],
-            testimonials: schoolData.testimonials || []
+            heroImages: companyData.heroImages || [],
+            programsOffered: companyData.programsOffered || [],
+            testimonials: companyData.testimonials || []
           });
-          if (schoolData.logo) {
-            setLogoPreview(schoolData.logo);
+          if (companyData.logo) {
+            setLogoPreview(companyData.logo);
           }
           setImagePreview({
-            about: schoolData.aboutImage || null,
-            mission: schoolData.missionImage || null,
-            vision: schoolData.visionImage || null
+            about: companyData.aboutImage || null,
+            mission: companyData.missionImage || null,
+            vision: companyData.visionImage || null
           });
         }
       } catch (err) {
-        setError("Failed to fetch school details");
+        setError(t('company.errors.fetchFailed'));
       } finally {
         setLoading(false);
       }
     };
 
-    fetchSchool();
+    fetchCompany();
   }, [id]);
 
   const handleInputChange = (e) => {
@@ -157,7 +158,7 @@ const SchoolEdit = () => {
     setError("");
 
     try {
-      if (!formData.name.trim()) throw new Error("School name is required");
+      if (!formData.name.trim()) throw new Error(t('company.companyNameRequired'));
 
       const formDataToSend = new FormData();
 
@@ -230,13 +231,13 @@ const SchoolEdit = () => {
         });
       }
 
-      const updated = await updateSchool(id, formDataToSend);
-      if (!updated) throw new Error("Failed to update school");
+      const updated = await updateCompany(id, formDataToSend);
+      if (!updated) throw new Error(t('company.errors.updateFailed'));
 
-      navigate("/admin/schools");
-    } catch (err) {
+      navigate("/admin/companies");
+    } catch (err) {   
       console.error("Update error:", err);
-      setError(err.message || "Failed to update school");
+      setError(err.message || "Failed to update company");
     } finally {
       setSubmitting(false);
     }
@@ -308,14 +309,14 @@ const SchoolEdit = () => {
   }
 
   return (
-    <div className="container  mx-auto p-6 max-w-4xl">
+    <div className="container mx-auto p-6 max-w-4xl">
       <div className="flex items-center justify-between mb-8">
-        <h2 className="text-3xl font-bold">Edit School</h2>
+        <h2 className="text-3xl font-bold">{t('company.editTitle')}</h2>
         <button 
-          onClick={() => navigate("/admin/schools")}
+          onClick={() => navigate("/admin/companies")}
           className="btn btn-ghost"
         >
-          ← Back to Schools
+          {t('company.backToCompanies')}
         </button>
       </div>
 
@@ -328,8 +329,8 @@ const SchoolEdit = () => {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-8 ">
-        <FormSection title="School Logo" icon={<FaSchool />}>
+      <form onSubmit={handleSubmit} className="space-y-8">
+        <FormSection title={t('company.sections.logo')} icon={<FaBuilding />}>
           <LogoUpload
             logo={formData.logo}
             logoPreview={logoPreview}
@@ -339,7 +340,7 @@ const SchoolEdit = () => {
           />
         </FormSection>
 
-        <FormSection title="Basic Information" icon={<FaPen />}>
+        <FormSection title={t('company.sections.basicInfo')} icon={<FaPen />}>
           <BasicInfo
             formData={formData}
             onInputChange={handleInputChange}
@@ -348,14 +349,14 @@ const SchoolEdit = () => {
           />
         </FormSection>
 
-        <FormSection title="Contact Information" icon={<FaPhoneAlt />}>
+        <FormSection title={t('company.sections.contactInfo')} icon={<FaPhoneAlt />}>
           <ContactInfo
             formData={formData}
             onInputChange={handleInputChange}
           />
         </FormSection>
 
-        <FormSection title="Social Media" icon={<FaGlobe />}>
+        <FormSection title={t('company.sections.socialMedia')} icon={<FaGlobe />}>
           <SocialMedia
             formData={formData}
             onInputChange={handleInputChange}
@@ -365,11 +366,11 @@ const SchoolEdit = () => {
         <div className="flex justify-end gap-4">
           <button
             type="button"
-            onClick={() => navigate("/admin/schools")}
+            onClick={() => navigate("/admin/companies")}
             className="btn btn-ghost"
             disabled={submitting}
           >
-            Cancel
+            {t('company.cancel')}
           </button>
           <button
             type="submit"
@@ -379,10 +380,10 @@ const SchoolEdit = () => {
             {submitting ? (
               <>
                 <span className="loading loading-spinner loading-sm"></span>
-                Updating...
+                {t('company.updating')}
               </>
             ) : (
-              "Update School"
+              t('company.updateCompany')
             )}
           </button>
         </div>
@@ -391,4 +392,4 @@ const SchoolEdit = () => {
   );
 };
 
-export default SchoolEdit;
+export default CampanyEdit;

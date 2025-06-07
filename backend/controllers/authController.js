@@ -153,49 +153,68 @@ export const getProfile = async (req, res) => {
 
 export const updateAdminProfile = async (req, res) => {
   try {
-    const { name, email } = req.body;
+    const { name, email, currentPassword, newPassword } = req.body;
     const user = await User.findById(req.user.id);
 
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // Update basic fields
-    user.name = name;
-    user.email = email;
+    // Update basic fields if provided
+    if (name) user.name = name;
+    if (email) user.email = email;
 
-    // Handle image upload if present
-    if (req.files) {
-      if (req.files.profilePic) {
-        // Using Promise to wait for the upload to complete
-        const profilePicResult = await new Promise((resolve, reject) => {
-          const uploadStream = cloudinary.uploader.upload_stream(
-            { folder: 'admin_profiles' },
-            (error, result) => {
-              if (error) {
-                reject(error); // Reject in case of error
-              } else {
-                resolve(result); // Resolve with the result of the upload
-              }
-            }
-          );
-          // Stream the image buffer to Cloudinary
-          uploadStream.end(req.files.profilePic[0].buffer);
-        });
-
-        user.profilePic = profilePicResult.secure_url;
+    // Handle password update if currentPassword and newPassword are provided
+    if (currentPassword && newPassword) {
+      // Validate new password length
+      if (newPassword.length < 6) {
+        return res.status(400).json({ message: 'New password must be at least 6 characters long' });
       }
 
+      // Verify current password
+      const isMatch = await bcrypt.compare(currentPassword, user.password);
+      if (!isMatch) {
+        return res.status(401).json({ message: 'Current password is incorrect' });
+      }
+
+      // Hash and set new password
+      const salt = await bcrypt.genSalt(10);
+      user.password = await bcrypt.hash(newPassword, salt);
+    } else if ((currentPassword && !newPassword) || (!currentPassword && newPassword)) {
+      return res.status(400).json({ message: 'Both current and new password are required to update password' });
     }
+
+    // Handle image upload if present
+    if (req.files?.profilePic) {
+      const profilePicResult = await new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+          { folder: 'admin_profiles' },
+          (error, result) => {
+            if (error) {
+              reject(error);
+            } else {
+              resolve(result);
+            }
+          }
+        );
+        uploadStream.end(req.files.profilePic[0].buffer);
+      });
+
+      user.profilePic = profilePicResult.secure_url;
+    }
+
     await user.save();
+
+    // Return updated user data (excluding password)
+    const updatedUser = await User.findById(user._id).select('-password');
 
     return res.status(200).json({
       message: 'Profile updated successfully',
       user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        profileImage: user.profileImage
+        id: updatedUser._id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        profilePic: updatedUser.profilePic
       }
     });
   } catch (err) {
@@ -203,6 +222,8 @@ export const updateAdminProfile = async (req, res) => {
     res.status(500).json({ message: 'Server error while updating profile' });
   }
 };
+
+// Password update functionality has been merged into updateAdminProfile
 
 export const logoutUser = async (req, res) => {
   try {

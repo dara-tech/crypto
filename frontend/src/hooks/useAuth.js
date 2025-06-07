@@ -83,17 +83,41 @@ const useAuth = () => {
   
   // Update Admin Profile
   const updateAdminProfile = async (formData) => {
+    setLoading(true);
+    setError("");
+    
     try {
-      const { data } = await API.put("/api/auth/profile", formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
+      // Check if this is a password update
+      const isPasswordUpdate = formData.get('currentPassword') && formData.get('newPassword');
+      
+      const { data } = await API.put(
+        "/api/auth/profile", 
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
         }
-      });
-      setProfile(data.user);
+      );
+      
+      // Update profile in state if this was a profile update
+      if (data.user) {
+        setProfile(data.user);
+      }
+      
+      // If this was a password update, show success message
+      if (isPasswordUpdate) {
+        return { success: true, message: 'Password updated successfully' };
+      }
+      
       return data;
     } catch (error) {
-      setError(error.response?.data?.message || "Error updating profile");
-      throw error;
+      const errorMessage = error.response?.data?.message || 
+                         (error.response?.data?.error || "Error updating profile");
+      setError(errorMessage);
+      throw new Error(errorMessage);
+    } finally {
+      setLoading(false);
     }
   };
 

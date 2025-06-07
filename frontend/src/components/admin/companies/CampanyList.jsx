@@ -1,35 +1,34 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import useSchools from "../../../hooks/useSchools";
-import { FaSchool, FaEye, FaEdit, FaTrash } from "react-icons/fa";
+import useCompanies from "../../../hooks/useCompanies";
+import { FaBuilding, FaEye, FaEdit, FaTrash } from "react-icons/fa";
 
-const SchoolList = () => {
+const CompanyList = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const { schools, getSchools, deleteSchool } = useSchools();
+  const { companies, getCompanies, deleteCompany } = useCompanies();
 
   useEffect(() => {
-    const fetchSchools = async () => {
+    const fetchCompanies = async () => {
       try {
-        await getSchools();
+        await getCompanies();
       } catch (err) {
-        setError("Failed to fetch schools");
+        setError("Failed to fetch companies");
       } finally {
         setLoading(false);
       }
     };
   
-    fetchSchools();
-  }, []); // ✅ Runs only once on mount
+    fetchCompanies();
+  }, []);
   
-
   const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you want to delete this school?")) {
+    if (window.confirm("Are you sure you want to delete this company?")) {
       try {
-        await deleteSchool(id);
-        await getSchools(); // Refresh the list
+        await deleteCompany(id);
+        await getCompanies(); // Refresh the list
       } catch (err) {
-        setError("Failed to delete school");
+        setError("Failed to delete company");
       }
     }
   };
@@ -79,69 +78,47 @@ const SchoolList = () => {
 
   return (
     <div className="container mx-auto p-6 h-screen">
-      {/* <div className="flex justify-between items-center mb-6">
-        <div className="flex items-center gap-2">
-          <FaSchool className="text-2xl" />
-          <h2 className="text-2xl font-bold">Schools</h2>
-        </div>
-        <Link to="/admin/schools/new" className="btn btn-primary">
-          Add New School
-        </Link>
-      </div> */}
-
       <div className="divide-y divide-gray-200">
-        {schools.map((school) => (
-          <div key={school._id} className="py-4 flex items-center justify-between">
+        {companies.map((company) => (
+          <div key={company._id} className="py-4 flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              {school.logo ? (
+              {company.logo ? (
                 <img
-                  src={school.logo}
-                  alt={school.name}
+                  src={company.logo}
+                  alt={company.name}
                   className="h-16 w-16 object-cover rounded"
                 />
               ) : (
                 <div className="h-16 w-16 flex items-center justify-center bg-gray-100 rounded">
-                  <FaSchool className="text-3xl text-gray-400" />
+                  <FaBuilding className="text-3xl text-gray-400" />
                 </div>
               )}
               <div>
-                <h3 className="font-medium">{school.name}</h3>
+                <h3 className="font-medium">{company.name}</h3>
                 <p className="text-sm text-gray-600">
-                  {school.contact?.address || "No address provided"}
+                  {company.contact?.address || "No address provided"}
                 </p>
               </div>
             </div>
             <div className="flex space-x-2">
-              {/* <Link
-                to={`/admin/schools/${school._id}`}
-                className="btn btn-primary btn-sm"
-              >
-                <FaEye  /> 
-              </Link> */}
               <Link
-                to={`/admin/schools/${school._id}`}
+                to={`/admin/companies/${company._id}`}
                 className="btn btn-ghost btn-sm"
               >
                 <FaEdit /> 
               </Link>
-              {/* <button
-                onClick={() => handleDelete(school._id)}
-                className="btn btn-error btn-sm"
-              >
-                <FaTrash  /> 
-              </button> */}
             </div>
           </div>
         ))}
       </div>
 
-      {schools.length === 0 && (
+      {companies.length === 0 && (
         <div className="text-center py-12">
-          <p className="text-gray-500">No schools found. Add your first school!</p>
+          <p className="text-gray-500">No companies found. Add your first company!</p>
         </div>
       )}
     </div>
   );
 };
 
-export default SchoolList;
+export default CompanyList;

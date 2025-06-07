@@ -2,3 +2,56 @@
 @plugin "daisyui" {
     themes: all;
 }
+
+/* Base font styles */
+:root {
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-khmer: 'Hanuman', 'Kantumruy Pro', system-ui, -apple-system, sans-serif;
+}
+
+/* Font smoothing */
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Language-specific font classes */
+.font-en {
+  font-family: var(--font-khmer);
+  font-feature-settings: 'kern', 'liga', 'clig', 'calt';
+}
+
+.font-km {
+  font-family: var(--font-khmer);
+  font-feature-settings: 'kern', 'liga', 'clig', 'calt';
+  line-height: 1.7; /* Slightly more line height for Khmer text */
+}
+
+/* Ensure proper rendering for Khmer text */
+:lang(km) {
+  font-family: var(--font-khmer);
+  line-height: 1.7;
+}
+
+/* Optimize font display */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  min-height: 100vh;
+  background-color: hsl(var(--b1));
+  color: hsl(var(--bc));
+}
+
+/* Fix for font loading */
+.font-loading {
+  visibility: hidden;
+}
+
+.font-loaded {
+  visibility: visible;
+}

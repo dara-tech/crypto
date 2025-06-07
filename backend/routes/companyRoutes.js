@@ -1,5 +1,5 @@
 import express from 'express';
-import { createCampany, getCampany, updateCampany, deleteCampany, getAllCampanies, } from '../controllers/campanyController.js';
+import { createCompany, getCompany, updateCompany, deleteCompany, getAllCompanies, } from '../controllers/companyController.js';
 import { protect } from '../middleware/authMiddleware.js';
 import upload from '../lib/multer.js';
 
@@ -16,11 +16,11 @@ const uploadFields = [
 ];
 
 // Basic CRUD routes
-router.post('/', protect, upload.fields(uploadFields), createCampany);
-router.get('/', getAllCampanies);
-router.get('/:id', getCampany);
-router.put('/:id', protect, upload.fields(uploadFields), updateCampany);
-router.delete('/:id', protect, deleteCampany);
+router.post('/', protect, upload.fields(uploadFields), createCompany);
+router.get('/', getAllCompanies);
+router.get('/:id', getCompany);
+router.put('/:id', protect, upload.fields(uploadFields), updateCompany);
+router.delete('/:id', protect, deleteCompany);
 
 
 export default router;

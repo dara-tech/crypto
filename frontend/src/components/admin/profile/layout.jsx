@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react"
-import { AlertCircle, User, Mail, Save } from "lucide-react"
+import { AlertCircle, User, Mail, Save, Lock, Settings, Shield } from "lucide-react"
+import { useTranslation } from 'react-i18next'
 import useAuth from "../../../hooks/useAuth"
 import ProfilePicture from "../../admin/profile/components/ProfilePicture"
+import ChangePassword from "./components/ChangePassword"
 
 const Profile = () => {
   const { profile, error, updateAdminProfile, getAdminProfile } = useAuth()
@@ -16,6 +18,9 @@ const Profile = () => {
   const [saveSuccess, setSaveSuccess] = useState(false)
   const [imagePreview, setImagePreview] = useState("/user.png")
   const [showUploadOptions, setShowUploadOptions] = useState(false)
+  const [isPasswordUpdating, setIsPasswordUpdating] = useState(false)
+  const [activeTab, setActiveTab] = useState("general")
+  const { t } = useTranslation()
 
   // Fetch user profile on component mount
   useEffect(() => {
@@ -77,108 +82,168 @@ const Profile = () => {
       // Refresh profile data after update
       getAdminProfile()
     } catch (err) {
-      setSaveError("Failed to update profile")
+      setSaveError(err.response?.data?.message || "Failed to update profile")
     } finally {
       setIsSaving(false)
     }
   }
 
+  const handlePasswordUpdate = async (passwordData) => {
+    try {
+      setIsPasswordUpdating(true)
+      setSaveError("")
+      
+      const formDataToSend = new FormData()
+      formDataToSend.append('currentPassword', passwordData.currentPassword)
+      formDataToSend.append('newPassword', passwordData.newPassword)
+      
+      await updateAdminProfile(formDataToSend)
+      setSaveSuccess(true)
+      return true
+    } catch (err) {
+      setSaveError(err.response?.data?.message || "Failed to update password")
+      throw err
+    } finally {
+      setIsPasswordUpdating(false)
+    }
+  }
+
   return (
-    <div className="container mx-auto px-4 py-8 h-screen">
-      <div className="max-w-2xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8">Profile Settings</h1>
+    <div className="container mx-auto px-4 py-8 min-h-screen bg-base-100">
+      <div className="max-w-5xl mx-auto">
+        <h1 className="text-3xl font-bold mb-8 text-primary">{t('update_profile')}</h1>
         
         {error && (
-          <div className="alert alert-error mb-6">
+          <div className="alert alert-error mb-6 shadow-lg">
             <AlertCircle className="w-6 h-6" />
             <span>{error}</span>
           </div>
         )}
 
         {saveError && (
-          <div className="alert alert-error mb-6">
+          <div className="alert alert-error mb-6 shadow-lg">
             <AlertCircle className="w-6 h-6" />
             <span>{saveError}</span>
           </div>
         )}
 
         {saveSuccess && (
-          <div className="alert alert-success mb-6">
+          <div className="alert alert-success mb-6 shadow-lg">
             <span>Profile updated successfully!</span>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-6 ">
-            <div>
-                
-            </div>
-          <div className="form-control">
-           
-            <ProfilePicture
-              imagePreview={imagePreview}
-              showUploadOptions={showUploadOptions}
-              setShowUploadOptions={setShowUploadOptions}
-              handleFileChange={handleFileChange}
-              formData={formData}
-              setImagePreview={setImagePreview}
-              setFormData={setFormData}
-              defaultImage="/user.png"
-            />
-          </div>
-
-          <div className="form-control">
-            <label className="label">
-              <span className="label-text text-base">Name</span>
-            </label>
-            <div className="relative">
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                className="input input-bordered focus:outline-none w-full pl-10"
-                placeholder="Enter your name"
-                required
-              />
-              <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-base-content/50 w-5 h-5" />
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Sidebar */}
+          <div className="lg:w-1/4">
+            <div className="bg-base-200 rounded-lg p-6 shadow-md">
+              <ul className="menu menu-vertical w-full">
+                <li className={activeTab === "general" ? "bordered" : ""}>
+                  <button 
+                    className="flex items-center gap-3 text-base font-medium" 
+                    onClick={() => setActiveTab("general")}
+                  >
+                    <User className="w-5 h-5" />
+                    {t('General Info')}
+                  </button>
+                </li>
+                <li className={activeTab === "security" ? "bordered" : ""}>
+                  <button 
+                    className="flex items-center gap-3 text-base font-medium" 
+                    onClick={() => setActiveTab("security")}
+                  >
+                    <Shield className="w-5 h-5" />
+                    {t('Security')}
+                  </button>
+                </li>
+              </ul>
             </div>
           </div>
 
-          <div className="form-control">
-            <label className="label">
-              <span className="label-text text-base">Email</span>
-            </label>
-            <div className="relative">
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                className="input input-bordered focus:outline-none w-full pl-10"
-                placeholder="Enter your email"
-                required
-              />
-              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-base-content/50 w-5 h-5" />
-            </div>
-          </div>
+          {/* Main content */}
+          <div className="lg:w-3/4">
+            <div className="bg-base-200 rounded-lg p-8 shadow-md">
+              {activeTab === "general" && (
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div className="mb-8">
+                    <ProfilePicture
+                      imagePreview={imagePreview}
+                      showUploadOptions={showUploadOptions}
+                      setShowUploadOptions={setShowUploadOptions}
+                      handleFileChange={handleFileChange}
+                      formData={formData}
+                      setImagePreview={setImagePreview}
+                      setFormData={setFormData}
+                      defaultImage="/user.png"
+                    />
+                  </div>
 
-          <div className="form-control mt-6">
-            <button 
-              type="submit" 
-              className={`btn btn-primary w-full ${isSaving ? "loading" : ""}`}
-              disabled={isSaving}
-            >
-              {isSaving ? (
-                "Saving..."
-              ) : (
-                <>
-                  <Save className="w-5 h-5 mr-2" />
-                  Save Changes
-                </>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="form-control">
+                      <label className="label">
+                        <span className="label-text text-base font-medium">{t('form.name')}</span>
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          name="name"
+                          value={formData.name}
+                          onChange={handleChange}
+                          className="input input-bordered focus:outline-none w-full pl-10"
+                          placeholder={t('form.enterName')}
+                          required
+                        />
+                        <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-base-content/50 w-5 h-5" />
+                      </div>
+                    </div>
+
+                    <div className="form-control">
+                      <label className="label">
+                        <span className="label-text text-base font-medium">{t('form.email')}</span>
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="email"
+                          name="email"
+                          value={formData.email}
+                          onChange={handleChange}
+                          className="input input-bordered focus:outline-none w-full pl-10"
+                          placeholder={t('form.enterEmail')}
+                          required
+                        />
+                        <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-base-content/50 w-5 h-5" />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="form-control mt-6">
+                    <button 
+                      type="submit" 
+                      className={`btn btn-primary w-full ${isSaving ? "loading" : ""}`}
+                      disabled={isSaving}
+                    >
+                      {isSaving ? (
+                        t('saving')
+                      ) : (
+                        <>
+                          <Save className="w-5 h-5 mr-2" />
+                          {t('saveChanges')}
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </form>
               )}
-            </button>
+
+              {activeTab === "security" && (
+                <div>
+                  <h2 className="text-xl font-semibold mb-6">{t('profile.changePassword')}</h2>
+                  <ChangePassword onPasswordChange={handlePasswordUpdate} />
+                </div>
+              )}
+            </div>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   )

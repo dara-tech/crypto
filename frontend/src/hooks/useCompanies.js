@@ -15,89 +15,89 @@ API.interceptors.request.use((config) => {
   return config;
 }, (error) => Promise.reject(error));
 
-const useCampanies = () => {
-  const [campanies, setCampanies] = useState([]);
+const useCompanies = () => {
+  const [companies, setCompanies] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Get all campanies
+  // Get all companies
   const getCompanies = async () => {
     setLoading(true);
     try {
-      const { data } = await API.get("/api/campanies");
-      console.log("Fetched campanies:", data);
-      setCampanies(data);
+      const { data } = await API.get("/api/companies");
+      console.log("Fetched companies:", data);
+      setCompanies(data);
     } catch (err) {
-      setError(err?.response?.data?.message || "Failed to fetch campanies");
+      setError(err?.response?.data?.message || "Failed to fetch companies");
     } finally {
       setLoading(false);
     }
   };
 
-  // Get single campany
-  const getCampany = async (id) => {
+  // Get single company
+  const getCompany = async (id) => {
     try {
-      const { data } = await API.get(`/api/campanies/${id}`);
-      console.log("Fetched campany data:", data);
+      const { data } = await API.get(`/api/companies/${id}`);
+      console.log("Fetched company data:", data);
       return data;
     } catch (err) {
-      setError(err?.response?.data?.message || "Failed to fetch campany");
+      setError(err?.response?.data?.message || "Failed to fetch company");
       return null;
     }
   };
 
-  // Create new campany
-  const createCampany = async (campanyData) => {
+  // Create new company
+  const createCompany = async (companyData) => {
     setLoading(true);
     try {
       const formData = new FormData();
       
       // Handle basic fields
-      Object.keys(campanyData).forEach(key => {
+      Object.keys(companyData).forEach(key => {
         if (key !== 'logo' && key !== 'heroImages' && key !== 'testimonialImages') {
-          if (typeof campanyData[key] === 'object') {
-            formData.append(key, JSON.stringify(campanyData[key]));
+          if (typeof companyData[key] === 'object') {
+            formData.append(key, JSON.stringify(companyData[key]));
           } else {
-            formData.append(key, campanyData[key]);
+            formData.append(key, companyData[key]);
           }
         }
       });
 
       // Handle file uploads
-      if (campanyData.logo) {
-        formData.append('logo', campanyData.logo);
+      if (companyData.logo) {
+        formData.append('logo', companyData.logo);
       }
       
-      if (campanyData.heroImages) {
-        campanyData.heroImages.forEach(image => {
+      if (companyData.heroImages) {
+        companyData.heroImages.forEach(image => {
           formData.append('heroImages', image);
         });
       }
 
-      if (campanyData.testimonialImages) {
-        campanyData.testimonialImages.forEach(image => {
+      if (companyData.testimonialImages) {
+        companyData.testimonialImages.forEach(image => {
           formData.append('testimonialImages', image);
         });
       }
 
-      const { data } = await API.post("/api/campanies", formData);
-      setCampanies([...campanies, data]);
+      const { data } = await API.post("/api/companies", formData);
+      setCompanies([...companies, data]);
       return data;
     } catch (err) {
-      setError(err?.response?.data?.message || "Failed to create campany");
+      setError(err?.response?.data?.message || "Failed to create company");
       return null;
     } finally {
       setLoading(false);
     }
   };
 
-  // Update campany
-  const updateCampany = useCallback(async (id, campanyData) => {
+  // Update company
+  const updateCompany = useCallback(async (id, companyData) => {
     setLoading(true);
     try {
       // Convert FormData to regular object
       const formDataObj = {};
-      for(let [key, value] of campanyData.entries()) {
+      for(let [key, value] of companyData.entries()) {
         try {
           // Try to parse JSON strings
           formDataObj[key] = JSON.parse(value);
@@ -107,50 +107,50 @@ const useCampanies = () => {
         }
       }
 
-      if (campanyData.logo) {
-        formDataObj.logo = campanyData.logo;
+      if (companyData.logo) {
+        formDataObj.logo = companyData.logo;
       } 
       
-      if (campanyData.heroImages) {
-        formDataObj.heroImages = campanyData.heroImages;
+      if (companyData.heroImages) {
+        formDataObj.heroImages = companyData.heroImages;
       }
       
-      if (campanyData.testimonialImages) {
-        formDataObj.testimonialImages = campanyData.testimonialImages;
+      if (companyData.testimonialImages) {
+        formDataObj.testimonialImages = companyData.testimonialImages;
       }
       
-      const response = await API.put(`/api/campanies/${id}`, formDataObj, {
+      const response = await API.put(`/api/companies/${id}`, formDataObj, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       });
       
-      // Update campanies state with new data
-      setCampanies(prevCampanies => 
-        prevCampanies.map(campany => 
-          campany._id === id ? response.data : campany
+      // Update companies state with new data
+      setCompanies(prevCompanies => 
+        prevCompanies.map(company => 
+          company._id === id ? response.data : company
         )
       );
       
       return response.data;
     } catch (err) {
       console.error("Update error:", err);
-      setError(err?.response?.data?.message || "Failed to update campany");
+      setError(err?.response?.data?.message || "Failed to update company");
       throw err;
     } finally {
       setLoading(false);
     }
   }, []);
 
-  // Delete campany
-  const deleteCampany = async (id) => {
+  // Delete company
+  const deleteCompany = async (id) => {
     setLoading(true);
     try {
-      await API.delete(`/api/campanies/${id}`);
-      setCampanies(campanies.filter(campany => campany._id !== id));
+      await API.delete(`/api/companies/${id}`);
+      setCompanies(companies.filter(company => company._id !== id));
       return true;
     } catch (err) {
-      setError(err?.response?.data?.message || "Failed to delete campany");
+      setError(err?.response?.data?.message || "Failed to delete company");
       return false;
     } finally {
       setLoading(false);
@@ -158,14 +158,15 @@ const useCampanies = () => {
   };
 
   return {
-    campanies,
+    companies,
     loading,
     error,
     getCompanies,
-    createCampany,
-    updateCampany,
-    deleteCampany
+    getCompany,
+    createCompany,
+    updateCompany,
+    deleteCompany
   };
 };
 
-export default useCampanies;
+export default useCompanies;

@@ -1,8 +1,8 @@
-import Campany from '../models/Campany.js';
+import Company from '../models/Company.js';
 import cloudinary from '../lib/cloudinary.js';
 
-// Create a new campany
-export const createCampany = async (req, res) => {
+// Create a new company
+export const createCompany = async (req, res) => {
   try {
     const {
       name,
@@ -14,7 +14,7 @@ export const createCampany = async (req, res) => {
       programsOffered
     } = req.body;
 
-    const campany = new Campany({
+    const company = new Company({
       name,
       about,
       mission,
@@ -28,7 +28,7 @@ export const createCampany = async (req, res) => {
     if (req.files?.logo) {
       const logoResult = await new Promise((resolve, reject) => {
         const uploadStream = cloudinary.uploader.upload_stream(
-          { folder: 'campany_logos' },
+          { folder: 'company_logos' },
           (error, result) => {
             if (error) reject(error);
             else resolve(result);
@@ -36,7 +36,7 @@ export const createCampany = async (req, res) => {
         );
         uploadStream.end(req.files.logo[0].buffer);
       });
-      campany.logo = logoResult.secure_url;
+      company.logo = logoResult.secure_url;
     }
 
     // Handle hero images upload if present
@@ -44,7 +44,7 @@ export const createCampany = async (req, res) => {
       const heroImagePromises = req.files.heroImages.map(image => {
         return new Promise((resolve, reject) => {
           const uploadStream = cloudinary.uploader.upload_stream(
-            { folder: 'campany_hero_images' },
+            { folder: 'company_hero_images' },
             (error, result) => {
               if (error) reject(error);
               else resolve(result.secure_url);
@@ -53,7 +53,7 @@ export const createCampany = async (req, res) => {
           uploadStream.end(image.buffer);
         });
       });
-      campany.heroImages = await Promise.all(heroImagePromises);
+      company.heroImages = await Promise.all(heroImagePromises);
     }
 
     // Handle testimonial images if present
@@ -63,7 +63,7 @@ export const createCampany = async (req, res) => {
         const testimonialImagePromises = req.files.testimonialImages.map(image => {
           return new Promise((resolve, reject) => {
             const uploadStream = cloudinary.uploader.upload_stream(
-              { folder: 'campany_testimonial_images' },
+              { folder: 'company_testimonial_images' },
               (error, result) => {
                 if (error) reject(error);
                 else resolve(result.secure_url);
@@ -74,43 +74,43 @@ export const createCampany = async (req, res) => {
         });
         const testimonialImageUrls = await Promise.all(testimonialImagePromises);
         
-        campany.testimonials = testimonials.map((testimonial, index) => ({
+        company.testimonials = testimonials.map((testimonial, index) => ({
           ...testimonial,
           imageUrl: testimonialImageUrls[index]
         }));
       } else {
-        campany.testimonials = testimonials;
+        company.testimonials = testimonials;
       }
     }
 
-    await campany.save();
-    res.status(201).json({ message: 'Campany created successfully', campany });
+    await company.save();
+    res.status(201).json({ message: 'Company created successfully', company });
   } catch (err) {
-    console.error('Create campany error:', err);
-    res.status(500).json({ message: 'Server error while creating campany' });
+    console.error('Create company error:', err);
+    res.status(500).json({ message: 'Server error while creating company' });
   }
 };
 
-// Get campany details
-export const getCampany = async (req, res) => {
+// Get company details
+export const getCompany = async (req, res) => {
   try {
-    const campany = await Campany.findById(req.params.id);
-    if (!campany) {
-      return res.status(404).json({ message: 'Campany not found' });
+    const company = await Company.findById(req.params.id);
+    if (!company) {
+      return res.status(404).json({ message: 'Company not found' });
     }
-    res.status(200).json(campany);
+    res.status(200).json(company);
   } catch (err) {
-    console.error('Get campany error:', err);
-    res.status(500).json({ message: 'Server error while fetching campany' });
+    console.error('Get company error:', err);
+    res.status(500).json({ message: 'Server error while fetching company' });
   }
 };
 
-// Update campany details
-export const updateCampany = async (req, res) => {
+// Update company details
+export const updateCompany = async (req, res) => {
   try {
-    const campany = await Campany.findById(req.params.id);
-    if (!campany) {
-      return res.status(404).json({ message: 'Campany not found' });
+    const company = await Company.findById(req.params.id);
+    if (!company) {
+      return res.status(404).json({ message: 'Company not found' });
     }
 
     // Update basic fields from request body
@@ -126,16 +126,16 @@ export const updateCampany = async (req, res) => {
 
     updateFields.forEach(field => {
       if (req.body[field] !== undefined) {
-        campany[field] = req.body[field];
+        company[field] = req.body[field];
       }
     });
 
     // Handle image uploads if present
     const imageFields = {
-      logo: 'campany_logos',
-      aboutImage: 'campany_about_images',
-      missionImage: 'campany_mission_images', 
-      visionImage: 'campany_vision_images'
+      logo: 'company_logos',
+      aboutImage: 'company_about_images',
+      missionImage: 'company_mission_images', 
+      visionImage: 'company_vision_images'
     };
 
     for (const [field, folder] of Object.entries(imageFields)) {
@@ -150,7 +150,7 @@ export const updateCampany = async (req, res) => {
           );
           uploadStream.end(req.files[field][0].buffer);
         });
-        campany[field] = result.secure_url;
+        company[field] = result.secure_url;
       }
     }
 
@@ -159,7 +159,7 @@ export const updateCampany = async (req, res) => {
       const heroImagePromises = req.files.heroImages.map(image => {
         return new Promise((resolve, reject) => {
           const uploadStream = cloudinary.uploader.upload_stream(
-            { folder: 'campany_hero_images' },
+            { folder: 'company_hero_images' },
             (error, result) => {
               if (error) reject(error);
               else resolve(result.secure_url);
@@ -169,7 +169,7 @@ export const updateCampany = async (req, res) => {
         });
       });
       const heroImageUrls = await Promise.all(heroImagePromises);
-      campany.heroImages = heroImageUrls;
+      company.heroImages = heroImageUrls;
     }
 
     // Handle testimonials update
@@ -179,7 +179,7 @@ export const updateCampany = async (req, res) => {
         const testimonialImagePromises = req.files.testimonialImages.map(image => {
           return new Promise((resolve, reject) => {
             const uploadStream = cloudinary.uploader.upload_stream(
-              { folder: 'campany_testimonial_images' },
+              { folder: 'company_testimonial_images' },
               (error, result) => {
                 if (error) reject(error);
                 else resolve(result.secure_url);
@@ -190,48 +190,48 @@ export const updateCampany = async (req, res) => {
         });
         const testimonialImageUrls = await Promise.all(testimonialImagePromises);
         
-        campany.testimonials = testimonials.map((testimonial, index) => ({
+        company.testimonials = testimonials.map((testimonial, index) => ({
           ...testimonial,
           imageUrl: testimonialImageUrls[index] || testimonial.imageUrl
         }));
       } else {
-        campany.testimonials = testimonials;
+        company.testimonials = testimonials;
       }
     }
 
-    const updatedCampany = await campany.save();
+    const updatedCompany = await company.save();
     res.status(200).json({ 
-      message: 'Campany updated successfully', 
-      campany: updatedCampany 
+      message: 'Company updated successfully', 
+      company: updatedCompany 
     });
 
   } catch (err) {
-    console.error('Update campany error:', err);
-    res.status(500).json({ message: 'Server error while updating campany' });
+    console.error('Update company error:', err);
+    res.status(500).json({ message: 'Server error while updating company' });
   }
 };
 
-// Delete campany
-export const deleteCampany = async (req, res) => {
+// Delete company
+export const deleteCompany = async (req, res) => {
   try {
-    const campany = await Campany.findByIdAndDelete(req.params.id);
-    if (!campany) {
-      return res.status(404).json({ message: 'Campany not found' });
+    const company = await Company.findByIdAndDelete(req.params.id);
+    if (!company) {
+      return res.status(404).json({ message: 'Company not found' });
     }
-    res.status(200).json({ message: 'Campany deleted successfully' });
+    res.status(200).json({ message: 'Company deleted successfully' });
   } catch (err) {
-    console.error('Delete campany error:', err);
-    res.status(500).json({ message: 'Server error while deleting campany' });
+    console.error('Delete company error:', err);
+    res.status(500).json({ message: 'Server error while deleting company' });
   }
 };
 
-// Get all campanies
-export const getAllCampanies = async (req, res) => {
+// Get all companies
+export const getAllCompanies = async (req, res) => {
   try {
-    const campanies = await Campany.find();
-    res.status(200).json(campanies);
+    const companies = await Company.find();
+    res.status(200).json(companies);
   } catch (err) {
-    console.error('Get all campanies error:', err);
-    res.status(500).json({ message: 'Server error while fetching campanies' });
+    console.error('Get all companies error:', err);
+    res.status(500).json({ message: 'Server error while fetching companies' });
   }
 };
