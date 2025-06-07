@@ -2,24 +2,33 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useEffect, useState } from 'react';
 import useCompanies from '../../hooks/useCompanies';
-import useAuth from '../../hooks/useAuth';
+// Re-import useAuth as it's for the current user's profile
+import useAuth from '../../hooks/useAuth'; 
+// No need for useUserProfile here, as it's for fetching arbitrary users by ID.
+// import useUserProfile from '../../hooks/useUserProfile';
 
 const HeroSection = () => {
   const { t } = useTranslation();
-  const { companies, getCompanies } = useCompanies();
-  const { profile, getAdminProfile } = useAuth();
-  const [loading, setLoading] = useState(true);
+  const { companies, getCompanies, loading: companiesLoading } = useCompanies();
+  // Correctly use useAuth for the current authenticated user's profile
+  const { profile, getAdminProfile, loading: profileLoading } = useAuth(); 
+
+  const [initialFetchComplete, setInitialFetchComplete] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
+      // These functions are from useCompanies and useAuth, which are correct for this usage.
       await getCompanies();
-      await getAdminProfile();
-      setLoading(false);
+      await getAdminProfile(); // Fetches the current authenticated user's profile
+      setInitialFetchComplete(true);
     };
     fetchData();
-  }, []);
+  }, []); // Dependencies are correct
 
-  const company = companies?.[0];
+  // Combine loading states from all relevant hooks
+  const overallLoading = !initialFetchComplete || companiesLoading || profileLoading;
+
+  const company = companies?.[0]; // Get the first company from the fetched list
 
   return (
     <section className="relative bg-gray-50 overflow-hidden">
@@ -34,23 +43,26 @@ const HeroSection = () => {
           {/* Left side - Content */}
           <div className="relative z-10">
             <span className="inline-block px-3 py-1 text-sm font-semibold text-purple-600 bg-purple-100 rounded-full mb-4">
-              {loading ? t('hero.tagline') : company?.tagline || t('hero.tagline')}
+              {/* Display loading text or actual tagline */}
+              {overallLoading ? t('hero.loading') : company?.tagline || t('hero.tagline')}
             </span>
 
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-              {loading ? t('hero.title') : company?.name || t('hero.title')}
+              {/* Display loading text or actual company name */}
+              {overallLoading ? t('hero.loading') : company?.name || t('hero.title')}
             </h1>
 
             <p className="text-lg text-gray-600 mb-8 max-w-lg">
-              {loading ? t('hero.subtitle') : company?.description || t('hero.subtitle')}
+              {/* Display loading text or actual company description */}
+              {overallLoading ? t('hero.loading') : company?.description || t('hero.subtitle')}
               <Link to="/about" className="text-green-600 hover:text-green-700 font-medium ml-1">
                 {t('hero.learnMore')}
               </Link>
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4">
-              <Link 
-                to="/get-started" 
+              <Link
+                to="/get-started"
                 className="px-8 py-4 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-lg text-center transition-colors duration-200"
               >
                 {t('hero.cta')}
@@ -58,12 +70,13 @@ const HeroSection = () => {
             </div>
           </div>
 
-          {/* Right side - Image */}
+          {/* Right side - Image (using authenticated user's profile pic) */}
           <div className="relative">
             <div className="relative z-10">
               <img
-                src={loading ? "/images/hero-woman.png" : profile?.user?.profilePic || "/images/hero-woman.png"}
-                alt={loading ? "Happy customer" : profile?.user?.name || "Happy customer"}
+                // Use a placeholder if loading, otherwise the user's profile pic or a default hero image
+                src={overallLoading ? "/images/placeholder.png" : profile?.user?.profilePic || "/images/hero-woman.png"}
+                alt={overallLoading ? "Loading image" : profile?.user?.name || "Happy customer"}
                 className="w-full h-auto max-w-lg mx-auto"
               />
             </div>

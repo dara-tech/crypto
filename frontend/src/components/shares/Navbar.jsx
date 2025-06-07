@@ -1,349 +1,347 @@
-import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import {
-  FaUserCircle,
-  FaSearch,
-  FaBell,
-  FaSignOutAlt,
-  FaCog,
-  FaHome,
-  FaBuilding,
-  FaEnvelope,
-  FaFileContract,
-  FaInfoCircle,
-  FaUserCog,
-} from 'react-icons/fa';
-import { RiDashboardFill } from 'react-icons/ri';
-import { FiMenu, FiX } from 'react-icons/fi';
-import { debounce } from 'lodash';
+import { FaUserCircle, FaHome, FaSchool, FaEnvelope, FaChartLine, FaBuilding, FaUserCog } from 'react-icons/fa';
+import LanguageSwitcher from './LanguageSwitcher';
+import { HiOutlineAcademicCap, HiAcademicCap } from 'react-icons/hi';
+import { MdOutlineHome, MdHome } from 'react-icons/md';
+import { IoInformationCircleOutline, IoInformationCircle } from 'react-icons/io5';
+import { MdOutlineMail, MdMail } from 'react-icons/md';
+import { RiDashboardLine, RiDashboardFill } from 'react-icons/ri';
+import { BsPersonGear } from 'react-icons/bs';
 import useAuth from '../../hooks/useAuth';
 import useCompanies from '../../hooks/useCompanies';
-import LanguageSwitcher from './LanguageSwitcher';
 
 const Navbar = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { profile, logout, getAdminProfile, loading: profileLoading } = useAuth();
   const { companies, getCompanies, loading: companiesLoading } = useCompanies();
-  const location = useLocation();
-  const navigate = useNavigate();
-
-  // State Management
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isDesktopSearchOpen, setIsDesktopSearchOpen] = useState(false);
-  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [currentCompany, setCurrentCompany] = useState(null);
+  const [language, setCurrentLanguage] = useState(i18n.language || 'en');
+  const location = useLocation();
   
-  const [notifications, setNotifications] = useState([
-    { id: 1, title: "New Feature", message: "Our platform is now faster.", read: false, timestamp: new Date() },
-    { id: 2, title: "Welcome!", message: "Thanks for joining.", read: true, timestamp: new Date() },
-  ]);
-  const unreadCount = useMemo(() => notifications.filter(n => !n.read).length, [notifications]);
-
-  // Refs for click-outside detection
-  const searchRef = useRef(null);
-  const profileRef = useRef(null);
-  const notificationRef = useRef(null);
-  const mobileMenuRef = useRef(null);
-
-  // --- Effects ---
-
+  // Update language when i18n language changes
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (profileRef.current && !profileRef.current.contains(event.target)) setIsProfileOpen(false);
-      if (notificationRef.current && !notificationRef.current.contains(event.target)) setIsNotificationOpen(false);
-      if (searchRef.current && !searchRef.current.contains(event.target)) setIsDesktopSearchOpen(false);
-      // For mobile menu, clicking outside the menu (but not the toggle button) should close it
-      if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target) && isMenuOpen) {
-         const menuToggle = document.getElementById('mobile-menu-toggle');
-         if(menuToggle && !menuToggle.contains(event.target)) {
-            setIsMenuOpen(false);
-         }
-      }
+    const handleLanguageChange = (lng) => {
+      setCurrentLanguage(lng);
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isMenuOpen]); // Added isMenuOpen dependency
+    
+    i18n.on('languageChanged', handleLanguageChange);
+    return () => {
+      i18n.off('languageChanged', handleLanguageChange);
+    };
+  }, [i18n]);
 
+  // Set initial language from localStorage or browser
   useEffect(() => {
-    if (isMenuOpen) setIsMenuOpen(false);
-  }, [location.pathname]);
+    const savedLanguage = localStorage.getItem('i18nextLng');
+    if (savedLanguage) {
+      setCurrentLanguage(savedLanguage);
+    }
+    // Initialize language if not set
+    if (!language) {
+      setCurrentLanguage(i18n.language || 'en');
+    }
+  }, [i18n.language]);
 
-  useEffect(() => {
-    document.body.style.overflow = isMenuOpen ? 'hidden' : '';
-    return () => { document.body.style.overflow = ''; };
-  }, [isMenuOpen]);
+  const isAdminRoute = location.pathname.startsWith('/admin');
 
-  useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 10);
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
+  // Fetch companies data on mount
   useEffect(() => {
     getCompanies();
-    getAdminProfile();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // --- Handlers & Memos ---
+  // Fetch user profile whenever token changes
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      getAdminProfile();
+    }
+  }, [localStorage.getItem('token')]);
 
-  const handleLogout = useCallback(() => {
-    logout();
-    setIsProfileOpen(false);
-    navigate('/');
-  }, [logout, navigate]);
+  // Update current company when companies data changes
+  useEffect(() => {
+    if (companies && companies.length > 0) {
+      setCurrentCompany(companies[0]);
+    }
+  }, [companies]);
 
-  const debouncedSearch = useMemo(
-    () => debounce((query) => {
-      if (query.trim()) navigate(`/search?q=${encodeURIComponent(query)}`);
-    }, 500),
-    [navigate]
-  );
-  
-  useEffect(() => () => debouncedSearch.cancel(), [debouncedSearch]);
+  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
-  const handleSearchChange = (e) => {
-    setSearchQuery(e.target.value);
-    debouncedSearch(e.target.value);
-  };
+  const adminLinks = [
+    { 
+      to: '/admin/dashboard', 
+      label: t('dashboard'), 
+      icon: <RiDashboardLine className="w-5 h-5" />,
+      activeIcon: <RiDashboardFill className="w-5 h-5" />
+    },
+    { 
+      to: '/admin/companies', 
+      label: t('companies'), 
+      icon: <FaBuilding className="w-5 h-5" />,
+      activeIcon: <FaBuilding className="w-5 h-5 text-primary" />
+    },
+    { 
+      to: '/admin/profile', 
+      label: t('Profile'), 
+      icon: <BsPersonGear className="w-5 h-5" />,
+      activeIcon: <BsPersonGear className="w-5 h-5 text-primary" />
+    }
+  ];
 
-  const navLinks = useMemo(() => {
-    const commonLinks = [
-      { to: '/', label: t('home'), icon: <FaHome /> },
-      { to: '/companies', label: t('companies'), icon: <FaBuilding /> },
-      { to: '/about', label: t('about'), icon: <FaInfoCircle /> },
-      { to: '/contact', label: t('contact'), icon: <FaEnvelope /> },
-      { to: '/privacy-policy', label: t('privacyPolicy'), icon: <FaFileContract /> }
-    ];
-    const adminLinks = [
-      { to: '/admin/dashboard', label: t('dashboard'), icon: <RiDashboardFill /> },
-      { to: '/admin/companies', label: t('companies'), icon: <FaBuilding /> },
-      { to: '/admin/profile', label: t('profile'), icon: <FaUserCog /> }
-    ];
-    return location.pathname.startsWith('/admin') ? adminLinks : commonLinks;
-  }, [t, location.pathname]);
+  const publicLinks = [
+    { 
+      to: '/', 
+      label: t('home'), 
+      icon: <MdOutlineHome className="w-5 h-5" />,
+      activeIcon: <MdHome className="w-5 h-5" />
+    },
+    { 
+      to: '/companies', 
+      label: t('companies'), 
+      icon: <FaBuilding className="w-5 h-5" />,
+      activeIcon: <FaBuilding className="w-5 h-5 text-primary" />
+    },
+    { 
+      to: '/about', 
+      label: t('about'), 
+      icon: <IoInformationCircleOutline className="w-5 h-5" />,
+      activeIcon: <IoInformationCircle className="w-5 h-5" />
+    },
+    { 
+      to: '/contact', 
+      label: t('contact'), 
+      icon: <MdOutlineMail className="w-5 h-5" />,
+      activeIcon: <MdMail className="w-5 h-5" />
+    }
+  ];
 
-  const profileMenuItems = useMemo(() => [
-    { label: t('profile.viewProfile'), icon: <FaUserCircle />, onClick: () => navigate('/profile') },
-    { label: t('settings'), icon: <FaCog />, onClick: () => navigate('/settings') },
-    { label: t('logout'), icon: <FaSignOutAlt />, onClick: handleLogout, isDanger: true },
-  ], [t, navigate, handleLogout]);
-
-  // --- Render ---
+  const activeLinks = isAdminRoute ? adminLinks : publicLinks;
 
   return (
-    <>
-      <nav
-        className={`sticky top-0 z-40 transition-all duration-300 ${
-          isScrolled
-            ? 'bg-base-100/80 backdrop-blur-lg shadow-md border-b border-base-200/50'
-            : 'bg-base-100 border-b border-transparent'
-        }`}
-      >
-        <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            
-            {/* Logo */}
-            <Link to="/" className="flex items-center space-x-3 group">
-              <div className="w-10 h-10 transition-transform duration-300 group-hover:scale-110">
+    <nav className="bg-base-100 border-b border-base-200 sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between h-16">
+          <div className="flex items-center">
+            <Link to="/" className="flex-shrink-0 flex items-center">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
                 {companiesLoading ? (
-                  <div className="w-10 h-10 rounded-full bg-base-200 animate-pulse" />
+                  <div className="w-8 h-8 animate-pulse bg-base-200 rounded-full" />
+                ) : currentCompany?.logo ? (
+                  <img
+                    className="object-cover w-full h-full"
+                    src={currentCompany.logo}
+                    alt={currentCompany.name}
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = '/default-company-logo.png';
+                    }}
+                  />
                 ) : (
                   <img
-                    src={companies?.[0]?.logo || '/default-company-logo.png'}
-                    alt={`${companies?.[0]?.name || 'App'} Logo`}
-                    className="w-10 h-10 rounded-full object-cover border-2 border-base-300 group-hover:border-primary transition-colors"
+                    className="object-cover w-full h-full"
+                    src="/default-company-logo.png"
+                    alt="Default Company Logo"
                   />
                 )}
               </div>
-              <span className="text-xl font-bold text-base-content group-hover:text-primary transition-colors">
-                {companiesLoading ? <div className="h-6 w-32 bg-base-200 rounded animate-pulse" /> : (companies?.[0]?.name || t('appName'))}
+              <span className="ml-3 text-xl font-bold text-primary">
+                {companiesLoading ? (
+                  <div className="h-6 w-32 animate-pulse bg-base-200 rounded" />
+                ) : (
+                  currentCompany?.name || t('appName')
+                )}
               </span>
             </Link>
+          </div>
 
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-2">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.to}
-                  to={link.to}
-                  className={`px-3 py-2 rounded-md text-sm font-medium flex items-center gap-2 relative transition-colors ${
-                    location.pathname === link.to ? 'text-primary' : 'text-base-content/80 hover:bg-base-200 hover:text-base-content'
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex md:items-center md:space-x-4">
+            {activeLinks.map(link => (
+              <Link
+                key={link.to}
+                to={link.to}
+                className={`px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 flex items-center gap-2 relative h-full
+                  ${location.pathname === link.to
+                    ? 'text-primary after:absolute after:bottom-[-1px] after:left-1 after:w-full after:h-[2px] after:bg-primary after:rounded-none'
+                    : 'text-base-content hover:bg-base-200/20'
                   }`}
-                >
-                  {link.icon}
-                  <span>{link.label}</span>
-                  {location.pathname === link.to && (
-                    <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full" />
-                  )}
-                </Link>
-              ))}
-            </div>
+              >
+                {location.pathname === link.to ? link.activeIcon : link.icon}
+                {link.label}
+              </Link>
+            ))}
 
-            {/* Right-side Icons & Actions */}
-            <div className="flex items-center space-x-2">
-              {/* Desktop Search */}
-              <div ref={searchRef} className="relative hidden md:block">
-                <input
-                  type="text"
-                  placeholder={t('search.placeholder') + '...'}
-                  value={searchQuery}
-                  onChange={handleSearchChange}
-                  onFocus={() => setIsDesktopSearchOpen(true)}
-                  className={`pl-10 pr-4 py-2 text-sm bg-base-200 rounded-full border border-transparent focus:ring-2 focus:ring-primary focus:border-primary focus:bg-base-100 transition-all duration-300 ease-in-out ${
-                    isDesktopSearchOpen ? 'w-64' : 'w-10'
-                  }`}
-                />
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/50 pointer-events-none">
-                  <FaSearch />
-                </div>
+            {/* Language Switcher */}
+            <LanguageSwitcher />
+
+            {profileLoading ? (
+              <div className="flex items-center space-x-2">
+                <div className="w-8 h-8 animate-pulse bg-base-200 rounded-full" />
+                <div className="h-4 w-24 animate-pulse bg-base-200 rounded" />
               </div>
-              
-              <LanguageSwitcher />
-
-              {/* Notifications */}
-              <div ref={notificationRef} className="relative">
-                 <button
-                  onClick={() => setIsNotificationOpen(o => !o)}
-                  className="p-2 rounded-full hover:bg-base-200 relative transition-transform hover:scale-110"
+            ) : profile?.user ? (
+              <div className="relative">
+                <button
+                  onClick={toggleMenu}
+                  className="flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium hover:bg-base-200"
                 >
-                  <FaBell className="w-5 h-5" />
-                  {unreadCount > 0 && (
-                    <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-base-100" />
-                  )}
+                  <div className="w-8 h-8 rounded-full overflow-hidden bg-base-200">
+                    {profile.user.profilePic ? (
+                      <img
+                        src={profile.user.profilePic}
+                        alt={profile.user.name}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = '/default-avatar.png';
+                        }}
+                      />
+                    ) : (
+                      <FaUserCircle className="w-full h-full text-base-content/50" />
+                    )}
+                  </div>
+                  <span className="max-w-[100px] truncate">{profile.user.name}</span>
                 </button>
-                {isNotificationOpen && (
-                  <div
-                    className="absolute right-0 mt-2 w-80 bg-base-100 rounded-lg shadow-xl border border-base-300 z-50"
-                  >
-                    <div className="p-3 border-b border-base-200 font-semibold">{t('notifications')}</div>
-                    <div className="max-h-96 overflow-y-auto">
-                      {notifications.length > 0 ? (
-                         notifications.map(n => (
-                          <div key={n.id} className={`p-3 border-b border-base-200 last:border-b-0 hover:bg-base-200 ${!n.read && 'bg-primary/10'}`}>
-                            <p className="font-semibold text-sm">{n.title}</p>
-                            <p className="text-xs text-base-content/70">{n.message}</p>
-                          </div>
-                         ))
-                      ) : (
-                        <p className="p-4 text-center text-sm text-base-content/60">{t('noNotifications')}</p>
-                      )}
+                {isMenuOpen && (
+                  <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-base-100 ring-1 ring-black ring-opacity-5">
+                    <div className="py-1">
+                      <Link
+                        to={"/"}
+                        className="block px-4 py-2 text-sm text-base-content hover:bg-base-200"
+                      >
+                        {t('menu.title')}
+                      </Link>
+                      <Link
+                        to={"/admin"}
+                        className="block px-4 py-2 text-sm text-base-content hover:bg-base-200"
+                      >
+                        {t('menu.admin')}
+                      </Link>
+                      <button
+                        onClick={logout}
+                        className="block w-full text-left px-4 py-2 text-sm text-base-content hover:bg-base-200"
+                      >
+                        {t('auth.logout')}
+                      </button>
                     </div>
                   </div>
                 )}
               </div>
-
-              {/* Profile Dropdown */}
-              {profileLoading ? (
-                <div className="w-10 h-10 rounded-full bg-base-200 animate-pulse" />
-              ) : profile?.user ? (
-                <div ref={profileRef} className="relative">
-                  <button onClick={() => setIsProfileOpen(o => !o)}>
-                    <img
-                      src={profile.user.profilePic || '/default-avatar.png'}
-                      alt="User Profile"
-                      className="w-10 h-10 rounded-full object-cover border-2 border-transparent hover:border-primary transition-colors"
-                    />
-                  </button>
-                  {isProfileOpen && (
-                    <div
-                      className="absolute right-0 mt-2 w-56 bg-base-100 rounded-lg shadow-xl border border-base-300 z-50"
-                    >
-                       <div className="p-3 border-b border-base-200">
-                         <p className="font-semibold truncate">{profile.user.name}</p>
-                         <p className="text-sm text-base-content/60 truncate">{profile.user.email}</p>
-                       </div>
-                       <div className="py-1">
-                         {profileMenuItems.map(item => (
-                           <button
-                             key={item.label}
-                             onClick={() => { item.onClick(); setIsProfileOpen(false); }}
-                             className={`w-full text-left flex items-center gap-3 px-4 py-2 text-sm transition-colors ${
-                               item.isDanger ? 'text-red-500 hover:bg-red-500/10' : 'text-base-content hover:bg-base-200'
-                             }`}
-                           >
-                             {item.icon}
-                             <span>{item.label}</span>
-                           </button>
-                         ))}
-                       </div>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <Link to="/login" className="px-4 py-2 text-sm font-medium bg-primary text-primary-content rounded-full hover:bg-primary/90">
-                  {t('login')}
-                </Link>
-              )}
-
-              {/* Mobile Menu Toggle */}
-              <div className="md:hidden">
-                <button id="mobile-menu-toggle" onClick={() => setIsMenuOpen(o => !o)} className="p-2" aria-label="Open menu">
-                  {isMenuOpen ? <FiX className="w-6 h-6" /> : <FiMenu className="w-6 h-6" />}
-                </button>
-              </div>
-            </div>
+            ) : (
+              <Link
+                to="/login"
+                className="px-3 py-2 rounded-md text-sm font-medium bg-primary text-primary-content hover:bg-primary-focus"
+              >
+                {t('login')}
+              </Link>
+            )}
           </div>
-        </div>
-      </nav>
 
-      {/* Mobile Menu */}
-      <div
-        className={`fixed inset-0 z-40 transition-opacity duration-300 ease-in-out ${
-          isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
-        }`}
-      >
-        {/* Backdrop */}
-        <div className="absolute inset-0 bg-black/50" onClick={() => setIsMenuOpen(false)} />
-        
-        {/* Panel */}
-        <div
-          ref={mobileMenuRef}
-          className={`fixed top-0 right-0 h-full w-4/5 max-w-sm bg-base-100 z-50 shadow-lg flex flex-col transition-transform duration-300 ease-in-out ${
-            isMenuOpen ? 'translate-x-0' : 'translate-x-full'
-          }`}
-        >
-          <div className="flex items-center justify-between p-4 border-b border-base-200">
-            <h2 className="font-bold text-lg">{t('menu.title')}</h2>
-            <button onClick={() => setIsMenuOpen(false)} className="p-2" aria-label="Close menu">
-              <FiX className="w-6 h-6" />
+          {/* Mobile menu button */}
+          <div className="md:hidden flex items-center">
+            <button
+              onClick={toggleMenu}
+              className="inline-flex items-center justify-center p-2 rounded-md text-base-content hover:bg-base-200"
+            >
+              <span className="sr-only">{t('menu.open')}</span>
+              <svg
+                className={`${isMenuOpen ? 'hidden' : 'block'} h-6 w-6`}
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+              <svg
+                className={`${isMenuOpen ? 'block' : 'hidden'} h-6 w-6`}
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
             </button>
-          </div>
-          <div className="flex-grow p-4 overflow-y-auto">
-            <div className="relative mb-4">
-              <input
-                type="text"
-                placeholder={t('search.placeholder') + '...'}
-                value={searchQuery}
-                onChange={handleSearchChange}
-                className="w-full pl-10 pr-4 py-2 text-sm bg-base-200 rounded-full border border-transparent focus:ring-2 focus:ring-primary focus:border-primary"
-              />
-              <div className="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/50 pointer-events-none">
-                <FaSearch />
-              </div>
-            </div>
-            <nav className="flex flex-col space-y-2">
-              {navLinks.map((link) => (
-                <Link
-                  key={`mobile-${link.to}`}
-                  to={link.to}
-                  onClick={() => setIsMenuOpen(false)}
-                  className={`flex items-center gap-4 p-3 rounded-lg text-base font-medium transition-colors ${
-                    location.pathname === link.to ? 'bg-primary/10 text-primary' : 'hover:bg-base-200'
-                  }`}
-                >
-                  {link.icon}
-                  <span>{link.label}</span>
-                </Link>
-              ))}
-            </nav>
           </div>
         </div>
       </div>
-    </>
+
+      {/* Mobile menu */}
+      <div className={`${isMenuOpen ? 'block' : 'hidden'} md:hidden`}>
+        <div className="px-2 pt-2 pb-3 space-y-1">
+          {activeLinks.map(link => (
+            <Link
+              key={link.to}
+              to={link.to}
+              className={`flex px-3 py-2 rounded-md text-base font-medium items-center gap-2 relative
+                ${location.pathname === link.to
+                  ? 'text-primary after:absolute after:bottom-[-1px] after:left-0 after:w-full after:h-[2px] after:bg-primary after:rounded-none'
+                  : 'text-base-content hover:bg-base-200/50'
+                }`}
+            >
+              {location.pathname === link.to ? link.activeIcon : link.icon}
+              {link.label}
+            </Link>
+          ))}
+          
+          {profileLoading ? (
+            <div className="flex items-center space-x-3 px-3 py-2">
+              <div className="w-8 h-8 animate-pulse bg-base-200 rounded-full" />
+              <div className="h-4 w-24 animate-pulse bg-base-200 rounded" />
+            </div>
+          ) : profile?.user ? (
+            <>
+              <div className="space-y-2">
+                {/* Mobile Language Switcher */}
+                <div className="border-b border-base-200 py-1">
+                  <LanguageSwitcher />
+                </div>
+                <div className="flex items-center space-x-3 px-3 py-2">
+                  <div className="w-8 h-8 rounded-full overflow-hidden bg-base-200">
+                    {profile.user.profilePic ? (
+                      <img
+                        src={profile.user.profilePic}
+                        alt={profile.user.name}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = '/default-avatar.png';
+                        }}
+                      />
+                    ) : (
+                      <FaUserCircle className="w-full h-full text-base-content/50" />
+                    )}
+                  </div>
+                  <span className="text-base-content">{profile.user.name}</span>
+                </div>
+              </div>
+              <Link
+                to={isAdminRoute ? "/admin/profile" : "/profile"}
+                className="flex px-3 py-2 rounded-md text-base font-medium text-base-content hover:bg-base-200"
+              >
+                {t('profile.settings')}
+              </Link>
+              <button
+                onClick={logout}
+                className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-base-content hover:bg-base-200"
+              >
+                Logout
+              </button>
+            </>
+          ) : (
+            <Link
+              to="/login"
+              className="flex px-3 py-2 rounded-md text-base font-medium bg-primary text-primary-content hover:bg-primary-focus"
+            >
+              Login
+            </Link>
+          )}
+        </div>
+      </div>
+    </nav>
   );
 };
 

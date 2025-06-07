@@ -7,7 +7,6 @@ import Profile from './components/admin/profile/layout';
 import Navbar from './components/shares/Navbar';
 import SettingPage from './components/shares/SettingPage';
 import { useThemeStore } from './store/useThemeStore';
-
 import About from './components/clientPage/About'
 import Footer from './components/shares/Footer'
 import Mission from './components/clientPage/Mission'
@@ -38,6 +37,7 @@ function App() {
             <Route path="/contact" element={<Contact />} />
             <Route path="/privacy-policy" element={<PolicyPrivacy />} />
             <Route path="/" element={<Home />} />
+            
           </Routes>
           <Footer />
         {/* </Suspense> */}
