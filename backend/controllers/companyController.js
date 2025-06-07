@@ -9,6 +9,7 @@ export const createCompany = async (req, res) => {
       about,
       mission,
       vision,
+      privacyPolicy,
       contact,
       socialMedia,
       programsOffered
@@ -19,6 +20,7 @@ export const createCompany = async (req, res) => {
       about,
       mission,
       vision,
+      privacyPolicy,
       contact,
       socialMedia,
       programsOffered
@@ -119,6 +121,7 @@ export const updateCompany = async (req, res) => {
       'about',
       'mission', 
       'vision',
+      'privacyPolicy',
       'contact',
       'socialMedia',
       'programsOffered'

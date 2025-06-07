@@ -48,18 +48,20 @@ const Profile = () => {
     }))
   }
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
+  const handleFileChange = (file) => {
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
-        alert("File size should be less than 5MB");
+        setSaveError("File size should be less than 5MB");
         return;
       }
       const previewUrl = URL.createObjectURL(file);
       setImagePreview(previewUrl);
-      setFormData({ ...formData, profilePic: file });
-      setShowUploadOptions(false);
+      setFormData(prev => ({
+        ...prev,
+        profilePic: file
+      }));
       setSelectedImage(file);
+      setSaveError("");
     }
   };
 
@@ -73,15 +75,37 @@ const Profile = () => {
       const formDataToSend = new FormData()
       formDataToSend.append('name', formData.name)
       formDataToSend.append('email', formData.email)
+      
+      // Always append the profile picture if selectedImage exists
       if (selectedImage) {
         formDataToSend.append('profilePic', selectedImage)
+      } else if (formData.profilePic) {
+        // If selectedImage is null but formData.profilePic exists (might be a string URL)
+        // Only append if it's a File object
+        if (formData.profilePic instanceof File) {
+          formDataToSend.append('profilePic', formData.profilePic)
+        }
       }
 
-      await updateAdminProfile(formDataToSend)
+      console.log('Submitting form data:', {
+        name: formData.name,
+        email: formData.email,
+        hasProfilePic: !!selectedImage || !!(formData.profilePic && formData.profilePic instanceof File)
+      });
+
+      const response = await updateAdminProfile(formDataToSend)
       setSaveSuccess(true)
+      
       // Refresh profile data after update
-      getAdminProfile()
+      await getAdminProfile()
+      
+      // Reset the selectedImage to null after successful update
+      setSelectedImage(null)
+      
+      // Show success message for 3 seconds
+      setTimeout(() => setSaveSuccess(false), 3000)
     } catch (err) {
+      console.error('Error updating profile:', err);
       setSaveError(err.response?.data?.message || "Failed to update profile")
     } finally {
       setIsSaving(false)
@@ -166,16 +190,27 @@ const Profile = () => {
               {activeTab === "general" && (
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="mb-8">
+                    <div className="flex flex-col items-center">
                     <ProfilePicture
                       imagePreview={imagePreview}
-                      showUploadOptions={showUploadOptions}
-                      setShowUploadOptions={setShowUploadOptions}
-                      handleFileChange={handleFileChange}
-                      formData={formData}
-                      setImagePreview={setImagePreview}
-                      setFormData={setFormData}
-                      defaultImage="/user.png"
+                      handleFileChange={(file) => {
+                        if (file) {
+                          const previewUrl = URL.createObjectURL(file);
+                          setImagePreview(previewUrl);
+                          setSelectedImage(file); // Make sure to update the selectedImage state
+                          setFormData(prev => ({
+                            ...prev,
+                            profilePic: file
+                          }));
+                        }
+                      }}
+                      error={saveError}
+                      setError={setSaveError}
                     />
+                    {saveError && (
+                      <p className="mt-2 text-sm text-error">{saveError}</p>
+                    )}
+                  </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

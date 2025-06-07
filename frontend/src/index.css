@@ -1,4 +1,5 @@
 @import "tailwindcss";
+
 @plugin "daisyui" {
     themes: all;
 }
@@ -40,6 +41,11 @@ html {
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
 }
+.ProseMirror:focus {
+  outline: none;
+  box-shadow: none;
+}
+
 
 body {
   min-height: 100vh;

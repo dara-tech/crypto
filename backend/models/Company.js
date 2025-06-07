@@ -13,6 +13,10 @@ const companySchema = new mongoose.Schema({
   about: {
     type: String,
   },
+  privacyPolicy: {
+    type: String,
+  },
+
   aboutImage: {
     type: String,
     default: "",

@@ -26,7 +26,10 @@ export const initI18n = () => {
       },
       react: {
         useSuspense: true,
-      }
+      },
+      // --- ADD THIS LINE ---
+      returnObjects: true // Allows i18next to return objects for nested keys
+      // ---------------------
     });
 };
 
@@ -35,7 +38,6 @@ i18n.on('languageChanged', (lng) => {
     console.log('Language changed to:', lng);
   }
 
-  // Apply font class to <body> based on language
   const body = document.body;
   body.classList.remove('font-en', 'font-km');
   body.classList.add(lng === 'km' ? 'font-km' : 'font-en');

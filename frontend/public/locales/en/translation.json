@@ -3,21 +3,56 @@
   "login": "Login",
   "home": "Home",
   "register": "Register",
-  "Profile": "Profile",
+  "profile": {
+    "title": "Profile",
+    "changePassword": "Change Password",
+    "currentPassword": "CurrentPassword",
+    "newPassword": "New Password",
+    "confirmPassword": "Confirm Password",
+    "updatePassword": "Update Password",
+    "settings": "Profile Settings",
+    "picture": {
+      "upload": "Upload Photo",
+      "uploading": "Uploading...",
+      "uploaded": "Profile picture uploaded successfully!",
+      "removingBg": "Removing background...",
+      "bgRemoved": "Background removed successfully!",
+      "removed": "Profile picture removed",
+      "remove": "Remove",
+      "removeBg": "Remove Background",
+      "supportedFormats": "JPG, PNG, or GIF",
+      "maxSize": "Max file size: 5MB",
+      "invalidType": "Please upload an image file (JPG, PNG, or GIF)",
+      "sizeLimit": "Image must be less than 5MB",
+      "dimensionError": "Image is too small. Minimum size is 100x100px",
+      "loadError": "Failed to load image. Please try another file.",
+      "bgRemoveError": "Failed to remove background. Please try again.",
+      "alt": "Profile Picture"
+    }
+  },
   "settings": "Settings",
   "schools": "Schools",
   "companies": "Companies",
   "contact": "Contact",
   "about": "About Us",
   "mission": "Our Mission",
+  "privacyPolicy": "Privacy Policy",
   "vision": "Our Vision",
   "language": "Language",
   "english": "English",
   "khmer": "Khmer",
+  "search": {
+    "title": "Search",
+    "placeholder": "Search",
+    "results": "Search Results",
+    "noResults": "No results found",
+    "loading": "Loading...",
+    "error": "Error loading search results"
+  },
   "dashboard": "Dashboard",
   "update_profile": "Profile Settings",
-  "General Info": "General Info",
-  "Security": "Security",
+  "generalInfo": "General Info",
+  "security": "Security",
   "saving": "Saving...",
   "saveChanges": "Save Changes",
   "form": {
@@ -25,15 +60,6 @@
     "email": "Email",
     "enterName": "Enter your name",
     "enterEmail": "Enter your email"
-  },
-  "profile": {
-    "title": "Profile",
-    "changePassword": "Change Password",
-    "currentPassword": "Current Password",
-    "newPassword": "New Password",
-    "confirmPassword": "Confirm Password",
-    "updatePassword": "Update Password",
-    "settings": "Profile Settings"
   },
   "menu": {
     "title": "Menu",
@@ -83,15 +109,25 @@
     "updateCompany": "Update Company",
     "updating": "Updating...",
     "cancel": "Cancel",
+    "privacyPolicy": "Privacy Policy",
+    "privacyPolicyPlaceholder": "Enter your privacy policy here...",
     "sections": {
       "logo": "Company Logo",
       "basicInfo": "Basic Information",
       "contactInfo": "Contact Information",
-      "socialMedia": "Social Media"
+      "socialMedia": "Social Media",
+      "privacyPolicy": "Privacy Policy"
     },
     "errors": {
       "fetchFailed": "Failed to fetch company details",
       "updateFailed": "Failed to update company"
     }
+  },
+  "hero": {
+    "title": "Welcome to KH HARA",
+    "tagline": "We are here to help you",
+    "subtitle": "We are here to help you",
+    "cta": "Get Started",
+    "learnMore": "Learn More"
   }
 }

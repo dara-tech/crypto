@@ -15,6 +15,8 @@ import Vision from './components/clientPage/Vision'
 import CampanyEdit from './components/admin/companies/CampanyEdit'
 import CampanyList from './components/admin/companies/CampanyList'
 import Contact from './components/clientPage/Contact'
+import PolicyPrivacy from './components/clientPage/PolicyPrivacy'
+import Home from './components/clientPage/Home'
 
 function App() {
   const { theme } = useThemeStore()
@@ -34,7 +36,8 @@ function App() {
             <Route path="/mission" element={<Mission />} />
             <Route path="/vision" element={<Vision />} />
             <Route path="/contact" element={<Contact />} />
-            
+            <Route path="/privacy-policy" element={<PolicyPrivacy />} />
+            <Route path="/" element={<Home />} />
           </Routes>
           <Footer />
         {/* </Suspense> */}

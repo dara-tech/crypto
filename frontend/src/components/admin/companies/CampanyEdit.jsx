@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { FaBuilding, FaPen, FaPhoneAlt, FaGlobe } from "react-icons/fa";
+import { FaBuilding, FaPen, FaPhoneAlt, FaGlobe, FaFile } from "react-icons/fa";
 import useCompanies from "../../../hooks/useCompanies";
 import LogoUpload from "./edit/LogoUpload";
 import BasicInfo from "./edit/BasicInfo";
 import ContactInfo from "./edit/ContactInfo";
 import SocialMedia from "./edit/SocialMedia";
 import FormSection from "./edit/FormSection";
+import PrivacyPolicy from "./edit/PrivacyPolicy";
 import { useTranslation } from "react-i18next";
 
 const CampanyEdit = () => {
@@ -23,6 +24,7 @@ const CampanyEdit = () => {
     mission: "",
     missionImage: "",
     vision: "",
+    privacyPolicy: "",
     visionImage: "",
     contact: {
       address: "",
@@ -65,6 +67,7 @@ const CampanyEdit = () => {
             mission: companyData.mission || "",
             missionImage: companyData.missionImage || "",
             vision: companyData.vision || "",
+            privacyPolicy: companyData.privacyPolicy || "",
             visionImage: companyData.visionImage || "",
             contact: {
               address: companyData.contact?.address || "",
@@ -167,6 +170,7 @@ const CampanyEdit = () => {
       formDataToSend.append("about", formData.about || "");
       formDataToSend.append("mission", formData.mission || "");
       formDataToSend.append("vision", formData.vision || "");
+      formDataToSend.append("privacyPolicy", formData.privacyPolicy || "");
       
       // Handle logo file if updated
       if (formData.logo instanceof File) {
@@ -358,6 +362,13 @@ const CampanyEdit = () => {
 
         <FormSection title={t('company.sections.socialMedia')} icon={<FaGlobe />}>
           <SocialMedia
+            formData={formData}
+            onInputChange={handleInputChange}
+          />
+        </FormSection>
+
+        <FormSection title={t('company.sections.privacyPolicy')} icon={<FaFile />}>
+          <PrivacyPolicy
             formData={formData}
             onInputChange={handleInputChange}
           />
