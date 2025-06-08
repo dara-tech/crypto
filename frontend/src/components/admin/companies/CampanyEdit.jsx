@@ -26,6 +26,7 @@ const CampanyEdit = () => {
     vision: "",
     privacyPolicy: "",
     visionImage: "",
+    heroImage: "",  // Added heroImage field
     contact: {
       address: "",
       phone: "", 
@@ -50,7 +51,8 @@ const CampanyEdit = () => {
   const [imagePreview, setImagePreview] = useState({
     about: null,
     mission: null,
-    vision: null
+    vision: null,
+    heroImage: null
   });
 
   useEffect(() => {
@@ -69,6 +71,7 @@ const CampanyEdit = () => {
             vision: companyData.vision || "",
             privacyPolicy: companyData.privacyPolicy || "",
             visionImage: companyData.visionImage || "",
+            heroImage: companyData.heroImage || "",
             contact: {
               address: companyData.contact?.address || "",
               phone: companyData.contact?.phone || "",
@@ -91,7 +94,8 @@ const CampanyEdit = () => {
           setImagePreview({
             about: companyData.aboutImage || null,
             mission: companyData.missionImage || null,
-            vision: companyData.visionImage || null
+            vision: companyData.visionImage || null,
+            heroImage: companyData.heroImage || null
           });
         }
       } catch (err) {
@@ -134,10 +138,15 @@ const CampanyEdit = () => {
 
   const handleImageChange = (field, file) => {
     if (!file) {
+      // Handle image removal
+      const update = {};
+      update[field] = "";
       setFormData(prev => ({
         ...prev,
-        [`${field}Image`]: ""
+        ...update
       }));
+      
+      // Update preview
       setImagePreview(prev => ({
         ...prev,
         [field]: null
@@ -145,14 +154,31 @@ const CampanyEdit = () => {
       return;
     }
 
+    // Create preview URL for the image
+    const previewUrl = file instanceof File ? URL.createObjectURL(file) : file;
+    
+    // Update form data with the actual file or URL
+    const update = {};
+    update[field] = file;
+    
     setFormData(prev => ({
       ...prev,
-      [`${field}Image`]: file
+      ...update
     }));
+    
+    // Update preview
     setImagePreview(prev => ({
       ...prev,
-      [field]: URL.createObjectURL(file)
+      [field]: previewUrl
     }));
+    
+    // Special handling for heroImage to ensure it's properly set in formData
+    if (field === 'heroImage') {
+      setFormData(prev => ({
+        ...prev,
+        heroImage: file
+      }));
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -177,6 +203,13 @@ const CampanyEdit = () => {
         formDataToSend.append("logo", formData.logo);
       } else if (typeof formData.logo === 'string') {
         formDataToSend.append("logo", formData.logo);
+      }
+
+      // Handle hero image (single image)
+      if (formData.heroImage instanceof File) {
+        formDataToSend.append("heroImage", formData.heroImage);
+      } else if (typeof formData.heroImage === 'string') {
+        formDataToSend.append("heroImage", formData.heroImage);
       }
 
       // Handle section images

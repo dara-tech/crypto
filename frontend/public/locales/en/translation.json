@@ -6,7 +6,7 @@
   "profile": {
     "title": "Profile",
     "changePassword": "Change Password",
-    "currentPassword": "CurrentPassword",
+    "currentPassword": "Current Password",
     "newPassword": "New Password",
     "confirmPassword": "Confirm Password",
     "updatePassword": "Update Password",
@@ -31,6 +31,60 @@
     }
   },
   "settings": "Settings",
+  "company": {
+    "heroSection": "Hero Image",
+    "heroImage": "Hero Image",
+    "heroImageAlt": "School hero image",
+    "heroImageTooltip": "Upload a high-quality image for the hero section (recommended: 1920x1080px)",
+    "heroImageDescription": "This image will be displayed at the top of your school's homepage. Use a high-quality, engaging image that represents your school.",
+    "schoolName": "School Name",
+    "schoolNamePlaceholder": "Enter school name",
+    "schoolNameTooltip": "Enter your school's official name",
+    "editTitle": "Edit Company",
+    "backToCompanies": "← Back to Companies",
+    "companyNameRequired": "Company name is required",
+    "updateCompany": "Update Company",
+    "updating": "Updating...",
+    "cancel": "Cancel",
+    "privacyPolicyPlaceholder": "Enter your privacy policy here...",
+    "sections": {
+      "logo": "Company Logo",
+      "basicInfo": "Basic Information",
+      "contactInfo": "Contact Information",
+      "socialMedia": "Social Media",
+      "privacyPolicy": "Privacy Policy"
+    },
+    "errors": {
+      "fetchFailed": "Failed to fetch company details",
+      "updateFailed": "Failed to update company"
+    }
+  },
+  "common": {
+    "changeImage": "Change image",
+    "removeImage": "Remove image",
+    "dragAndDrop": "Drag and drop an image here, or",
+    "browse": "browse",
+    "or": "or",
+    "uploadImage": "Upload Image",
+    "remove": "Remove",
+    "removeBg": "Remove Background"
+  },
+  "validation": {
+    "maxLength": "Maximum {{max}} characters allowed"
+  },
+  "imageUpload": {
+    "maxSize": "Maximum file size: 5MB",
+    "sizeError": "Image size should be less than 5MB",
+    "typeError": "Please upload an image file",
+    "success": "Image uploaded successfully",
+    "error": "Error uploading image",
+    "removingBg": "Removing background...",
+    "bgRemoved": "Background removed successfully",
+    "bgRemoveError": "Failed to remove background",
+    "removeBg": "Remove background",
+    "uploading": "Uploading...",
+    "removed": "Image removed successfully"
+  },
   "schools": "Schools",
   "companies": "Companies",
   "contact": "Contact",
@@ -100,27 +154,6 @@
       "twitter": "Twitter",
       "instagram": "Instagram",
       "linkedin": "LinkedIn"
-    }
-  },
-  "company": {
-    "editTitle": "Edit Company",
-    "backToCompanies": "← Back to Companies",
-    "companyNameRequired": "Company name is required",
-    "updateCompany": "Update Company",
-    "updating": "Updating...",
-    "cancel": "Cancel",
-    "privacyPolicy": "Privacy Policy",
-    "privacyPolicyPlaceholder": "Enter your privacy policy here...",
-    "sections": {
-      "logo": "Company Logo",
-      "basicInfo": "Basic Information",
-      "contactInfo": "Contact Information",
-      "socialMedia": "Social Media",
-      "privacyPolicy": "Privacy Policy"
-    },
-    "errors": {
-      "fetchFailed": "Failed to fetch company details",
-      "updateFailed": "Failed to update company"
     }
   },
   "hero": {

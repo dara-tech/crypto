@@ -38,6 +38,12 @@ const companySchema = new mongoose.Schema({
     default: "",
     // URL to the vision section image
   },
+  heroImage: {
+    type: String,
+    default: "",
+    // URL to the hero section image
+  },
+  
   contact: {
     address: String,
     phone: String,
@@ -50,6 +56,7 @@ const companySchema = new mongoose.Schema({
     youtube: String,
     linkedin: String,
   },
+
   heroImages: [String], // Homepage carousel images
   programsOffered: [String], // E.g. ['Preschool', 'Primary', 'Secondary']
   testimonials: [

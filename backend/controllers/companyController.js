@@ -129,50 +129,107 @@ export const updateCompany = async (req, res) => {
 
     updateFields.forEach(field => {
       if (req.body[field] !== undefined) {
+        // Skip if the value is an empty array for heroImage
+        if (field === 'heroImage' && Array.isArray(req.body[field])) {
+          return; // Skip setting heroImage if it's an array
+        }
         company[field] = req.body[field];
       }
     });
 
-    // Handle image uploads if present
-    const imageFields = {
+    // Handle heroImage specifically to prevent array assignment
+    if (req.body.heroImage && !Array.isArray(req.body.heroImage)) {
+      company.heroImage = req.body.heroImage;
+    }
+
+    // Handle single image uploads (logo, aboutImage, missionImage, visionImage, heroImage)
+    const singleImageFields = {
       logo: 'company_logos',
       aboutImage: 'company_about_images',
-      missionImage: 'company_mission_images', 
+      missionImage: 'company_mission_images',
       visionImage: 'company_vision_images'
+      // Removed heroImage from here since it's handled separately
     };
 
-    for (const [field, folder] of Object.entries(imageFields)) {
-      if (req.files?.[field]) {
+    // Process single image uploads
+    for (const [field, folder] of Object.entries(singleImageFields)) {
+      if (req.files?.[field]?.[0]?.buffer) {
+        try {
+          const result = await new Promise((resolve, reject) => {
+            const uploadStream = cloudinary.uploader.upload_stream(
+              { folder },
+              (error, result) => {
+                if (error) reject(error);
+                else resolve(result);
+              }
+            );
+            uploadStream.end(req.files[field][0].buffer);
+          });
+          company[field] = result.secure_url;
+        } catch (error) {
+          console.error(`Error uploading ${field} image:`, error);
+          // Don't fail the whole request if a single image upload fails
+        }
+      }
+    }
+
+    // Handle heroImage upload separately
+    if (req.files?.heroImage?.[0]?.buffer) {
+      try {
         const result = await new Promise((resolve, reject) => {
           const uploadStream = cloudinary.uploader.upload_stream(
-            { folder },
+            { folder: 'company_hero_images' },
             (error, result) => {
               if (error) reject(error);
               else resolve(result);
             }
           );
-          uploadStream.end(req.files[field][0].buffer);
+          uploadStream.end(req.files.heroImage[0].buffer);
         });
-        company[field] = result.secure_url;
+        company.heroImage = result.secure_url;
+      } catch (error) {
+        console.error('Error uploading hero image:', error);
+        // Don't fail the whole request if hero image upload fails
       }
     }
 
-    // Handle hero images update if present
+    // Handle hero images (array) update if present
     if (req.files?.heroImages) {
-      const heroImagePromises = req.files.heroImages.map(image => {
-        return new Promise((resolve, reject) => {
-          const uploadStream = cloudinary.uploader.upload_stream(
-            { folder: 'company_hero_images' },
-            (error, result) => {
-              if (error) reject(error);
-              else resolve(result.secure_url);
-            }
-          );
-          uploadStream.end(image.buffer);
+      // Filter out any empty values that might come from the form
+      const validHeroImages = req.files.heroImages.filter(img => img && img.buffer && img.buffer.length > 0);
+      
+      if (validHeroImages.length > 0) {
+        const heroImagePromises = validHeroImages.map(image => {
+          return new Promise((resolve, reject) => {
+            const uploadStream = cloudinary.uploader.upload_stream(
+              { folder: 'company_hero_images' },
+              (error, result) => {
+                if (error) reject(error);
+                else resolve(result.secure_url);
+              }
+            );
+            uploadStream.end(image.buffer);
+          });
         });
-      });
-      const heroImageUrls = await Promise.all(heroImagePromises);
-      company.heroImages = heroImageUrls;
+        
+        try {
+          const newHeroImageUrls = await Promise.all(heroImagePromises);
+          
+          // Initialize heroImages as array if it doesn't exist
+          if (!company.heroImages || !Array.isArray(company.heroImages)) {
+            company.heroImages = [];
+          }
+          
+          // Filter out any empty strings from existing heroImages
+          company.heroImages = company.heroImages.filter(Boolean);
+          
+          // Add new images to the array
+          company.heroImages = [...company.heroImages, ...newHeroImageUrls];
+        } catch (err) {
+          console.error('Error uploading hero images:', err);
+          // Don't fail the whole request if hero image upload fails
+        }
+      }
     }
 
     // Handle testimonials update

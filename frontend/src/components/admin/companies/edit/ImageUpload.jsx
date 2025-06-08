@@ -6,6 +6,7 @@ const ImageUpload = ({
   field, 
   label, 
   currentImage, 
+    previewImage: previewImageProp, 
   onImageChange, 
   tooltip,
   aspectRatio = "aspect-square"

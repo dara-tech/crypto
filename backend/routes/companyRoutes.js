@@ -11,6 +11,7 @@ const uploadFields = [
   { name: 'aboutImage', maxCount: 1 },
   { name: 'missionImage', maxCount: 1 },
   { name: 'visionImage', maxCount: 1 },
+  { name: 'heroImage', maxCount: 1 },
   { name: 'heroImages', maxCount: 5 },
   { name: 'testimonialImages', maxCount: 10 }
 ];

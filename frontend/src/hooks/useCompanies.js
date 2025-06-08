@@ -111,10 +111,6 @@ const useCompanies = () => {
         formDataObj.logo = companyData.logo;
       } 
       
-      if (companyData.heroImages) {
-        formDataObj.heroImages = companyData.heroImages;
-      }
-      
       if (companyData.testimonialImages) {
         formDataObj.testimonialImages = companyData.testimonialImages;
       }
