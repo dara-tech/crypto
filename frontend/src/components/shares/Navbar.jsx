@@ -70,7 +70,10 @@ const Navbar = () => {
   }, [companies]);
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
-  const toggleProfileMenu = () => setIsProfileMenuOpen(!isProfileMenuOpen);
+  const toggleProfileMenu = (e) => {
+    e.stopPropagation();
+    setIsProfileMenuOpen(!isProfileMenuOpen);
+  };
   const handleLogout = () => {
     setIsProfileMenuOpen(false);
     logout();
@@ -79,7 +82,7 @@ const Navbar = () => {
   const adminLinks = [
     { to: '/admin/dashboard', label: t('dashboard'), icon: <RiDashboardLine />, activeIcon: <RiDashboardFill /> },
     { to: '/admin/companies', label: t('companies'), icon: <FaBuilding />, activeIcon: <FaBuilding /> },
-    { to: '/admin/profile', label: t('Profile'), icon: <BsPersonGear />, activeIcon: <BsPersonGear /> }
+    { to: '/admin/profile', label: t('Profile'), icon: <BsPersonGear />, activeIcon: <BsPersonGear /> },
   ];
 
   const publicLinks = [
@@ -93,7 +96,7 @@ const Navbar = () => {
   const activeLinks = profile?.user ? adminLinks : publicLinks;
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+    <nav className={`top-0 left-0 right-0 z-50 transition-all duration-300 ${
       isScrolled 
         ? 'bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-lg border-b border-gray-200/20 dark:border-gray-700/20' 
         : 'bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700'
@@ -103,7 +106,7 @@ const Navbar = () => {
           {/* Logo Section */}
           <div className="flex items-center">
             <Link to="/" className="flex-shrink-0 flex items-center group">
-              <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
+              <div className="relative w-10 h-10 rounded-xl bg-transparent flex items-center justify-center group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
                 {companiesLoading ? (
                   <div className="w-8 h-8 animate-pulse bg-white/20 rounded-lg" />
                 ) : currentCompany?.logo ? (
@@ -196,7 +199,7 @@ const Navbar = () => {
                         )}
                       </div>
                     </div>
-                    <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-400 border-2 border-white dark:border-gray-900 rounded-full"></div>
+                    <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-400 border-2 border-white dark:border-gray-900 rounded-full z-10"></div>
                   </div>
                   <span className="max-w-[120px] truncate text-gray-700 dark:text-gray-300">
                     {profile.user.name}
@@ -208,7 +211,7 @@ const Navbar = () => {
 
                 {/* Profile Dropdown */}
                 {isProfileMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-56 rounded-xl shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black/5 dark:ring-white/10 overflow-hidden animate-in slide-in-from-top-2 duration-200">
+                  <div className="absolute right-0 mt-2 w-56 rounded-xl shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black/5 dark:ring-white/10 overflow-hidden animate-in slide-in-from-top-2 duration-200 z-50">
                     <div className="p-3 border-b border-gray-100 dark:border-gray-700">
                       <div className="flex items-center space-x-3">
                         <div className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-blue-400 to-purple-500 p-0.5">
