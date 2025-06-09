@@ -1,30 +1,49 @@
 // AdminLogin.js
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Eye, EyeOff, Lock, Mail, AlertCircle } from "lucide-react"
 import useAuth from "../../hooks/useAuth"
-import { Link } from "react-router-dom"
+import { Link, useLocation, useNavigate } from "react-router-dom"
 
 const LoginPage = () => {
   const [credentials, setCredentials] = useState({ email: "", password: "" })
   const [showPassword, setShowPassword] = useState(false)
+  const location = useLocation()
+  const navigate = useNavigate()
+  const { error, loading, handleLogin, isAuthenticated } = useAuth()
 
-  const { error, loading, handleLogin } = useAuth()
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      const params = new URLSearchParams(location.search)
+      const from = params.get('from') || '/admin/dashboard'
+      navigate(from, { replace: true })
+    }
+  }, [isAuthenticated, location.search, navigate])
 
   const handleChange = (e) => {
     const { name, value } = e.target
     setCredentials((prev) => ({ ...prev, [name]: value }))
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    handleLogin(credentials)
+    const { success } = await handleLogin(credentials)
+    if (success) {
+      // The actual navigation is handled in the handleLogin function
+      // This is just a fallback in case the navigation doesn't happen
+      const params = new URLSearchParams(window.location.search)
+      const from = params.get('from') || '/admin/dashboard'
+      navigate(from, { replace: true })
+    }
   }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-base-100 px-4 ">
       <div className="card w-full max-w-md  bg-base-100 border-t-6 shadow-md border-primary">
         <div className="card-body">
-          <h2 className="card-title text-3xl font-bold text-center mb-6 text-primary">Admin Login</h2>
+          <h2 className="card-title text-3xl font-bold text-center mb-6 text-primary">
+            {location.pathname.includes('admin') ? 'Admin Login' : 'Login'}
+          </h2>
           {error && (
             <div className="alert alert-error mb-6">
               <AlertCircle className="w-6 h-6" />

@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import './App.css';
 import LoginPage from './components/auth/loginPage';
 import RegisterPage from './components/auth/RegisterPage';
@@ -7,15 +7,16 @@ import Profile from './components/admin/profile/layout';
 import Navbar from './components/shares/Navbar';
 import SettingPage from './components/shares/SettingPage';
 import { useThemeStore } from './store/useThemeStore';
-import About from './components/clientPage/About'
-import Footer from './components/shares/Footer'
-import Mission from './components/clientPage/Mission'
-import Vision from './components/clientPage/Vision'
-import CampanyEdit from './components/admin/companies/CampanyEdit'
-import CampanyList from './components/admin/companies/CampanyList'
-import Contact from './components/clientPage/Contact'
-import PolicyPrivacy from './components/clientPage/PolicyPrivacy'
-import Home from './components/clientPage/Home'
+import About from './components/clientPage/About';
+import Footer from './components/shares/Footer';
+import Mission from './components/clientPage/Mission';
+import Vision from './components/clientPage/Vision';
+import CampanyEdit from './components/admin/companies/CampanyEdit';
+import CampanyList from './components/admin/companies/CampanyList';
+import Contact from './components/clientPage/Contact';
+import PolicyPrivacy from './components/clientPage/PolicyPrivacy';
+import Home from './components/clientPage/Home';
+import ProtectedRoute from './components/auth/ProtectedRoute';
 
 function App() {
   const { theme } = useThemeStore()
@@ -25,12 +26,9 @@ function App() {
         {/* <Suspense fallback={<div>Loading...</div>}> */}
           <Navbar />
           <Routes>
+            {/* Public routes */}
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
-            <Route path="/admin/profile" element={<Profile />} />
-            <Route path="/admin/setting" element={<SettingPage />} />
-            <Route path="/admin/companies/:id" element={<CampanyEdit />} />
-            <Route path="/admin/companies" element={<CampanyList />} />
             <Route path="/about" element={<About />} />
             <Route path="/mission" element={<Mission />} />
             <Route path="/vision" element={<Vision />} />
@@ -38,6 +36,16 @@ function App() {
             <Route path="/privacy-policy" element={<PolicyPrivacy />} />
             <Route path="/" element={<Home />} />
             
+            {/* Protected routes - only accessible when authenticated */}
+            <Route element={<ProtectedRoute />}>
+              <Route path="/admin/profile" element={<Profile />} />
+              <Route path="/admin/setting" element={<SettingPage />} />
+              <Route path="/admin/companies/:id" element={<CampanyEdit />} />
+              <Route path="/admin/companies" element={<CampanyList />} />
+            </Route>
+
+            {/* Redirect to home for any unknown routes */}
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
           <Footer />
         {/* </Suspense> */}

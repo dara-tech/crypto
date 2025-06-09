@@ -1,39 +1,44 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
-const API_URL = import.meta.env.MODE === "development" ? "http://localhost:5001" : "https://crypto-nmz7.onrender.com";
+const API_URL = import.meta.env.MODE === "development"
+  ? "http://localhost:5001"
+  : "https://crypto-nmz7.onrender.com";
 
 const API = axios.create({ baseURL: API_URL });
 
 // ✅ Automatically attach token to every request
-API.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  } else {
-    console.warn("⚠️ No token found in localStorage!");
-  }
-  return config;
-}, (error) => Promise.reject(error));
-
+API.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    } else {
+      console.warn("⚠️ No token found in localStorage!");
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
 const useAuth = () => {
   const [profile, setProfile] = useState(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(() => !!localStorage.getItem("token"));
   const navigate = useNavigate();
 
-  const getAdminProfile = async () => {
+  const getAdminProfile = useCallback(async () => {
     const token = localStorage.getItem("token");
-    console.log("Token being sent:", token); // ✅ Debugging
-  
+    console.log("Token being sent:", token);
+
     if (!token) {
-      console.error("🚨 No token found in localStorage! Redirecting to login.");
+      console.error("🚨 No token found! Redirecting to login.");
       navigate("/auth/login");
       return;
     }
-  
+
     try {
       const { data } = await API.get("/api/auth/me");
       console.log("Profile data:", data);
@@ -47,11 +52,9 @@ const useAuth = () => {
       }
       setError(error.response?.data?.message || "Error fetching profile");
     }
-  };
-  
+  }, [navigate]);
 
-  // Login Handler
-  const handleLogin = async (credentials) => {
+  const handleLogin = useCallback(async (credentials) => {
     setLoading(true);
     setError("");
 
@@ -59,17 +62,32 @@ const useAuth = () => {
       const { data } = await API.post("/api/auth/login", credentials);
       localStorage.setItem("token", data.token);
       setProfile(data.admin);
-      navigate("/admin/dashboard");
+      setIsAuthenticated(true);
+
+      const from = new URLSearchParams(window.location.search).get("from") || "/admin/dashboard";
+      navigate(from, { replace: true });
+
+      return { success: true };
     } catch (err) {
-      setError(err?.response?.data?.message || "Login failed. Please try again.");
+      const errorMessage = err?.response?.data?.message || "Login failed. Please try again.";
+      setError(errorMessage);
+      return { success: false, error: errorMessage };
     } finally {
       setLoading(false);
     }
-  };
+  }, [navigate]);
 
-  const handleRegister = async (credentials) => {
+  const handleLogout = useCallback(() => {
+    localStorage.removeItem("token");
+    setProfile(null);
+    setIsAuthenticated(false);
+    navigate("/login");
+  }, [navigate]);
+
+  const handleRegister = useCallback(async (credentials) => {
     setLoading(true);
     setError("");
+
     try {
       const response = await API.post("/api/auth/register", credentials);
       console.log("Registration successful:", response.data);
@@ -79,67 +97,61 @@ const useAuth = () => {
     } finally {
       setLoading(false);
     }
-  }
-  
-  // Update Admin Profile
-  const updateAdminProfile = async (formData) => {
+  }, [navigate]);
+
+  const updateAdminProfile = useCallback(async (formData) => {
     setLoading(true);
     setError("");
-    
+
     try {
-      // Check if this is a password update
-      const isPasswordUpdate = formData.get('currentPassword') && formData.get('newPassword');
-      
-      const { data } = await API.put(
-        "/api/auth/profile", 
-        formData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        }
-      );
-      
-      // Update profile in state if this was a profile update
+      const isPasswordUpdate = formData.get("currentPassword") && formData.get("newPassword");
+
+      const { data } = await API.put("/api/auth/profile", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
       if (data.user) {
         setProfile(data.user);
       }
-      
-      // If this was a password update, show success message
+
       if (isPasswordUpdate) {
-        return { success: true, message: 'Password updated successfully' };
+        return { success: true, message: "Password updated successfully" };
       }
-      
+
       return data;
     } catch (error) {
-      const errorMessage = error.response?.data?.message || 
-                         (error.response?.data?.error || "Error updating profile");
+      const errorMessage =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        "Error updating profile";
       setError(errorMessage);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
     }
-  };
-
-  // Logout Handler
-  const logout = async () => {
-    try {
-      await API.post("/api/auth/logout");
-      localStorage.removeItem("token");
-      setProfile(null);
-      navigate("/login");
-    } catch (error) {
-      console.error("❌ Logout failed:", error);
-      setError("Logout failed. Please try again.");
-    }
-  };
+  }, []);
 
   // Auto-fetch profile on mount
   useEffect(() => {
-    if (localStorage.getItem("token")) getAdminProfile();
-  }, []);
+    if (localStorage.getItem("token")) {
+      getAdminProfile();
+    }
+  }, [getAdminProfile]);
 
-  return { profile, error, loading, handleLogin, handleRegister, getAdminProfile, updateAdminProfile, logout };
+  return {
+    profile,
+    error,
+    loading,
+    isAuthenticated,
+    handleLogin,
+    logout: handleLogout, // Expose as logout for backward compatibility
+    handleLogout,         // Keep for backward compatibility
+    handleRegister,
+    updateAdminProfile,
+    getAdminProfile,
+  };
 };
 
 export default useAuth;

@@ -1,14 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { FaUserCircle, FaHome, FaSchool, FaEnvelope, FaChartLine, FaBuilding, FaUserCog } from 'react-icons/fa';
+import { FaUserCircle, FaBuilding, FaChevronDown } from 'react-icons/fa';
 import LanguageSwitcher from './LanguageSwitcher';
 import { HiOutlineAcademicCap, HiAcademicCap } from 'react-icons/hi';
-import { MdOutlineHome, MdHome } from 'react-icons/md';
+import { MdOutlineHome, MdHome, MdOutlineMail, MdMail } from 'react-icons/md';
 import { IoInformationCircleOutline, IoInformationCircle } from 'react-icons/io5';
-import { MdOutlineMail, MdMail } from 'react-icons/md';
 import { RiDashboardLine, RiDashboardFill } from 'react-icons/ri';
 import { BsPersonGear } from 'react-icons/bs';
+import { HiOutlineLogout, HiOutlineUser, HiOutlineCog } from 'react-icons/hi';
 import useAuth from '../../hooks/useAuth';
 import useCompanies from '../../hooks/useCompanies';
 
@@ -17,50 +17,52 @@ const Navbar = () => {
   const { profile, logout, getAdminProfile, loading: profileLoading } = useAuth();
   const { companies, getCompanies, loading: companiesLoading } = useCompanies();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [currentCompany, setCurrentCompany] = useState(null);
   const [language, setCurrentLanguage] = useState(i18n.language || 'en');
+  const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
-  
-  // Update language when i18n language changes
-  useEffect(() => {
-    const handleLanguageChange = (lng) => {
-      setCurrentLanguage(lng);
-    };
-    
-    i18n.on('languageChanged', handleLanguageChange);
-    return () => {
-      i18n.off('languageChanged', handleLanguageChange);
-    };
-  }, [i18n]);
+  const profileMenuRef = useRef(null);
+  const mobileMenuRef = useRef(null);
 
-  // Set initial language from localStorage or browser
   useEffect(() => {
-    const savedLanguage = localStorage.getItem('i18nextLng');
-    if (savedLanguage) {
-      setCurrentLanguage(savedLanguage);
-    }
-    // Initialize language if not set
-    if (!language) {
-      setCurrentLanguage(i18n.language || 'en');
-    }
-  }, [i18n.language]);
-
-  const isAdminRoute = location.pathname.startsWith('/admin');
-
-  // Fetch companies data on mount
-  useEffect(() => {
-    getCompanies();
+    const handleScroll = () => setIsScrolled(window.scrollY > 10);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Fetch user profile whenever token changes
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target)) {
+        setIsProfileMenuOpen(false);
+      }
+      if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target)) {
+        setIsMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    const handleLanguageChange = (lng) => setCurrentLanguage(lng);
+    i18n.on('languageChanged', handleLanguageChange);
+    return () => i18n.off('languageChanged', handleLanguageChange);
+  }, [i18n]);
+
+  useEffect(() => {
+    const savedLanguage = localStorage.getItem('i18nextLng');
+    if (savedLanguage) setCurrentLanguage(savedLanguage);
+    if (!language) setCurrentLanguage(i18n.language || 'en');
+  }, [i18n.language, language]);
+
+  useEffect(() => { getCompanies(); }, []);
+
   useEffect(() => {
     const token = localStorage.getItem('token');
-    if (token) {
-      getAdminProfile();
-    }
-  }, [localStorage.getItem('token')]);
+    if (token) getAdminProfile();
+  }, [getAdminProfile]);
 
-  // Update current company when companies data changes
   useEffect(() => {
     if (companies && companies.length > 0) {
       setCurrentCompany(companies[0]);
@@ -68,69 +70,45 @@ const Navbar = () => {
   }, [companies]);
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+  const toggleProfileMenu = () => setIsProfileMenuOpen(!isProfileMenuOpen);
+  const handleLogout = () => {
+    setIsProfileMenuOpen(false);
+    logout();
+  };
 
   const adminLinks = [
-    { 
-      to: '/admin/dashboard', 
-      label: t('dashboard'), 
-      icon: <RiDashboardLine className="w-5 h-5" />,
-      activeIcon: <RiDashboardFill className="w-5 h-5" />
-    },
-    { 
-      to: '/admin/companies', 
-      label: t('companies'), 
-      icon: <FaBuilding className="w-5 h-5" />,
-      activeIcon: <FaBuilding className="w-5 h-5 text-primary" />
-    },
-    { 
-      to: '/admin/profile', 
-      label: t('Profile'), 
-      icon: <BsPersonGear className="w-5 h-5" />,
-      activeIcon: <BsPersonGear className="w-5 h-5 text-primary" />
-    }
+    { to: '/admin/dashboard', label: t('dashboard'), icon: <RiDashboardLine />, activeIcon: <RiDashboardFill /> },
+    { to: '/admin/companies', label: t('companies'), icon: <FaBuilding />, activeIcon: <FaBuilding /> },
+    { to: '/admin/profile', label: t('Profile'), icon: <BsPersonGear />, activeIcon: <BsPersonGear /> }
   ];
 
   const publicLinks = [
-    { 
-      to: '/', 
-      label: t('home'), 
-      icon: <MdOutlineHome className="w-5 h-5" />,
-      activeIcon: <MdHome className="w-5 h-5" />
-    },
-    { 
-      to: '/companies', 
-      label: t('companies'), 
-      icon: <FaBuilding className="w-5 h-5" />,
-      activeIcon: <FaBuilding className="w-5 h-5 text-primary" />
-    },
-    { 
-      to: '/about', 
-      label: t('about'), 
-      icon: <IoInformationCircleOutline className="w-5 h-5" />,
-      activeIcon: <IoInformationCircle className="w-5 h-5" />
-    },
-    { 
-      to: '/contact', 
-      label: t('contact'), 
-      icon: <MdOutlineMail className="w-5 h-5" />,
-      activeIcon: <MdMail className="w-5 h-5" />
-    }
+    { to: '/', label: t('home'), icon: <MdOutlineHome />, activeIcon: <MdHome /> },
+    { to: '/companies', label: t('companies'), icon: <FaBuilding />, activeIcon: <FaBuilding /> },
+    { to: '/about', label: t('about'), icon: <IoInformationCircleOutline />, activeIcon: <IoInformationCircle /> },
+    { to: '/contact', label: t('contact'), icon: <MdOutlineMail />, activeIcon: <MdMail /> }
   ];
 
-  const activeLinks = isAdminRoute ? adminLinks : publicLinks;
+  // Show admin links when authenticated, public links when not
+  const activeLinks = profile?.user ? adminLinks : publicLinks;
 
   return (
-    <nav className="bg-base-100 border-b border-base-200 sticky top-0 z-50">
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      isScrolled 
+        ? 'bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-lg border-b border-gray-200/20 dark:border-gray-700/20' 
+        : 'bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700'
+    }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
+        <div className="flex justify-between items-center h-16">
+          {/* Logo Section */}
           <div className="flex items-center">
-            <Link to="/" className="flex-shrink-0 flex items-center">
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+            <Link to="/" className="flex-shrink-0 flex items-center group">
+              <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
                 {companiesLoading ? (
-                  <div className="w-8 h-8 animate-pulse bg-base-200 rounded-full" />
+                  <div className="w-8 h-8 animate-pulse bg-white/20 rounded-lg" />
                 ) : currentCompany?.logo ? (
                   <img
-                    className="object-cover w-full h-full"
+                    className="object-cover w-8 h-8 rounded-lg"
                     src={currentCompany.logo}
                     alt={currentCompany.name}
                     onError={(e) => {
@@ -139,91 +117,157 @@ const Navbar = () => {
                     }}
                   />
                 ) : (
-                  <img
-                    className="object-cover w-full h-full"
-                    src="/default-company-logo.png"
-                    alt="Default Company Logo"
-                  />
+                  <div className="w-6 h-6 bg-white rounded text-blue-600 flex items-center justify-center font-bold text-sm">
+                    C
+                  </div>
                 )}
               </div>
-              <span className="ml-3 text-xl font-bold text-primary">
-                {companiesLoading ? (
-                  <div className="h-6 w-32 animate-pulse bg-base-200 rounded" />
-                ) : (
-                  currentCompany?.name || t('appName')
-                )}
-              </span>
+              <div className="ml-3">
+                <span className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+                  {companiesLoading ? (
+                    <div className="h-6 w-32 animate-pulse bg-gray-200 dark:bg-gray-700 rounded" />
+                  ) : (
+                    currentCompany?.name || t('appName')
+                  )}
+                </span>
+              </div>
             </Link>
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex md:items-center md:space-x-4">
-            {activeLinks.map(link => (
-              <Link
-                key={link.to}
-                to={link.to}
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 flex items-center gap-2 relative h-full
-                  ${location.pathname === link.to
-                    ? 'text-primary after:absolute after:bottom-[-1px] after:left-1 after:w-full after:h-[2px] after:bg-primary after:rounded-none'
-                    : 'text-base-content hover:bg-base-200/20'
+          <div className="hidden md:flex md:items-center md:space-x-1">
+            {activeLinks.map(link => {
+              const isActive = location.pathname === link.to;
+              return (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2 group ${
+                    isActive
+                      ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20'
+                      : 'text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800/50'
                   }`}
-              >
-                {location.pathname === link.to ? link.activeIcon : link.icon}
-                {link.label}
-              </Link>
-            ))}
+                >
+                  <span className={`transition-transform duration-200 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`}>
+                    {isActive ? link.activeIcon : link.icon}
+                  </span>
+                  {link.label}
+                  {isActive && (
+                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full" />
+                  )}
+                </Link>
+              );
+            })}
 
             {/* Language Switcher */}
-            <LanguageSwitcher />
+            <div className="ml-2">
+              <LanguageSwitcher />
+            </div>
 
+            {/* Profile Section */}
             {profileLoading ? (
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 animate-pulse bg-base-200 rounded-full" />
-                <div className="h-4 w-24 animate-pulse bg-base-200 rounded" />
+              <div className="flex items-center space-x-3 ml-4">
+                <div className="w-8 h-8 animate-pulse bg-gray-200 dark:bg-gray-700 rounded-full" />
+                <div className="h-4 w-24 animate-pulse bg-gray-200 dark:bg-gray-700 rounded" />
               </div>
             ) : profile?.user ? (
-              <div className="relative">
+              <div className="relative ml-4" ref={profileMenuRef}>
                 <button
-                  onClick={toggleMenu}
-                  className="flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium hover:bg-base-200"
+                  onClick={toggleProfileMenu}
+                  className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all duration-200 group"
                 >
-                  <div className="w-8 h-8 rounded-full overflow-hidden bg-base-200">
-                    {profile.user.profilePic ? (
-                      <img
-                        src={profile.user.profilePic}
-                        alt={profile.user.name}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          e.target.onerror = null;
-                          e.target.src = '/default-avatar.png';
-                        }}
-                      />
-                    ) : (
-                      <FaUserCircle className="w-full h-full text-base-content/50" />
-                    )}
+                  <div className="relative">
+                    <div className="w-9 h-9 rounded-full overflow-hidden bg-gradient-to-br from-blue-400 to-purple-500 p-0.5">
+                      <div className="w-full h-full rounded-full overflow-hidden bg-white dark:bg-gray-900">
+                        {profile.user.profilePic ? (
+                          <img
+                            src={profile.user.profilePic}
+                            alt={profile.user.name}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src = '/default-avatar.png';
+                            }}
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-gray-800">
+                            <FaUserCircle className="w-6 h-6 text-gray-400" />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-400 border-2 border-white dark:border-gray-900 rounded-full"></div>
                   </div>
-                  <span className="max-w-[100px] truncate">{profile.user.name}</span>
+                  <span className="max-w-[120px] truncate text-gray-700 dark:text-gray-300">
+                    {profile.user.name}
+                  </span>
+                  <FaChevronDown className={`w-3 h-3 text-gray-400 transition-transform duration-200 ${
+                    isProfileMenuOpen ? 'rotate-180' : ''
+                  }`} />
                 </button>
-                {isMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-base-100 ring-1 ring-black ring-opacity-5">
+
+                {/* Profile Dropdown */}
+                {isProfileMenuOpen && (
+                  <div className="absolute right-0 mt-2 w-56 rounded-xl shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black/5 dark:ring-white/10 overflow-hidden animate-in slide-in-from-top-2 duration-200">
+                    <div className="p-3 border-b border-gray-100 dark:border-gray-700">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-blue-400 to-purple-500 p-0.5">
+                          <div className="w-full h-full rounded-full overflow-hidden bg-white dark:bg-gray-900">
+                            {profile.user.profilePic ? (
+                              <img
+                                src={profile.user.profilePic}
+                                alt={profile.user.name}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-gray-800">
+                                <FaUserCircle className="w-6 h-6 text-gray-400" />
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                            {profile.user.name}
+                          </p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                            {profile.user.email}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    
                     <div className="py-1">
                       <Link
-                        to={"/"}
-                        className="block px-4 py-2 text-sm text-base-content hover:bg-base-200"
+                        to="/"
+                        onClick={() => setIsProfileMenuOpen(false)}
+                        className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-150"
                       >
-                        {t('menu.title')}
+                        <MdHome className="w-4 h-4 mr-3" />
+                        {t('menu.title') || 'Home'}
                       </Link>
                       <Link
-                        to={"/admin"}
-                        className="block px-4 py-2 text-sm text-base-content hover:bg-base-200"
+                        to="/admin/dashboard"
+                        onClick={() => setIsProfileMenuOpen(false)}
+                        className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-150"
                       >
-                        {t('menu.admin')}
+                        <HiOutlineCog className="w-4 h-4 mr-3" />
+                        {t('menu.admin') || 'Admin Panel'}
+                      </Link>
+                      <Link
+                        to="/admin/profile"
+                        onClick={() => setIsProfileMenuOpen(false)}
+                        className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-150"
+                      >
+                        <HiOutlineUser className="w-4 h-4 mr-3" />
+                        {t('profile.settings') || 'Profile Settings'}
                       </Link>
                       <button
-                        onClick={logout}
-                        className="block w-full text-left px-4 py-2 text-sm text-base-content hover:bg-base-200"
+                        onClick={handleLogout}
+                        className="flex items-center w-full px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors duration-150"
                       >
-                        {t('auth.logout')}
+                        <HiOutlineLogout className="w-4 h-4 mr-3" />
+                        {t('auth.logout') || 'Logout'}
                       </button>
                     </div>
                   </div>
@@ -232,9 +276,9 @@ const Navbar = () => {
             ) : (
               <Link
                 to="/login"
-                className="px-3 py-2 rounded-md text-sm font-medium bg-primary text-primary-content hover:bg-primary-focus"
+                className="ml-4 px-4 py-2 rounded-lg text-sm font-medium bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105"
               >
-                {t('login')}
+                {t('login') || 'Login'}
               </Link>
             )}
           </div>
@@ -243,64 +287,73 @@ const Navbar = () => {
           <div className="md:hidden flex items-center">
             <button
               onClick={toggleMenu}
-              className="inline-flex items-center justify-center p-2 rounded-md text-base-content hover:bg-base-200"
+              className="inline-flex items-center justify-center p-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200"
             >
-              <span className="sr-only">{t('menu.open')}</span>
-              <svg
-                className={`${isMenuOpen ? 'hidden' : 'block'} h-6 w-6`}
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-              <svg
-                className={`${isMenuOpen ? 'block' : 'hidden'} h-6 w-6`}
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              <span className="sr-only">{t('menu.open') || 'Open menu'}</span>
+              <div className="relative w-6 h-6">
+                <span className={`absolute inset-0 transform transition-all duration-300 ${
+                  isMenuOpen ? 'rotate-45 translate-y-0' : 'rotate-0 -translate-y-2'
+                }`}>
+                  <span className="block absolute h-0.5 w-6 bg-current transform transition-all duration-300" />
+                </span>
+                <span className={`absolute inset-0 transform transition-all duration-300 ${
+                  isMenuOpen ? 'opacity-0' : 'opacity-100'
+                }`}>
+                  <span className="block absolute h-0.5 w-6 bg-current transform transition-all duration-300" />
+                </span>
+                <span className={`absolute inset-0 transform transition-all duration-300 ${
+                  isMenuOpen ? '-rotate-45 translate-y-0' : 'rotate-0 translate-y-2'
+                }`}>
+                  <span className="block absolute h-0.5 w-6 bg-current transform transition-all duration-300" />
+                </span>
+              </div>
             </button>
           </div>
         </div>
       </div>
 
       {/* Mobile menu */}
-      <div className={`${isMenuOpen ? 'block' : 'hidden'} md:hidden`}>
-        <div className="px-2 pt-2 pb-3 space-y-1">
-          {activeLinks.map(link => (
-            <Link
-              key={link.to}
-              to={link.to}
-              className={`flex px-3 py-2 rounded-md text-base font-medium items-center gap-2 relative
-                ${location.pathname === link.to
-                  ? 'text-primary after:absolute after:bottom-[-1px] after:left-0 after:w-full after:h-[2px] after:bg-primary after:rounded-none'
-                  : 'text-base-content hover:bg-base-200/50'
+      <div className={`md:hidden transition-all duration-300 ease-in-out ${
+        isMenuOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'
+      } overflow-hidden`} ref={mobileMenuRef}>
+        <div className="px-4 pt-2 pb-4 space-y-2 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-t border-gray-200/20 dark:border-gray-700/20">
+          {activeLinks.map(link => {
+            const isActive = location.pathname === link.to;
+            return (
+              <Link
+                key={link.to}
+                to={link.to}
+                onClick={() => setIsMenuOpen(false)}
+                className={`flex items-center gap-3 px-4 py-3 rounded-lg text-base font-medium transition-all duration-200 ${
+                  isActive
+                    ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20'
+                    : 'text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800/50'
                 }`}
-            >
-              {location.pathname === link.to ? link.activeIcon : link.icon}
-              {link.label}
-            </Link>
-          ))}
+              >
+                <span className={`transition-transform duration-200 ${isActive ? 'scale-110' : ''}`}>
+                  {isActive ? link.activeIcon : link.icon}
+                </span>
+                {link.label}
+              </Link>
+            );
+          })}
           
+          {/* Mobile Language Switcher */}
+          <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
+            <LanguageSwitcher />
+          </div>
+
+          {/* Mobile Profile Section */}
           {profileLoading ? (
-            <div className="flex items-center space-x-3 px-3 py-2">
-              <div className="w-8 h-8 animate-pulse bg-base-200 rounded-full" />
-              <div className="h-4 w-24 animate-pulse bg-base-200 rounded" />
+            <div className="flex items-center space-x-3 px-4 py-3">
+              <div className="w-10 h-10 animate-pulse bg-gray-200 dark:bg-gray-700 rounded-full" />
+              <div className="h-4 w-24 animate-pulse bg-gray-200 dark:bg-gray-700 rounded" />
             </div>
           ) : profile?.user ? (
-            <>
-              <div className="space-y-2">
-                {/* Mobile Language Switcher */}
-                <div className="border-b border-base-200 py-1">
-                  <LanguageSwitcher />
-                </div>
-                <div className="flex items-center space-x-3 px-3 py-2">
-                  <div className="w-8 h-8 rounded-full overflow-hidden bg-base-200">
+            <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4 space-y-2">
+              <div className="flex items-center space-x-3 px-4 py-3">
+                <div className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-blue-400 to-purple-500 p-0.5">
+                  <div className="w-full h-full rounded-full overflow-hidden bg-white dark:bg-gray-900">
                     {profile.user.profilePic ? (
                       <img
                         src={profile.user.profilePic}
@@ -312,32 +365,52 @@ const Navbar = () => {
                         }}
                       />
                     ) : (
-                      <FaUserCircle className="w-full h-full text-base-content/50" />
+                      <div className="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-gray-800">
+                        <FaUserCircle className="w-6 h-6 text-gray-400" />
+                      </div>
                     )}
                   </div>
-                  <span className="text-base-content">{profile.user.name}</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-base font-medium text-gray-900 dark:text-white truncate">
+                    {profile.user.name}
+                  </p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
+                    {profile.user.email}
+                  </p>
                 </div>
               </div>
+              
               <Link
-                to={isAdminRoute ? "/admin/profile" : "/profile"}
-                className="flex px-3 py-2 rounded-md text-base font-medium text-base-content hover:bg-base-200"
+                to="/admin/profile"
+                onClick={() => setIsMenuOpen(false)}
+                className="flex items-center gap-3 px-4 py-3 rounded-lg text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors duration-200"
               >
-                {t('profile.settings')}
+                <HiOutlineUser className="w-5 h-5" />
+                {t('profile.settings') || 'Profile Settings'}
               </Link>
+              
               <button
-                onClick={logout}
-                className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-base-content hover:bg-base-200"
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  logout();
+                }}
+                className="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-base font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors duration-200"
               >
-                Logout
+                <HiOutlineLogout className="w-5 h-5" />
+                {t('auth.logout') || 'Logout'}
               </button>
-            </>
+            </div>
           ) : (
-            <Link
-              to="/login"
-              className="flex px-3 py-2 rounded-md text-base font-medium bg-primary text-primary-content hover:bg-primary-focus"
-            >
-              Login
-            </Link>
+            <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
+              <Link
+                to="/login"
+                onClick={() => setIsMenuOpen(false)}
+                className="flex items-center justify-center px-4 py-3 rounded-lg text-base font-medium bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 transition-all duration-200"
+              >
+                {t('login') || 'Login'}
+              </Link>
+            </div>
           )}
         </div>
       </div>
