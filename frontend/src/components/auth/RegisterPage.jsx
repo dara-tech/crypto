@@ -1,11 +1,22 @@
 import { useState } from "react"
-import { Eye, EyeOff, Lock, Mail, User, AlertCircle } from "lucide-react"
+import { Eye, EyeOff, Lock, Mail, User, AlertCircle, UserCog } from "lucide-react"
 import useAuth from "../../hooks/useAuth"
 import { Link } from "react-router-dom"
 
 const RegisterPage = () => {
-  const [credentials, setCredentials] = useState({ name: "", email: "", password: "" })
+  const [credentials, setCredentials] = useState({ 
+    name: "", 
+    email: "", 
+    password: "",
+    type: "user" // Default role
+  })
   const [showPassword, setShowPassword] = useState(false)
+  
+  const userRoles = [
+    { value: 'admin', label: 'Administrator' },
+    { value: 'user', label: 'Regular User' },
+    { value: 'payment_viewer', label: 'Payment Viewer' }
+  ]
 
   const { error, loading, handleRegister } = useAuth()
 
@@ -87,6 +98,28 @@ const RegisterPage = () => {
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
+              </div>
+            </div>
+            
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text text-base">User Role</span>
+              </label>
+              <div className="relative">
+                <select
+                  name="type"
+                  value={credentials.type}
+                  onChange={handleChange}
+                  className="select select-bordered border-primary focus:outline-none w-full pl-10"
+                  required
+                >
+                  {userRoles.map((role) => (
+                    <option key={role.value} value={role.value}>
+                      {role.label}
+                    </option>
+                  ))}
+                </select>
+                <UserCog className="absolute left-3 top-1/2 transform -translate-y-1/2 text-base-content/50 w-5 h-5" />
               </div>
             </div>
             <div className="form-control mt-6">

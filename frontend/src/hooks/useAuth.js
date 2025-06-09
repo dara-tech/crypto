@@ -14,13 +14,12 @@ API.interceptors.request.use(
     const token = localStorage.getItem("token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
-    } else {
-      console.warn("⚠️ No token found in localStorage!");
     }
     return config;
   },
   (error) => Promise.reject(error)
 );
+
 
 const useAuth = () => {
   const [profile, setProfile] = useState(null);
@@ -31,20 +30,27 @@ const useAuth = () => {
 
   const getAdminProfile = useCallback(async () => {
     const token = localStorage.getItem("token");
-    console.log("Token being sent:", token);
-
+  
     if (!token) {
       console.error("🚨 No token found! Redirecting to login.");
       navigate("/auth/login");
       return;
     }
-
+  
     try {
       const { data } = await API.get("/api/auth/me");
-      console.log("Profile data:", data);
-      setProfile(data);
+      console.log("📦 API Response:", data);
+  
+      // Support both formats: { user: { ... } } and { ... }
+      const userData = data?.user || data;
+  
+      if (!userData || typeof userData !== "object") {
+        throw new Error("❌ Unexpected API response format.");
+      }
+  
+      setProfile(userData);
     } catch (error) {
-      console.error("❌ API Request Failed:", error.response);
+      console.error("❌ API Request Failed:", error.response || error.message);
       if (error.response?.status === 401) {
         console.error("🚨 Unauthorized! Redirecting to login.");
         localStorage.removeItem("token");
@@ -53,21 +59,35 @@ const useAuth = () => {
       setError(error.response?.data?.message || "Error fetching profile");
     }
   }, [navigate]);
+  
 
   const handleLogin = useCallback(async (credentials) => {
     setLoading(true);
+    // console.log("Login credentials:", credentials);
     setError("");
-
+  
     try {
       const { data } = await API.post("/api/auth/login", credentials);
+      // console.log("Login response:", data);
       localStorage.setItem("token", data.token);
-      setProfile(data.admin);
+      // console.log("Token saved:", data.token);
+      setProfile(data.user); // ✅ Save the user profile
+  
       setIsAuthenticated(true);
+  
+      const role = data.user.type; // Make sure this is your role field
+      let redirectPath = "/";
+  
+      if (role === "admin") redirectPath = "/admin/dashboard";
+      else if (role === "payment_viewer") redirectPath = "/payment-viewer";
+      else if (role === "user") redirectPath = "/profile";
 
-      const from = new URLSearchParams(window.location.search).get("from") || "/admin/dashboard";
+  
+      const from = new URLSearchParams(window.location.search).get("from") || redirectPath;
       navigate(from, { replace: true });
-
+  
       return { success: true };
+
     } catch (err) {
       const errorMessage = err?.response?.data?.message || "Login failed. Please try again.";
       setError(errorMessage);
@@ -76,6 +96,7 @@ const useAuth = () => {
       setLoading(false);
     }
   }, [navigate]);
+  
 
   const handleLogout = useCallback(() => {
     localStorage.removeItem("token");

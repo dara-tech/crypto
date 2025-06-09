@@ -124,7 +124,8 @@ export const updateCompany = async (req, res) => {
       'privacyPolicy',
       'contact',
       'socialMedia',
-      'programsOffered'
+      'programsOffered',
+      'paymentGateway'
     ];
 
     updateFields.forEach(field => {
@@ -147,13 +148,16 @@ export const updateCompany = async (req, res) => {
       logo: 'company_logos',
       aboutImage: 'company_about_images',
       missionImage: 'company_mission_images',
-      visionImage: 'company_vision_images'
+      visionImage: 'company_vision_images',
+      paymentQR: 'company_qr_image'
       // Removed heroImage from here since it's handled separately
     };
 
     // Process single image uploads
+    console.log('Files received:', Object.keys(req.files || {}));
     for (const [field, folder] of Object.entries(singleImageFields)) {
       if (req.files?.[field]?.[0]?.buffer) {
+        console.log(`Processing ${field} upload to folder:`, folder);
         try {
           const result = await new Promise((resolve, reject) => {
             const uploadStream = cloudinary.uploader.upload_stream(
@@ -165,6 +169,7 @@ export const updateCompany = async (req, res) => {
             );
             uploadStream.end(req.files[field][0].buffer);
           });
+          console.log(`Successfully uploaded ${field} to:`, result.secure_url);
           company[field] = result.secure_url;
         } catch (error) {
           console.error(`Error uploading ${field} image:`, error);

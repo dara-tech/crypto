@@ -25,20 +25,21 @@ const Profile = () => {
   // Fetch user profile on component mount
   useEffect(() => {
     getAdminProfile()
+    console.log(profile)
   }, [])
 
   // Update form data when profile is loaded
   useEffect(() => {
-    if (profile?.user) {
+    if (profile) {
       setFormData({
-        name: profile.user.name || "",
-        email: profile.user.email || "",
-        profilePic: profile.user.profilePic || null
+        name: profile.name || "",
+        email: profile.email || "",
+        profilePic: profile.profilePic || null
       })
-      // Set the image preview to the user's profile picture or default image
-      setImagePreview(profile.user.profilePic || "/user.png")
+      setImagePreview(profile.profilePic || "/user.png")
     }
   }, [profile])
+
 
   const handleChange = (e) => {
     const { name, value } = e.target

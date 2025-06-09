@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { FaUserCircle, FaBuilding, FaChevronDown } from 'react-icons/fa';
+import { FaUserCircle, FaBuilding, FaChevronDown, FaMoneyBillWave } from 'react-icons/fa';
+import axios from 'axios';
 import LanguageSwitcher from './LanguageSwitcher';
 import { MdOutlineHome, MdHome, MdOutlineMail, MdMail, MdPrivacyTip } from 'react-icons/md';
 import { IoInformationCircleOutline, IoInformationCircle } from 'react-icons/io5';
@@ -13,6 +14,7 @@ import useCompanies from '../../hooks/useCompanies';
 
 const Navbar = () => {
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
   const { profile, logout, getAdminProfile, loading: profileLoading } = useAuth();
   const { companies, getCompanies, loading: companiesLoading } = useCompanies();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -20,9 +22,16 @@ const Navbar = () => {
   const [currentCompany, setCurrentCompany] = useState(null);
   const [language, setCurrentLanguage] = useState(i18n.language || 'en');
   const [isScrolled, setIsScrolled] = useState(false);
+  const [userRole, setUserRole] = useState(null);
   const location = useLocation();
   const profileMenuRef = useRef(null);
   const mobileMenuRef = useRef(null);
+
+useEffect(() => {
+  const role = profile?.type || null;
+  setUserRole(role);
+}, [profile]);
+
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 10);
@@ -78,12 +87,6 @@ const Navbar = () => {
     logout();
   };
 
-  const adminLinks = [
-    { to: '/admin/dashboard', label: t('dashboard'), icon: <RiDashboardLine />, activeIcon: <RiDashboardFill /> },
-    { to: '/admin/companies', label: t('companies'), icon: <FaBuilding />, activeIcon: <FaBuilding /> },
-    { to: '/admin/profile', label: t('Profile'), icon: <BsPersonGear />, activeIcon: <BsPersonGear /> },
-  ];
-
   const publicLinks = [
     { to: '/', label: t('home'), icon: <MdOutlineHome />, activeIcon: <MdHome /> },
     { to: '/companies', label: t('companies'), icon: <FaBuilding />, activeIcon: <FaBuilding /> },
@@ -92,8 +95,30 @@ const Navbar = () => {
     { to: '/privacy-policy', label: t('privacy-policy'), icon: <MdPrivacyTip />, activeIcon: <MdPrivacyTip /> },
   ];
 
-  // Show admin links when authenticated, public links when not
-  const activeLinks = profile?.user ? adminLinks : publicLinks;
+  let linksForAuthenticatedUser = [];
+  const paymentLinkItem = { to: '/payments', label: t('paymentViewer.title'), icon: <FaMoneyBillWave />, activeIcon: <FaMoneyBillWave /> };
+  const userProfileLinkItem = { to: '/admin/profile', label: t('Profile'), icon: <BsPersonGear />, activeIcon: <BsPersonGear /> };
+
+  if (userRole === 'admin') { // Condition for admin
+    linksForAuthenticatedUser = [
+      { to: '/admin/dashboard', label: t('dashboard'), icon: <RiDashboardLine />, activeIcon: <RiDashboardFill /> },
+      paymentLinkItem,
+      { to: '/admin/companies', label: t('companies'), icon: <FaBuilding />, activeIcon: <FaBuilding /> },
+      userProfileLinkItem,
+    ];
+  } else if (userRole === 'payment_viewer') { // Condition for payment_viewer
+    linksForAuthenticatedUser = [
+      paymentLinkItem,
+      userProfileLinkItem, 
+    ];
+  } else if (profile) { // Fallback for any other authenticated user
+    linksForAuthenticatedUser = [userProfileLinkItem]; 
+  }
+
+  const activeLinks = profile ? linksForAuthenticatedUser : publicLinks;
+  // The mobileMenuItems array is not directly used for rendering mobile links in the current JSX,
+  // as the mobile menu iterates over `activeLinks`. This section is simplified.
+  // If mobileMenuItems were used elsewhere, it would need similar conditional logic.
 
   return (
     <nav className={`top-0 left-0 right-0 z-50 transition-all duration-300 ${
@@ -140,7 +165,9 @@ const Navbar = () => {
           {/* Desktop Navigation */}
           <div className="hidden md:flex md:items-center md:space-x-1">
             {activeLinks.map(link => {
-              const isActive = location.pathname === link.to;
+              const isActive = location.pathname.startsWith(link.to);
+              const Icon = isActive ? link.activeIcon : link.icon;
+              
               return (
                 <Link
                   key={link.to}
@@ -173,7 +200,7 @@ const Navbar = () => {
                 <div className="w-8 h-8 animate-pulse bg-gray-200 dark:bg-gray-700 rounded-full" />
                 <div className="h-4 w-24 animate-pulse bg-gray-200 dark:bg-gray-700 rounded" />
               </div>
-            ) : profile?.user ? (
+            ) : profile ? (
               <div className="relative ml-4" ref={profileMenuRef}>
                 <button
                   onClick={toggleProfileMenu}
@@ -182,10 +209,10 @@ const Navbar = () => {
                   <div className="relative">
                     <div className="w-9 h-9 rounded-full overflow-hidden bg-gradient-to-br from-blue-400 to-purple-500 p-0.5">
                       <div className="w-full h-full rounded-full overflow-hidden bg-white dark:bg-gray-900">
-                        {profile.user.profilePic ? (
+                        {profile.profilePic ? (
                           <img
-                            src={profile.user.profilePic}
-                            alt={profile.user.name}
+                            src={profile.profilePic}
+                            alt={profile.name}
                             className="w-full h-full object-cover"
                             onError={(e) => {
                               e.target.onerror = null;
@@ -202,7 +229,7 @@ const Navbar = () => {
                     <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-400 border-2 border-white dark:border-gray-900 rounded-full z-10"></div>
                   </div>
                   <span className="max-w-[120px] truncate text-gray-700 dark:text-gray-300">
-                    {profile.user.name}
+                    {profile.name}
                   </span>
                   <FaChevronDown className={`w-3 h-3 text-gray-400 transition-transform duration-200 ${
                     isProfileMenuOpen ? 'rotate-180' : ''
@@ -216,10 +243,10 @@ const Navbar = () => {
                       <div className="flex items-center space-x-3">
                         <div className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-blue-400 to-purple-500 p-0.5">
                           <div className="w-full h-full rounded-full overflow-hidden bg-white dark:bg-gray-900">
-                            {profile.user.profilePic ? (
+                            {profile.profilePic ? (
                               <img
-                                src={profile.user.profilePic}
-                                alt={profile.user.name}
+                                src={profile.profilePic}
+                                alt={profile.name}
                                 className="w-full h-full object-cover"
                               />
                             ) : (
@@ -231,10 +258,10 @@ const Navbar = () => {
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                            {profile.user.name}
+                            {profile.name}
                           </p>
                           <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                            {profile.user.email}
+                            {profile.email}
                           </p>
                         </div>
                       </div>
@@ -352,15 +379,15 @@ const Navbar = () => {
               <div className="w-10 h-10 animate-pulse bg-gray-200 dark:bg-gray-700 rounded-full" />
               <div className="h-4 w-24 animate-pulse bg-gray-200 dark:bg-gray-700 rounded" />
             </div>
-          ) : profile?.user ? (
+          ) : profile ? (
             <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4 space-y-2">
               <div className="flex items-center space-x-3 px-4 py-3">
                 <div className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-blue-400 to-purple-500 p-0.5">
                   <div className="w-full h-full rounded-full overflow-hidden bg-white dark:bg-gray-900">
-                    {profile.user.profilePic ? (
+                    {profile.profilePic ? (
                       <img
-                        src={profile.user.profilePic}
-                        alt={profile.user.name}
+                        src={profile.profilePic}
+                        alt={profile.name}
                         className="w-full h-full object-cover"
                         onError={(e) => {
                           e.target.onerror = null;
@@ -376,10 +403,10 @@ const Navbar = () => {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-base font-medium text-gray-900 dark:text-white truncate">
-                    {profile.user.name}
+                    {profile.name}
                   </p>
                   <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
-                    {profile.user.email}
+                    {profile.email}
                   </p>
                 </div>
               </div>
@@ -422,3 +449,4 @@ const Navbar = () => {
 };
 
 export default Navbar;
+            

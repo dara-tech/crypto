@@ -8,6 +8,7 @@ import https from 'https'; // Added
 import authRoutes from './routes/authRoutes.js';
 import schoolRoutes from './routes/schoolRoutes.js';
 import companyRoute from './routes/companyRoutes.js';
+import paymentRoutes from './routes/paymentRoutes.js';
 
 dotenv.config();
 
@@ -40,6 +41,7 @@ app.use((req, res, next) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/schools', schoolRoutes);
 app.use('/api/companies', companyRoute);
+app.use('/api/payments', paymentRoutes);
 
 // // Health check
 // app.get('/health', (req, res) => {

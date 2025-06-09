@@ -17,6 +17,7 @@ import Contact from './components/clientPage/Contact';
 import PolicyPrivacy from './components/clientPage/PolicyPrivacy';
 import Home from './components/clientPage/Home';
 import ProtectedRoute from './components/auth/ProtectedRoute';
+import PaymentViewerPage from './pages/PaymentViewerPage';
 
 function App() {
   const { theme } = useThemeStore()
@@ -37,12 +38,17 @@ function App() {
             <Route path="/" element={<Home />} />
             
             {/* Protected routes - only accessible when authenticated */}
-            <Route element={<ProtectedRoute />}>
+            <Route element={<ProtectedRoute allowedRoles={['admin', 'user']} />}>
               <Route path="/admin/profile" element={<Profile />} />
               <Route path="/admin/setting" element={<SettingPage />} />
               <Route path="/admin/companies/:id" element={<CampanyEdit />} />
               <Route path="/admin/companies" element={<CampanyList />} />
             </Route>
+            
+            {/* Payment viewer route - accessible to payment_viewer and admin roles */}
+            {/* <Route element={<ProtectedRoute allowedRoles={['admin', 'payment_viewer']} />}> */}
+              <Route path="/payments" element={<PaymentViewerPage />} />
+            {/* </Route> */}
 
             {/* Redirect to home for any unknown routes */}
             <Route path="*" element={<Navigate to="/" replace />} />

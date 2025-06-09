@@ -7,7 +7,13 @@ import cloudinary from "../lib/cloudinary.js";
 
 export const registerUser = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, type = 'user' } = req.body;
+    
+    // Validate role
+    const validRoles = ['admin', 'user', 'payment_viewer'];
+    if (!validRoles.includes(type)) {
+      return res.status(400).json({ message: 'Invalid user role' });
+    }
 
     // Input validation
     if (!name || !email || !password) {
@@ -35,13 +41,22 @@ export const registerUser = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // Create new user
-    const newUser = new User({ name, email, password: hashedPassword });
+    // Create new user with role
+    const newUser = new User({ 
+      name, 
+      email, 
+      password: hashedPassword,
+      type 
+    });
     await newUser.save();
 
-    // Generate JWT
+    // Generate JWT with user type
     const token = jwt.sign(
-      { id: newUser._id, email: newUser.email }, 
+      { 
+        id: newUser._id, 
+        email: newUser.email,
+        type: newUser.type 
+      }, 
       process.env.JWT_SECRET, 
       { expiresIn: '1h' }
     );
@@ -52,7 +67,8 @@ export const registerUser = async (req, res) => {
       user: {
         id: newUser._id,
         name: newUser.name,
-        email: newUser.email
+        email: newUser.email,
+        type: newUser.type
       }
     });
   } catch (err) {
@@ -82,9 +98,13 @@ export const loginUser = async (req, res) => {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    // Generate JWT
+    // Generate JWT with user type
     const token = jwt.sign(
-      { id: user._id, email: user.email },
+      { 
+        id: user._id, 
+        email: user.email,
+        type: user.type 
+      },
       process.env.JWT_SECRET,
       { expiresIn: '1h' }
     );
@@ -96,7 +116,8 @@ export const loginUser = async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
-        profilePic: user.profilePic
+        profilePic: user.profilePic,
+        type: user.type
       }
     });
   } catch (err) {
@@ -119,7 +140,8 @@ export const getUser = async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
-        profilePic: user.profilePic
+        profilePic: user.profilePic,
+        type: user.type
       }
     });
   } catch (err) {
@@ -142,7 +164,8 @@ export const getProfile = async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
-        profilePic: user.profilePic
+        profilePic: user.profilePic,
+        type: user.type
       }
     });
   } catch (err) {
@@ -224,6 +247,28 @@ export const updateAdminProfile = async (req, res) => {
 };
 
 // Password update functionality has been merged into updateAdminProfile
+
+export const getCurrentUser = async (req, res) => {
+  try {
+    // The user is already verified by the auth middleware
+    const user = await User.findById(req.user.id).select('-password');
+    
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    res.json({
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      type: user.type,
+      profilePic: user.profilePic
+    });
+  } catch (error) {
+    console.error('Error fetching user:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
 
 export const logoutUser = async (req, res) => {
   try {

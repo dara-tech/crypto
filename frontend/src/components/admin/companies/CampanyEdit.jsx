@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { FaBuilding, FaPen, FaPhoneAlt, FaGlobe, FaFile } from "react-icons/fa";
+import { FaBuilding, FaPen, FaPhoneAlt, FaGlobe, FaFile, FaCreditCard } from "react-icons/fa";
 import useCompanies from "../../../hooks/useCompanies";
 import LogoUpload from "./edit/LogoUpload";
 import BasicInfo from "./edit/BasicInfo";
 import ContactInfo from "./edit/ContactInfo";
 import SocialMedia from "./edit/SocialMedia";
+import PaymentGateway from "./edit/PaymentGateway";
 import FormSection from "./edit/FormSection";
 import PrivacyPolicy from "./edit/PrivacyPolicy";
 import { useTranslation } from "react-i18next";
@@ -39,6 +40,9 @@ const CampanyEdit = () => {
       youtube: "",
       linkedin: ""
     },
+    paymentGateway: "",
+    paymentQR: "",
+    
     heroImages: [],
     programsOffered: [],
     testimonials: []
@@ -84,6 +88,9 @@ const CampanyEdit = () => {
               youtube: companyData.socialMedia?.youtube || "",
               linkedin: companyData.socialMedia?.linkedin || ""
             },
+            paymentGateway: companyData.paymentGateway || "",
+            paymentQR: companyData.paymentQR || "",
+            
             heroImages: companyData.heroImages || [],
             programsOffered: companyData.programsOffered || [],
             testimonials: companyData.testimonials || []
@@ -95,7 +102,8 @@ const CampanyEdit = () => {
             about: companyData.aboutImage || null,
             mission: companyData.missionImage || null,
             vision: companyData.visionImage || null,
-            heroImage: companyData.heroImage || null
+            heroImage: companyData.heroImage || null,
+            paymentQR: companyData.paymentQR || null
           });
         }
       } catch (err) {
@@ -137,13 +145,14 @@ const CampanyEdit = () => {
   };
 
   const handleImageChange = (field, file) => {
+    console.log('handleImageChange called with:', { field, file });
+    
     if (!file) {
+      console.log('No file provided, removing image for field:', field);
       // Handle image removal
-      const update = {};
-      update[field] = "";
       setFormData(prev => ({
         ...prev,
-        ...update
+        [field]: ""
       }));
       
       // Update preview
@@ -154,17 +163,34 @@ const CampanyEdit = () => {
       return;
     }
 
+    console.log('Processing file for field:', field);
+    console.log('File type:', typeof file);
+    console.log('Is File instance:', file instanceof File);
+    
     // Create preview URL for the image
-    const previewUrl = file instanceof File ? URL.createObjectURL(file) : file;
+    let previewUrl;
+    if (file instanceof File) {
+      previewUrl = URL.createObjectURL(file);
+      console.log('Created preview URL for file');
+    } else if (typeof file === 'string') {
+      previewUrl = file;
+      console.log('Using existing URL for preview');
+    } else {
+      console.error('Invalid file type provided:', file);
+      return;
+    }
     
-    // Update form data with the actual file or URL
-    const update = {};
-    update[field] = file;
+    console.log('Updating form data for field:', field);
     
-    setFormData(prev => ({
-      ...prev,
-      ...update
-    }));
+    // Update form data with the actual file
+    setFormData(prev => {
+      const newData = {
+        ...prev,
+        [field]: file
+      };
+      console.log('New form data:', newData);
+      return newData;
+    });
     
     // Update preview
     setImagePreview(prev => ({
@@ -172,13 +198,7 @@ const CampanyEdit = () => {
       [field]: previewUrl
     }));
     
-    // Special handling for heroImage to ensure it's properly set in formData
-    if (field === 'heroImage') {
-      setFormData(prev => ({
-        ...prev,
-        heroImage: file
-      }));
-    }
+    console.log('Image preview updated for field:', field);
   };
 
   const handleSubmit = async (e) => {
@@ -218,6 +238,18 @@ const CampanyEdit = () => {
       } else if (typeof formData.aboutImage === 'string') {
         formDataToSend.append("aboutImage", formData.aboutImage);
       }
+      
+      // Handle payment QR code
+      console.log('Payment QR data:', formData.paymentQR);
+      if (formData.paymentQR instanceof File) {
+        console.log('Appending paymentQR file to form data');
+        formDataToSend.append("paymentQR", formData.paymentQR);
+      } else if (typeof formData.paymentQR === 'string') {
+        console.log('Appending paymentQR string to form data');
+        formDataToSend.append("paymentQR", formData.paymentQR);
+      } else {
+        console.log('No paymentQR data to append');
+      }
 
       if (formData.missionImage instanceof File) {
         formDataToSend.append("missionImage", formData.missionImage);
@@ -246,6 +278,9 @@ const CampanyEdit = () => {
         youtube: formData.socialMedia.youtube || "",
         linkedin: formData.socialMedia.linkedin || ""
       }));
+      
+      // Append payment gateway
+      formDataToSend.append("paymentGateway", formData.paymentGateway || "");
 
       // Handle arrays
       if (Array.isArray(formData.programsOffered)) {
@@ -397,6 +432,14 @@ const CampanyEdit = () => {
           <SocialMedia
             formData={formData}
             onInputChange={handleInputChange}
+          />
+        </FormSection>
+
+        <FormSection title="Payment Gateway" icon={<FaCreditCard />}>
+          <PaymentGateway
+            formData={formData}
+            onInputChange={handleInputChange}
+            onImageChange={handleImageChange}
           />
         </FormSection>
 

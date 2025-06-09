@@ -8,7 +8,7 @@ const userSchema = new mongoose.Schema({
   },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  type: { type: String, enum: ['admin', 'user'], default: 'user' }
+  type: { type: String, enum: ['admin', 'user', 'payment_viewer'], default: 'user' }
 }, { timestamps: true });
 
 export default mongoose.model('User', userSchema);

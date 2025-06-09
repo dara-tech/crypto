@@ -15,7 +15,7 @@ const LoginPage = () => {
   useEffect(() => {
     if (isAuthenticated) {
       const params = new URLSearchParams(location.search)
-      const from = params.get('from') || '/admin/dashboard'
+      const from = params.get('from') || '/'
       navigate(from, { replace: true })
     }
   }, [isAuthenticated, location.search, navigate])
@@ -28,13 +28,8 @@ const LoginPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault()
     const { success } = await handleLogin(credentials)
-    if (success) {
-      // The actual navigation is handled in the handleLogin function
-      // This is just a fallback in case the navigation doesn't happen
-      const params = new URLSearchParams(window.location.search)
-      const from = params.get('from') || '/admin/dashboard'
-      navigate(from, { replace: true })
-    }
+    // Navigation is handled within handleLogin in useAuth.js
+    // No need for additional navigation here if 'success' is true.
   }
 
   return (

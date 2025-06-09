@@ -56,6 +56,14 @@ const companySchema = new mongoose.Schema({
     youtube: String,
     linkedin: String,
   },
+  paymentGateway :{
+    type:String,
+  },
+  paymentQR :{
+    type: String,
+    default: "",
+    // URL to the hero section image
+  },
 
   heroImages: [String], // Homepage carousel images
   programsOffered: [String], // E.g. ['Preschool', 'Primary', 'Secondary']
