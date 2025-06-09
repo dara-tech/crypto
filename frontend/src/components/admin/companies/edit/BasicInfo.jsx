@@ -72,8 +72,8 @@ const BasicInfo = ({ formData, onInputChange, onImageChange, imagePreview }) => 
     <div className="space-y-6">
       <div className="form-control space-y-2">
         <label className="label">
-          <span className="label-text font-medium">{t('company.schoolName')}</span>
-          <div className="tooltip" data-tip={t('company.schoolNameTooltip')}>
+          <span className="label-text font-medium">{t('company.companyName')}</span>
+          <div className="tooltip" data-tip={t('company.companyNameTooltip')}>
             <IoInformationCircle className="w-4 h-4 text-gray-400" />
           </div>
         </label>
@@ -86,7 +86,7 @@ const BasicInfo = ({ formData, onInputChange, onImageChange, imagePreview }) => 
           className={`input input-bordered w-full transition-all duration-200 ${
             focusedField === 'name' ? 'input-primary' : ''
           }`}
-          placeholder={t('company.schoolNamePlaceholder')} 
+          placeholder={t('company.companyNamePlaceholder')} 
           required 
         />
       </div>
@@ -115,16 +115,16 @@ const BasicInfo = ({ formData, onInputChange, onImageChange, imagePreview }) => 
           {renderTextArea(
             'about',
             'About',
-            'Tell us about your school...',
+            'Tell us about your company...',
             500,
-            'Share your school\'s story and unique features (max 500 characters)'
+            'Share your company\'s story and unique features (max 500 characters)'
           )}
           <ImageUpload
             field="aboutImage"
             label="About Image"
             currentImage={formData.aboutImage}
             onImageChange={onImageChange}
-            tooltip="Upload an image that represents your school's story"
+            tooltip="Upload an image that represents your company's story"
             aspectRatio="aspect-video"
           />
         </div>
@@ -133,16 +133,16 @@ const BasicInfo = ({ formData, onInputChange, onImageChange, imagePreview }) => 
           {renderTextArea(
             'mission',
             'Mission',
-            'What is your school\'s mission?',
+            'What is your company\'s mission?',
             200,
-            'Define your school\'s purpose and goals (max 200 characters)'
+            'Define your company\'s purpose and goals (max 200 characters)'
           )}
           <ImageUpload
             field="missionImage"
             label="Mission Image"
             currentImage={formData.missionImage}
             onImageChange={onImageChange}
-            tooltip="Upload an image that represents your school's mission"
+            tooltip="Upload an image that represents your company's mission"
             aspectRatio="aspect-video"
           />
         </div>
@@ -151,16 +151,16 @@ const BasicInfo = ({ formData, onInputChange, onImageChange, imagePreview }) => 
           {renderTextArea(
             'vision',
             'Vision',
-            'What is your school\'s vision?',
+            'What is your company\'s vision?',
             200,
-            'Describe your school\'s future aspirations (max 200 characters)'
+            'Describe your company\'s future aspirations (max 200 characters)'
           )}
           <ImageUpload
             field="visionImage"
             label="Vision Image"
             currentImage={formData.visionImage}
             onImageChange={onImageChange}
-            tooltip="Upload an image that represents your school's vision"
+            tooltip="Upload an image that represents your company's vision"
             aspectRatio="aspect-video"
           />
         </div>

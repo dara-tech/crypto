@@ -46,7 +46,7 @@ const Footer = () => {
   const company = companies[0]
 
   return (
-    <footer className="bg-base-200 text-base-content">
+    <footer className="bg-base-200 text-base-content ">
       <div className="container mx-auto p-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Company Info */}

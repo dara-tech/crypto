@@ -3,8 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { FaUserCircle, FaBuilding, FaChevronDown } from 'react-icons/fa';
 import LanguageSwitcher from './LanguageSwitcher';
-import { HiOutlineAcademicCap, HiAcademicCap } from 'react-icons/hi';
-import { MdOutlineHome, MdHome, MdOutlineMail, MdMail } from 'react-icons/md';
+import { MdOutlineHome, MdHome, MdOutlineMail, MdMail, MdPrivacyTip } from 'react-icons/md';
 import { IoInformationCircleOutline, IoInformationCircle } from 'react-icons/io5';
 import { RiDashboardLine, RiDashboardFill } from 'react-icons/ri';
 import { BsPersonGear } from 'react-icons/bs';
@@ -89,7 +88,8 @@ const Navbar = () => {
     { to: '/', label: t('home'), icon: <MdOutlineHome />, activeIcon: <MdHome /> },
     { to: '/companies', label: t('companies'), icon: <FaBuilding />, activeIcon: <FaBuilding /> },
     { to: '/about', label: t('about'), icon: <IoInformationCircleOutline />, activeIcon: <IoInformationCircle /> },
-    { to: '/contact', label: t('contact'), icon: <MdOutlineMail />, activeIcon: <MdMail /> }
+    { to: '/contact', label: t('contact'), icon: <MdOutlineMail />, activeIcon: <MdMail /> },
+    { to: '/privacy-policy', label: t('privacy-policy'), icon: <MdPrivacyTip />, activeIcon: <MdPrivacyTip /> },
   ];
 
   // Show admin links when authenticated, public links when not
@@ -241,14 +241,14 @@ const Navbar = () => {
                     </div>
                     
                     <div className="py-1">
-                      <Link
+                      {/* <Link
                         to="/"
                         onClick={() => setIsProfileMenuOpen(false)}
                         className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-150"
                       >
                         <MdHome className="w-4 h-4 mr-3" />
                         {t('menu.title') || 'Home'}
-                      </Link>
+                      </Link> */}
                       <Link
                         to="/admin/dashboard"
                         onClick={() => setIsProfileMenuOpen(false)}

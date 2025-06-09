@@ -154,9 +154,8 @@ const LogoUpload = ({ logo, logoPreview, onLogoChange, error, setError }) => {
   return (
     <div className="form-control">
       <label className="label">
-        <span className="label-text">School Logo</span>
         <span className="label-text-alt text-xs text-base-content/70">
-          Upload a logo for your school
+          Upload a logo for your company
         </span>
       </label>
       <div 
@@ -189,11 +188,11 @@ const LogoUpload = ({ logo, logoPreview, onLogoChange, error, setError }) => {
               {logoPreview ? (
                 <img 
                   src={logoPreview} 
-                  alt="School Logo Preview" 
+                  alt="Company Logo Preview" 
                   className="object-cover w-full h-full"
                   onError={(e) => {
                     e.target.onerror = null;
-                    e.target.src = '/default-school.png';
+                    e.target.src = '/default-company.png';
                   }}
                 />
               ) : (
