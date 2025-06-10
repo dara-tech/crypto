@@ -2,9 +2,8 @@ import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
-const API_URL = import.meta.env.MODE === "development"
-  ? "http://localhost:5001"
-  : "https://crypto-nmz7.onrender.com";
+
+const API_URL = import.meta.env.MODE === "development" ? "http://localhost:5001" : "https://crypto-nmz7.onrender.com";
 
 const API = axios.create({ baseURL: API_URL });
 

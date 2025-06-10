@@ -5,8 +5,57 @@ import useAuth from "../../../hooks/useAuth"
 import ProfilePicture from "../../admin/profile/components/ProfilePicture"
 import ChangePassword from "./components/ChangePassword"
 
+const ProfileSkeleton = () => {
+  return (
+    <div className="container mx-auto px-4 py-8 min-h-screen bg-base-100">
+      <div className="max-w-5xl mx-auto">
+        <div className="h-8 bg-base-300 rounded w-1/3 mb-8 animate-pulse"></div>
+
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Sidebar Skeleton */}
+          <div className="lg:w-1/4">
+            <div className="bg-base-200 rounded-lg p-6 shadow-md">
+              <ul className="menu menu-vertical w-full space-y-4">
+                <li><div className="h-10 bg-base-300 rounded animate-pulse"></div></li>
+                <li><div className="h-10 bg-base-300 rounded animate-pulse"></div></li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Main content Skeleton */}
+          <div className="lg:w-3/4">
+            <div className="bg-base-200 rounded-lg p-8 shadow-md space-y-8">
+              {/* Profile Picture Skeleton */}
+              <div className="flex flex-col items-center">
+                <div className="w-32 h-32 rounded-full bg-base-300 animate-pulse"></div>
+              </div>
+
+              {/* Form Skeleton */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <div className="h-5 bg-base-300 rounded w-1/4 animate-pulse"></div>
+                  <div className="h-12 bg-base-300 rounded animate-pulse"></div>
+                </div>
+                <div className="space-y-2">
+                  <div className="h-5 bg-base-300 rounded w-1/4 animate-pulse"></div>
+                  <div className="h-12 bg-base-300 rounded animate-pulse"></div>
+                </div>
+              </div>
+
+              {/* Button Skeleton */}
+              <div className="form-control mt-6">
+                <div className="h-12 bg-primary/50 rounded animate-pulse w-full"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 const Profile = () => {
-  const { profile, error, updateAdminProfile, getAdminProfile } = useAuth()
+  const { profile, loading, error, updateAdminProfile, getAdminProfile } = useAuth()
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -25,7 +74,6 @@ const Profile = () => {
   // Fetch user profile on component mount
   useEffect(() => {
     getAdminProfile()
-    console.log(profile)
   }, [])
 
   // Update form data when profile is loaded
@@ -131,6 +179,10 @@ const Profile = () => {
     } finally {
       setIsPasswordUpdating(false)
     }
+  }
+
+  if (loading && !profile) {
+    return <ProfileSkeleton />
   }
 
   return (

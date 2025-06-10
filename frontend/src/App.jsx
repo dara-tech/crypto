@@ -38,8 +38,8 @@ function App() {
             <Route path="/" element={<Home />} />
             
             {/* Protected routes - only accessible when authenticated */}
-            <Route element={<ProtectedRoute allowedRoles={['admin', 'user']} />}>
-              <Route path="/admin/profile" element={<Profile />} />
+            <Route element={<ProtectedRoute allowedRoles={['admin', 'user', 'payment_viewer']} />}>
+              <Route path="/profile" element={<Profile />} />
               <Route path="/admin/setting" element={<SettingPage />} />
               <Route path="/admin/companies/:id" element={<CampanyEdit />} />
               <Route path="/admin/companies" element={<CampanyList />} />

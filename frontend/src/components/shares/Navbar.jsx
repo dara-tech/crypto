@@ -97,7 +97,7 @@ useEffect(() => {
 
   let linksForAuthenticatedUser = [];
   const paymentLinkItem = { to: '/payments', label: t('paymentViewer.title'), icon: <FaMoneyBillWave />, activeIcon: <FaMoneyBillWave /> };
-  const userProfileLinkItem = { to: '/admin/profile', label: t('Profile'), icon: <BsPersonGear />, activeIcon: <BsPersonGear /> };
+  const userProfileLinkItem = { to: '/profile', label: t('Profile'), icon: <BsPersonGear />, activeIcon: <BsPersonGear /> };
 
   if (userRole === 'admin') { // Condition for admin
     linksForAuthenticatedUser = [

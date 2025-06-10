@@ -33,32 +33,40 @@ const HeroSection = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
           {/* Left side: Text */}
           <div className="relative z-10">
-            <span className="inline-block px-3 py-1 text-sm font-semibold text-purple-600 bg-purple-100 rounded-full mb-4">
-              {overallLoading ? t('hero.loading') : company?.tagline || t('hero.tagline')}
-            </span>
-
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-              {overallLoading ? t('hero.loading') : company?.name || t('hero.title')}
-            </h1>
-
-            <p className="text-lg text-gray-600 mb-8 max-w-lg">
-              {overallLoading ? t('hero.loading') : company?.description || t('hero.subtitle')}
-              <Link to="/about" className="text-green-600 hover:text-green-700 font-medium ml-1">
-                {t('hero.learnMore')}
-              </Link>
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Link
-                to="/get-started"
-                className="px-8 py-4 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-lg text-center transition-colors duration-200"
-              >
-                {t('hero.cta')}
-              </Link>
-            </div>
+            {overallLoading ? (
+              <>
+                <div className="w-32 h-8 bg-gray-200 rounded-full animate-pulse mb-4"></div>
+                <div className="w-full h-14 bg-gray-200 rounded-lg animate-pulse mb-6"></div>
+                <div className="w-full h-24 bg-gray-200 rounded-lg animate-pulse mb-8"></div>
+                <div className="w-40 h-12 bg-gray-200 rounded-lg animate-pulse"></div>
+              </>
+            ) : (
+              <>
+                <span className="inline-block px-3 py-1 text-sm font-semibold text-purple-600 bg-purple-100 rounded-full mb-4">
+                  {company?.tagline || t('hero.tagline')}
+                </span>
+                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+                  {company?.name || t('hero.title')}
+                </h1>
+                <p className="text-lg text-gray-600 mb-8 max-w-lg">
+                  {company?.description || t('hero.subtitle')}
+                  <Link to="/about" className="text-green-600 hover:text-green-700 font-medium ml-1">
+                    {t('hero.learnMore')}
+                  </Link>
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <Link
+                    to="/get-started"
+                    className="px-8 py-4 bg-teal-600 hover:bg-teal-700 text-white font-medium rounded-lg text-center transition-colors duration-200"
+                  >
+                    {t('hero.cta')}
+                  </Link>
+                </div>
+              </>
+            )}
           </div>
 
-          {/* Right side: Hero Image from company.heroImage ONLY */}
+          {/* Right side: Hero Image */}
           <div className="relative">
             <div className="relative z-10">
               {overallLoading ? (
@@ -67,7 +75,7 @@ const HeroSection = () => {
                 <img
                   src={company?.heroImage || '/images/hero-placeholder.jpg'}
                   alt={company?.name || 'Company Hero'}
-                  className="w-full h-auto max-w-lg mx-auto "
+                  className="w-full h-auto max-w-lg mx-auto"
                 />
               )}
             </div>
