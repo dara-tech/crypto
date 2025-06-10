@@ -1,36 +1,49 @@
-import { useEffect } from 'react'; // useState removed as state is managed by the hook
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaLink, FaSignOutAlt } from 'react-icons/fa';
+import { FaLink, FaSignOutAlt, FaDownload, FaCopy } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
-// axios import removed, http client is in the hook
 import { toast } from 'react-hot-toast';
-import usePaymentGateways from '../hooks/usePaymentGateways'; // Adjust path if necessary
+import usePaymentGateways from '../hooks/usePaymentGateways';
 
 const PaymentViewerPage = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  // Use the hook to get payment data, loading state, and error state.
-  // Assuming /api/payments for this page returns a single object, not an array of gateways.
-  const { gateways: paymentInfo, loading, error } = usePaymentGateways(); 
+  const { gateways: paymentInfo, loading, error } = usePaymentGateways();
 
   useEffect(() => {
     if (error) {
-      // console.error('Error from usePaymentGateways hook:', error); // For client-side debugging
       if (error.response?.status === 401) {
         toast.error(t('errors.sessionExpired', 'Session expired. Please login again.'));
-        // Consider centralizing logout logic (e.g., useAuth().logout())
-        localStorage.removeItem('token'); 
+        localStorage.removeItem('token');
         navigate('/login');
       } else {
         toast.error(error.response?.data?.message || error.message || t('errors.failedToLoadPaymentInfo', 'Failed to load payment information'));
       }
     }
-  }, [error, navigate, t]); // Added t to dependencies array
-
+  }, [error, navigate, t]);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
     navigate('/login');
+  };
+
+  const handleCopyLink = () => {
+    if (paymentInfo?.paymentGateway) {
+      navigator.clipboard.writeText(paymentInfo.paymentGateway);
+      toast.success(t('company.paymentGateway.linkCopied', 'Payment link copied!'));
+    }
+  };
+
+  const handleDownloadQR = () => {
+    if (!paymentInfo?.paymentQR) return;
+
+    const link = document.createElement('a');
+    link.href = paymentInfo.paymentQR;
+    link.download = 'payment-qr-code.png';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success(t('company.paymentGateway.qrDownloaded', 'QR code downloaded!'));
   };
 
   if (loading) {
@@ -56,37 +69,53 @@ const PaymentViewerPage = () => {
         </div>
 
         <div className="space-y-6">
-          {/* Payment Gateway Link */}
-          {paymentInfo && paymentInfo.paymentGateway && (
+          {paymentInfo?.paymentGateway && (
             <div className="p-4 border rounded-lg">
               <h2 className="text-lg font-semibold mb-2 flex items-center gap-2">
                 <FaLink className="text-blue-500" />
                 {t('company.paymentGateway.link')}
               </h2>
-              <a
-                href={paymentInfo.paymentGateway}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 hover:underline break-all"
-              >
-                {paymentInfo.paymentGateway}
-              </a>
+              <div className="flex items-center justify-between gap-4 flex-wrap">
+                <a
+                  href={paymentInfo.paymentGateway}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:underline break-all"
+                >
+                  {paymentInfo.paymentGateway}
+                </a>
+                <button
+                  onClick={handleCopyLink}
+                  className="flex items-center gap-1 text-sm text-blue-600 hover:underline"
+                >
+                  <FaCopy />
+                  {t('common.copy')}
+                </button>
+              </div>
             </div>
           )}
 
-          {/* QR Code */}
-          {paymentInfo && paymentInfo.paymentQR && (
+          {paymentInfo?.paymentQR && (
             <div className="p-4 border rounded-lg">
               <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
                 <FaLink className="text-green-500" />
                 {t('company.paymentGateway.qrCode')}
               </h2>
-              <div className="flex justify-center">
+              <div className="flex justify-center relative">
                 <img
                   src={paymentInfo.paymentQR}
                   alt="Payment QR Code"
                   className="max-w-xs w-full h-auto border rounded"
                 />
+              </div>
+              <div className="mt-2 text-center">
+                <button
+                  onClick={handleDownloadQR}
+                  className="inline-flex items-center gap-1 text-sm text-green-600 hover:underline"
+                >
+                  <FaDownload />
+                  {t('common.download')}
+                </button>
               </div>
               <p className="text-sm text-gray-500 mt-2 text-center">
                 {t('company.paymentGateway.qrDescription')}
@@ -94,7 +123,6 @@ const PaymentViewerPage = () => {
             </div>
           )}
 
-          {/* Show this message only if not loading, no error, and paymentInfo is truly empty or null */}
           {!loading && !error && (!paymentInfo || (!paymentInfo.paymentGateway && !paymentInfo.paymentQR)) && (
             <div className="text-center py-8 text-gray-500">
               {t('paymentViewer.noPaymentInfo')}

@@ -16,6 +16,9 @@ const companySchema = new mongoose.Schema({
   privacyPolicy: {
     type: String,
   },
+  termsConditions: {
+    type: String,
+  },
 
   aboutImage: {
     type: String,

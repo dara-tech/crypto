@@ -23,7 +23,6 @@ API.interceptors.request.use(
 const useAuth = () => {
   const [profile, setProfile] = useState(null);
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(() => !!localStorage.getItem("token"));
   const navigate = useNavigate();
 
@@ -61,15 +60,11 @@ const useAuth = () => {
   
 
   const handleLogin = useCallback(async (credentials) => {
-    setLoading(true);
-    // console.log("Login credentials:", credentials);
     setError("");
   
     try {
       const { data } = await API.post("/api/auth/login", credentials);
-      // console.log("Login response:", data);
       localStorage.setItem("token", data.token);
-      // console.log("Token saved:", data.token);
       setProfile(data.user); // ✅ Save the user profile
   
       setIsAuthenticated(true);
@@ -91,8 +86,6 @@ const useAuth = () => {
       const errorMessage = err?.response?.data?.message || "Login failed. Please try again.";
       setError(errorMessage);
       return { success: false, error: errorMessage };
-    } finally {
-      setLoading(false);
     }
   }, [navigate]);
   
@@ -105,7 +98,6 @@ const useAuth = () => {
   }, [navigate]);
 
   const handleRegister = useCallback(async (credentials) => {
-    setLoading(true);
     setError("");
 
     try {
@@ -114,13 +106,10 @@ const useAuth = () => {
       navigate("/login");
     } catch (error) {
       setError(error.response?.data?.message || "Registration failed. Please try again.");
-    } finally {
-      setLoading(false);
     }
   }, [navigate]);
 
   const updateAdminProfile = useCallback(async (formData) => {
-    setLoading(true);
     setError("");
 
     try {
@@ -148,8 +137,6 @@ const useAuth = () => {
         "Error updating profile";
       setError(errorMessage);
       throw new Error(errorMessage);
-    } finally {
-      setLoading(false);
     }
   }, []);
 
@@ -163,7 +150,6 @@ const useAuth = () => {
   return {
     profile,
     error,
-    loading,
     isAuthenticated,
     handleLogin,
     logout: handleLogout, // Expose as logout for backward compatibility

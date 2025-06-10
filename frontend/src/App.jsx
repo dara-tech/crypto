@@ -15,6 +15,7 @@ import CampanyEdit from './components/admin/companies/CampanyEdit';
 import CampanyList from './components/admin/companies/CampanyList';
 import Contact from './components/clientPage/Contact';
 import PolicyPrivacy from './components/clientPage/PolicyPrivacy';
+import TermsAndConditions from './components/clientPage/TermsAndConditions';
 import Home from './components/clientPage/Home';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import PaymentViewerPage from './pages/PaymentViewerPage';
@@ -35,6 +36,7 @@ function App() {
             <Route path="/vision" element={<Vision />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/privacy-policy" element={<PolicyPrivacy />} />
+            <Route path="/terms-conditions" element={<TermsAndConditions />} />
             <Route path="/" element={<Home />} />
             
             {/* Protected routes - only accessible when authenticated */}

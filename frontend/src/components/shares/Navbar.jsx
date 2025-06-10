@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { FaUserCircle, FaBuilding, FaChevronDown, FaMoneyBillWave } from 'react-icons/fa';
 import axios from 'axios';
 import LanguageSwitcher from './LanguageSwitcher';
-import { MdOutlineHome, MdHome, MdOutlineMail, MdMail, MdPrivacyTip } from 'react-icons/md';
+import { MdOutlineHome, MdHome, MdOutlineMail, MdMail, MdPrivacyTip, MdOutlineDescription } from 'react-icons/md';
 import { IoInformationCircleOutline, IoInformationCircle } from 'react-icons/io5';
 import { RiDashboardLine, RiDashboardFill } from 'react-icons/ri';
 import { BsPersonGear } from 'react-icons/bs';
@@ -93,6 +93,7 @@ useEffect(() => {
     { to: '/about', label: t('about'), icon: <IoInformationCircleOutline />, activeIcon: <IoInformationCircle /> },
     { to: '/contact', label: t('contact'), icon: <MdOutlineMail />, activeIcon: <MdMail /> },
     { to: '/privacy-policy', label: t('privacy-policy'), icon: <MdPrivacyTip />, activeIcon: <MdPrivacyTip /> },
+    { to: '/terms-conditions', label: t('terms-conditions'), icon: <MdOutlineDescription />, activeIcon: <MdOutlineDescription /> },
   ];
 
   let linksForAuthenticatedUser = [];
@@ -276,16 +277,18 @@ useEffect(() => {
                         <MdHome className="w-4 h-4 mr-3" />
                         {t('menu.title') || 'Home'}
                       </Link> */}
+                          {userRole === 'admin' && (
+                            <Link
+                              to="/admin/dashboard"
+                              onClick={() => setIsProfileMenuOpen(false)}
+                              className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-150"
+                            >
+                              <HiOutlineCog className="w-4 h-4 mr-3" />
+                            {t('menu.admin') || 'Admin Panel'}
+                          </Link>
+                      )}
                       <Link
-                        to="/admin/dashboard"
-                        onClick={() => setIsProfileMenuOpen(false)}
-                        className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-150"
-                      >
-                        <HiOutlineCog className="w-4 h-4 mr-3" />
-                        {t('menu.admin') || 'Admin Panel'}
-                      </Link>
-                      <Link
-                        to="/admin/profile"
+                        to="/profile"
                         onClick={() => setIsProfileMenuOpen(false)}
                         className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-150"
                       >

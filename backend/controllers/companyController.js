@@ -125,6 +125,7 @@ export const updateCompany = async (req, res) => {
       'contact',
       'socialMedia',
       'programsOffered',
+      'termsConditions',
       'paymentGateway'
     ];
 

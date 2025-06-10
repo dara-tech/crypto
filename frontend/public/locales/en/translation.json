@@ -4,6 +4,7 @@
   "home": "Home",
   "register": "Register",
   "privacy-policy": "Privacy Policy",
+  "terms-conditions": "Terms",
   "profile": {
     "title": "Profile",
     "changePassword": "Change Password",
@@ -41,6 +42,7 @@
     "heroImage": "Hero Image",
     "heroImageAlt": "School hero image",
     "privacyPolicy": "Privacy Policy",
+    "termsConditions": "Terms and Conditions",
     "heroImageTooltip": "Upload a high-quality image for the hero section (recommended: 1920x1080px)",
     "heroImageDescription": "This image will be displayed at the top of your school's homepage. Use a high-quality, engaging image that represents your school.",
     "companyName": "Company Name",
@@ -53,13 +55,15 @@
     "updating": "Updating...",
     "cancel": "Cancel",
     "privacyPolicyPlaceholder": "Enter your privacy policy here...",
+    "termsConditionsPlaceholder": "Enter your terms and conditions here...",
     "sections": {
       "logo": "Company Logo",
       "basicInfo": "Basic Information",
       "contactInfo": "Contact Information",
       "socialMedia": "Social Media",
       "paymentGateway": "Payment Gateway",
-      "privacyPolicy": "Privacy Policy"
+      "privacyPolicy": "Privacy Policy",
+      "termsConditions": "Terms and Conditions"
     },
     "paymentGateway": {
       "title": "Payment Gateway",
@@ -76,6 +80,8 @@
   "common": {
     "changeImage": "Change image",
     "removeImage": "Remove image",
+    "download": "Download ",
+    "copy": "Copy",
     "dragAndDrop": "Drag and drop an image here, or",
     "browse": "browse",
     "or": "or",

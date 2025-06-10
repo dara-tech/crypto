@@ -19,6 +19,7 @@
   "vision": "ចក្ខុវិស័យ",
 
   "privacy-policy": "គោលការណ៍ឯកជនភាព",
+  "terms-conditions": "គោលការណ៍",
   "language": "ភាសា",
   "english": "អង់គ្លេស",
   "khmer": "ខ្មែរ",
@@ -46,6 +47,7 @@
   "company": {
     "heroSection": "ផ្នែករូបភាពសំខាន់",
     "privacyPolicy": "គោលការណ៍ឯកជនភាព",
+    "termsConditions": "គោលការណ៍",
     "heroImage": "រូបភាពសំខាន់",
     "heroImageAlt": "រូបភាពសំខាន់របស់ក្រុមហ៊ុន",
     "heroImageTooltip": "ផ្ទុកឡើងរូបភាពដែលមានគុណភាពខ្ពស់សម្រាប់ផ្នែករូបភាពសំខាន់ (ទំហំដែលបានណែនាំ៖ 1920x1080px)",
@@ -62,11 +64,13 @@
     "privacyPolicyPlaceholder": "បញ្ចូលគោលការណ៍ឯកជនភាពរបស់អ្នកនៅទីនេះ...",
     "sections": {
       "logo": "ឡូហ្គោក្រុមហ៊ុន",
+      
       "basicInfo": "ព័ត៌មានមូលដ្ឋាន",
       "contactInfo": "ព័ត៌មានទំនាក់ទំនង",
       "socialMedia": "បណ្ដាញសង្គម",
       "paymentGateway": "ច្រកទូរទូទាត់ប្រាក់",
-      "privacyPolicy": "គោលការណ៍ឯកជនភាព"
+      "privacyPolicy": "គោលការណ៍ឯកជនភាព",
+      "termsAndConditions": "គោលការណ៍"
     },
     "paymentGateway": {
       "title": "ច្រកទូរទូទាត់ប្រាក់",
@@ -83,6 +87,8 @@
   "common": {
     "changeImage": "ផ្លាស់ប្ដូររូបភាព",
     "removeImage": "លុបរូបភាពចេញ",
+    "copy": "ចម្លង",
+    "download": "ទាញយក",
     "dragAndDrop": "អូសរូបភាពមកទីនេះ ឬ",
     "browse": "រកមើល",
     "or": "ឬ",

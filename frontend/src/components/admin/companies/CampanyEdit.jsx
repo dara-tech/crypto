@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { FaBuilding, FaPen, FaPhoneAlt, FaGlobe, FaFile, FaCreditCard } from "react-icons/fa";
+import { FaBuilding, FaPen, FaPhoneAlt, FaGlobe, FaFile, FaCreditCard, FaChevronDown } from "react-icons/fa";
 import useCompanies from "../../../hooks/useCompanies";
 import LogoUpload from "./edit/LogoUpload";
 import BasicInfo from "./edit/BasicInfo";
@@ -9,13 +9,17 @@ import SocialMedia from "./edit/SocialMedia";
 import PaymentGateway from "./edit/PaymentGateway";
 import FormSection from "./edit/FormSection";
 import PrivacyPolicy from "./edit/PrivacyPolicy";
+import TermsAndConditions from "./edit/TermCondition";
 import { useTranslation } from "react-i18next";
 
-const CampanyEdit = () => {
+const CompanyEdit = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { getCompany, updateCompany } = useCompanies();
+
+  // Tab state
+  const [activeTab, setActiveTab] = useState('logo');
 
   const [formData, setFormData] = useState({
     name: "",
@@ -26,8 +30,9 @@ const CampanyEdit = () => {
     missionImage: "",
     vision: "",
     privacyPolicy: "",
+    termsConditions: "",
     visionImage: "",
-    heroImage: "",  // Added heroImage field
+    heroImage: "",
     contact: {
       address: "",
       phone: "", 
@@ -42,7 +47,6 @@ const CampanyEdit = () => {
     },
     paymentGateway: "",
     paymentQR: "",
-    
     heroImages: [],
     programsOffered: [],
     testimonials: []
@@ -59,6 +63,17 @@ const CampanyEdit = () => {
     heroImage: null
   });
 
+  // Tab configuration
+  const tabs = [
+    { id: 'logo', label: t('company.sections.logo') || 'Logo', icon: <FaBuilding /> },
+    { id: 'basic', label: t('company.sections.basicInfo') || 'Basic Info', icon: <FaPen /> },
+    { id: 'contact', label: t('company.sections.contactInfo') || 'Contact Info', icon: <FaPhoneAlt /> },
+    { id: 'social', label: t('company.sections.socialMedia') || 'Social Media', icon: <FaGlobe /> },
+    { id: 'payment', label: 'Payment Gateway', icon: <FaCreditCard /> },
+    { id: 'privacy', label: t('company.sections.privacyPolicy') || 'Privacy Policy', icon: <FaFile /> },
+    { id: 'terms', label: t('company.sections.termsAndConditions') || 'Terms & Conditions', icon: <FaFile /> }
+  ];
+
   useEffect(() => {
     const fetchCompany = async () => {
       try {
@@ -74,6 +89,7 @@ const CampanyEdit = () => {
             missionImage: companyData.missionImage || "",
             vision: companyData.vision || "",
             privacyPolicy: companyData.privacyPolicy || "",
+            termsConditions: companyData.termsConditions || "",
             visionImage: companyData.visionImage || "",
             heroImage: companyData.heroImage || "",
             contact: {
@@ -90,7 +106,6 @@ const CampanyEdit = () => {
             },
             paymentGateway: companyData.paymentGateway || "",
             paymentQR: companyData.paymentQR || "",
-            
             heroImages: companyData.heroImages || [],
             programsOffered: companyData.programsOffered || [],
             testimonials: companyData.testimonials || []
@@ -145,17 +160,12 @@ const CampanyEdit = () => {
   };
 
   const handleImageChange = (field, file) => {
-    console.log('handleImageChange called with:', { field, file });
-    
     if (!file) {
-      console.log('No file provided, removing image for field:', field);
-      // Handle image removal
       setFormData(prev => ({
         ...prev,
         [field]: ""
       }));
       
-      // Update preview
       setImagePreview(prev => ({
         ...prev,
         [field]: null
@@ -163,42 +173,24 @@ const CampanyEdit = () => {
       return;
     }
 
-    console.log('Processing file for field:', field);
-    console.log('File type:', typeof file);
-    console.log('Is File instance:', file instanceof File);
-    
-    // Create preview URL for the image
     let previewUrl;
     if (file instanceof File) {
       previewUrl = URL.createObjectURL(file);
-      console.log('Created preview URL for file');
     } else if (typeof file === 'string') {
       previewUrl = file;
-      console.log('Using existing URL for preview');
     } else {
-      console.error('Invalid file type provided:', file);
       return;
     }
     
-    console.log('Updating form data for field:', field);
+    setFormData(prev => ({
+      ...prev,
+      [field]: file
+    }));
     
-    // Update form data with the actual file
-    setFormData(prev => {
-      const newData = {
-        ...prev,
-        [field]: file
-      };
-      console.log('New form data:', newData);
-      return newData;
-    });
-    
-    // Update preview
     setImagePreview(prev => ({
       ...prev,
       [field]: previewUrl
     }));
-    
-    console.log('Image preview updated for field:', field);
   };
 
   const handleSubmit = async (e) => {
@@ -217,6 +209,7 @@ const CampanyEdit = () => {
       formDataToSend.append("mission", formData.mission || "");
       formDataToSend.append("vision", formData.vision || "");
       formDataToSend.append("privacyPolicy", formData.privacyPolicy || "");
+      formDataToSend.append("termsConditions", formData.termsConditions || "");
       
       // Handle logo file if updated
       if (formData.logo instanceof File) {
@@ -240,15 +233,10 @@ const CampanyEdit = () => {
       }
       
       // Handle payment QR code
-      console.log('Payment QR data:', formData.paymentQR);
       if (formData.paymentQR instanceof File) {
-        console.log('Appending paymentQR file to form data');
         formDataToSend.append("paymentQR", formData.paymentQR);
       } else if (typeof formData.paymentQR === 'string') {
-        console.log('Appending paymentQR string to form data');
         formDataToSend.append("paymentQR", formData.paymentQR);
-      } else {
-        console.log('No paymentQR data to append');
       }
 
       if (formData.missionImage instanceof File) {
@@ -315,65 +303,92 @@ const CampanyEdit = () => {
     }
   };
 
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'logo':
+        return (
+          <LogoUpload
+            logo={formData.logo}
+            logoPreview={logoPreview}
+            onLogoChange={handleLogoChange}
+            error={error}
+            setError={setError}
+          />
+        );
+      case 'basic':
+        return (
+          <BasicInfo
+            formData={formData}
+            onInputChange={handleInputChange}
+            onImageChange={handleImageChange}
+            imagePreview={imagePreview}
+          />
+        );
+      case 'contact':
+        return (
+          <ContactInfo
+            formData={formData}
+            onInputChange={handleInputChange}
+          />
+        );
+      case 'social':
+        return (
+          <SocialMedia
+            formData={formData}
+            onInputChange={handleInputChange}
+          />
+        );
+      case 'payment':
+        return (
+          <PaymentGateway
+            formData={formData}
+            onInputChange={handleInputChange}
+            onImageChange={handleImageChange}
+          />
+        );
+      case 'privacy':
+        return (
+          <PrivacyPolicy
+            formData={formData}
+            onInputChange={handleInputChange}
+          />
+        );
+      case 'terms':
+        return (
+          <TermsAndConditions
+            formData={formData}
+            onInputChange={handleInputChange}
+          />
+        );
+      default:
+        return null;
+    }
+  };
+
   if (loading) {
     return (
-      <div className="container mx-auto p-6 max-w-4xl">
+      <div className="container mx-auto p-6 max-w-6xl">
         <div className="flex items-center justify-between mb-8">
           <div className="h-8 w-48 bg-base-200 animate-pulse rounded"></div>
           <div className="h-10 w-32 bg-base-200 animate-pulse rounded"></div>
         </div>
 
         <div className="space-y-6">
-          {/* Logo Upload Skeleton */}
+          {/* Tab skeleton */}
+          <div className="flex space-x-2 mb-6">
+            {[1, 2, 3, 4, 5].map(i => (
+              <div key={i} className="h-12 w-32 bg-base-200 animate-pulse rounded"></div>
+            ))}
+          </div>
+          
+          {/* Content skeleton */}
           <div className="p-6 border rounded-lg bg-base-100">
             <div className="h-6 w-32 bg-base-200 animate-pulse rounded mb-4"></div>
-            <div className="flex justify-center">
-              <div className="w-48 h-48 rounded-full bg-base-200 animate-pulse"></div>
-            </div>
-          </div>
-
-          {/* Basic Info Skeleton */}
-          <div className="p-6 border rounded-lg bg-base-100">
-            <div className="h-6 w-40 bg-base-200 animate-pulse rounded mb-4"></div>
-            <div className="space-y-6">
-              {[1, 2, 3, 4].map(i => (
-                <div key={i}>
-                  <div className="h-4 w-24 bg-base-200 animate-pulse rounded mb-2"></div>
-                  <div className="h-10 bg-base-200 animate-pulse rounded"></div>
-                </div>
+            <div className="space-y-4">
+              {[1, 2, 3].map(i => (
+                <div key={i} className="h-10 bg-base-200 animate-pulse rounded"></div>
               ))}
             </div>
-          </div>
-
-          {/* Contact Info Skeleton */}
-          <div className="p-6 border rounded-lg bg-base-100">
-            <div className="h-6 w-44 bg-base-200 animate-pulse rounded mb-4"></div>
-            <div className="space-y-6">
-              {[1, 2, 3, 4].map(i => (
-                <div key={i}>
-                  <div className="h-4 w-24 bg-base-200 animate-pulse rounded mb-2"></div>
-                  <div className="h-10 bg-base-200 animate-pulse rounded"></div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Social Media Skeleton */}
-          <div className="p-6 border rounded-lg bg-base-100">
-            <div className="h-6 w-36 bg-base-200 animate-pulse rounded mb-4"></div>
-            <div className="space-y-6">
-              {[1, 2, 3, 4].map(i => (
-                <div key={i}>
-                  <div className="h-4 w-24 bg-base-200 animate-pulse rounded mb-2"></div>
-                  <div className="h-10 bg-base-200 animate-pulse rounded"></div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="flex justify-end gap-4">
-            <div className="h-10 w-24 bg-base-200 animate-pulse rounded"></div>
-            <div className="h-10 w-32 bg-base-200 animate-pulse rounded"></div>
           </div>
         </div>
       </div>
@@ -381,7 +396,7 @@ const CampanyEdit = () => {
   }
 
   return (
-    <div className="container mx-auto p-6 max-w-4xl">
+    <div className="container mx-auto p-6 max-w-6xl">
       <div className="flex items-center justify-between mb-8">
         <h2 className="text-3xl font-bold">{t('company.editTitle')}</h2>
         <button 
@@ -402,81 +417,125 @@ const CampanyEdit = () => {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-8">
-        <FormSection title={t('company.sections.logo')} icon={<FaBuilding />}>
-          <LogoUpload
-            logo={formData.logo}
-            logoPreview={logoPreview}
-            onLogoChange={handleLogoChange}
-            error={error}
-            setError={setError}
-          />
-        </FormSection>
+        {/* Desktop Tabs */}
+        <div className="hidden lg:block">
+          <div className="tabs tabs-boxed bg-base-200 p-1 mb-8">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveTab(tab.id)}
+                className={`tab tab-lg gap-2 ${
+                  activeTab === tab.id ? 'tab-active' : ''
+                }`}
+              >
+                {tab.icon}
+                <span className="hidden sm:inline">{tab.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
 
-        <FormSection title={t('company.sections.basicInfo')} icon={<FaPen />}>
-          <BasicInfo
-            formData={formData}
-            onInputChange={handleInputChange}
-            onImageChange={handleImageChange}
-            imagePreview={imagePreview}
-          />
-        </FormSection>
+        {/* Mobile Dropdown */}
+        <div className="lg:hidden mb-8">
+          <div className="dropdown dropdown-bottom w-full">
+            <div tabIndex={0} role="button" className="btn btn-outline w-full justify-between">
+              <div className="flex items-center gap-2">
+                {tabs.find(tab => tab.id === activeTab)?.icon}
+                <span>{tabs.find(tab => tab.id === activeTab)?.label}</span>
+              </div>
+              <FaChevronDown className="text-sm" />
+            </div>
+            <ul tabIndex={0} className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-full mt-1 z-10">
+              {tabs.map((tab) => (
+                <li key={tab.id}>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`flex items-center gap-2 ${
+                      activeTab === tab.id ? 'active' : ''
+                    }`}
+                  >
+                    {tab.icon}
+                    {tab.label}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
 
-        <FormSection title={t('company.sections.contactInfo')} icon={<FaPhoneAlt />}>
-          <ContactInfo
-            formData={formData}
-            onInputChange={handleInputChange}
-          />
-        </FormSection>
+        {/* Tab Content */}
+        <div className="bg-base-100 border rounded-lg p-6 min-h-[400px]">
+          <div className="flex items-center gap-2 mb-6">
+            {tabs.find(tab => tab.id === activeTab)?.icon}
+            <h3 className="text-2xl font-semibold">
+              {tabs.find(tab => tab.id === activeTab)?.label}
+            </h3>
+          </div>
+          
+          {renderTabContent()}
+        </div>
 
-        <FormSection title={t('company.sections.socialMedia')} icon={<FaGlobe />}>
-          <SocialMedia
-            formData={formData}
-            onInputChange={handleInputChange}
-          />
-        </FormSection>
+        {/* Navigation Buttons */}
+        <div className="flex justify-between items-center">
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                const currentIndex = tabs.findIndex(tab => tab.id === activeTab);
+                if (currentIndex > 0) {
+                  setActiveTab(tabs[currentIndex - 1].id);
+                }
+              }}
+              className="btn btn-outline btn-sm"
+              disabled={activeTab === tabs[0].id}
+            >
+              Previous
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                const currentIndex = tabs.findIndex(tab => tab.id === activeTab);
+                if (currentIndex < tabs.length - 1) {
+                  setActiveTab(tabs[currentIndex + 1].id);
+                }
+              }}
+              className="btn btn-outline btn-sm"
+              disabled={activeTab === tabs[tabs.length - 1].id}
+            >
+              Next
+            </button>
+          </div>
 
-        <FormSection title="Payment Gateway" icon={<FaCreditCard />}>
-          <PaymentGateway
-            formData={formData}
-            onInputChange={handleInputChange}
-            onImageChange={handleImageChange}
-          />
-        </FormSection>
-
-        <FormSection title={t('company.sections.privacyPolicy')} icon={<FaFile />}>
-          <PrivacyPolicy
-            formData={formData}
-            onInputChange={handleInputChange}
-          />
-        </FormSection>
-
-        <div className="flex justify-end gap-4">
-          <button
-            type="button"
-            onClick={() => navigate("/admin/companies")}
-            className="btn btn-ghost"
-            disabled={submitting}
-          >
-            {t('company.cancel')}
-          </button>
-          <button
-            type="submit"
-            className="btn btn-primary"
-            disabled={submitting}
-          >
-            {submitting ? (
-              <>
-                <span className="loading loading-spinner loading-sm"></span>
-                {t('company.updating')}
-              </>
-            ) : (
-              t('company.updateCompany')
-            )}
-          </button>
+          <div className="flex gap-4">
+            <button
+              type="button"
+              onClick={() => navigate("/admin/companies")}
+              className="btn btn-ghost"
+              disabled={submitting}
+            >
+              {t('company.cancel')}
+            </button>
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={submitting}
+            >
+              {submitting ? (
+                <>
+                  <span className="loading loading-spinner loading-sm"></span>
+                  {t('company.updating')}
+                </>
+              ) : (
+                t('company.updateCompany')
+              )}
+            </button>
+          </div>
         </div>
       </form>
     </div>
   );
 };
 
-export default CampanyEdit;
+export default CompanyEdit;
