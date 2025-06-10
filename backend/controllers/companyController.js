@@ -125,6 +125,7 @@ export const updateCompany = async (req, res) => {
       'contact',
       'socialMedia',
       'programsOffered',
+      'FAQs',
       'termsConditions',
       'paymentGateway'
     ];
@@ -265,6 +266,20 @@ export const updateCompany = async (req, res) => {
       }
     }
 
+    // Handle FAQs update
+    if (req.body.FAQs) {
+      try {
+        const faqs = JSON.parse(req.body.FAQs);
+        if (Array.isArray(faqs)) {
+          // Filter out any empty or invalid entries
+          company.FAQs = faqs.filter(faq => faq.question && faq.answer);
+        }
+      } catch (err) {
+        console.error('Error parsing FAQs JSON:', err);
+        // Don't fail the whole request, just log the error
+      }
+    }
+
     const updatedCompany = await company.save();
     res.status(200).json({ 
       message: 'Company updated successfully', 
@@ -278,6 +293,24 @@ export const updateCompany = async (req, res) => {
 };
 
 // Delete company
+// @desc    Get public company data by ID
+// @route   GET /api/companies/public/:id
+// @access  Public
+export const getPublicCompany = async (req, res) => {
+  try {
+    const company = await Company.findById(req.params.id).select('name logo FAQs');
+
+    if (company) {
+      res.json(company);
+    } else {
+      res.status(404).json({ message: 'Company not found' });
+    }
+  } catch (error) {
+    console.error(`Error fetching public company data: ${error.message}`);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
 export const deleteCompany = async (req, res) => {
   try {
     const company = await Company.findByIdAndDelete(req.params.id);

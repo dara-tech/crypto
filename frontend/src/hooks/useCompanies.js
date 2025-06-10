@@ -25,14 +25,16 @@ const useCompanies = () => {
     setLoading(true);
     try {
       const { data } = await API.get("/api/companies");
-      console.log("Fetched companies:", data);
       setCompanies(data);
+      return data;
     } catch (err) {
       setError(err?.response?.data?.message || "Failed to fetch companies");
+      return null;
     } finally {
       setLoading(false);
     }
   };
+
 
   // Get single company
   const getCompany = async (id) => {
@@ -161,7 +163,7 @@ const useCompanies = () => {
     getCompany,
     createCompany,
     updateCompany,
-    deleteCompany
+    deleteCompany,
   };
 };
 

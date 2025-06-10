@@ -11,14 +11,15 @@ import About from './components/clientPage/About';
 import Footer from './components/shares/Footer';
 import Mission from './components/clientPage/Mission';
 import Vision from './components/clientPage/Vision';
-import CampanyEdit from './components/admin/companies/CampanyEdit';
-import CampanyList from './components/admin/companies/CampanyList';
+import CompanyEdit from './components/admin/companies/CompanyEdit';
+import CompanyList from './components/admin/companies/CompanyList';
 import Contact from './components/clientPage/Contact';
 import PolicyPrivacy from './components/clientPage/PolicyPrivacy';
 import TermsAndConditions from './components/clientPage/TermsAndConditions';
 import Home from './components/clientPage/Home';
 import ProtectedRoute from './components/auth/ProtectedRoute';
-import PaymentViewerPage from './pages/PaymentViewerPage';
+import PaymentViewerPage from "./pages/PaymentViewerPage";
+import FaqPage from './components/clientPage/FaqPage';
 
 function App() {
   const { theme } = useThemeStore()
@@ -37,14 +38,15 @@ function App() {
             <Route path="/contact" element={<Contact />} />
             <Route path="/privacy-policy" element={<PolicyPrivacy />} />
             <Route path="/terms-conditions" element={<TermsAndConditions />} />
+            <Route path="/faq" element={<FaqPage />} />
             <Route path="/" element={<Home />} />
             
             {/* Protected routes - only accessible when authenticated */}
             <Route element={<ProtectedRoute allowedRoles={['admin', 'user', 'payment_viewer']} />}>
               <Route path="/profile" element={<Profile />} />
               <Route path="/admin/setting" element={<SettingPage />} />
-              <Route path="/admin/companies/:id" element={<CampanyEdit />} />
-              <Route path="/admin/companies" element={<CampanyList />} />
+              <Route path="/admin/companies/:id" element={<CompanyEdit />} />
+              <Route path="/admin/companies" element={<CompanyList />} />
             </Route>
             
             {/* Payment viewer route - accessible to payment_viewer and admin roles */}

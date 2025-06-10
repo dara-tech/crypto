@@ -94,6 +94,7 @@ useEffect(() => {
     { to: '/contact', label: t('contact'), icon: <MdOutlineMail />, activeIcon: <MdMail /> },
     { to: '/privacy-policy', label: t('privacy-policy'), icon: <MdPrivacyTip />, activeIcon: <MdPrivacyTip /> },
     { to: '/terms-conditions', label: t('terms-conditions'), icon: <MdOutlineDescription />, activeIcon: <MdOutlineDescription /> },
+    { to: '/faq', label: t('faq'), icon: <MdOutlineDescription /> },
   ];
 
   let linksForAuthenticatedUser = [];

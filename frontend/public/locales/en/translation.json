@@ -5,6 +5,7 @@
   "register": "Register",
   "privacy-policy": "Privacy Policy",
   "terms-conditions": "Terms",
+  "faq": "FAQ",
   "profile": {
     "title": "Profile",
     "changePassword": "Change Password",
@@ -60,10 +61,12 @@
       "logo": "Company Logo",
       "basicInfo": "Basic Information",
       "contactInfo": "Contact Information",
+      "faqs": "FAQs",
       "socialMedia": "Social Media",
       "paymentGateway": "Payment Gateway",
       "privacyPolicy": "Privacy Policy",
-      "termsConditions": "Terms and Conditions"
+      "termsConditions": "Terms and Conditions",
+      "termsAndConditions": "Terms and Conditions"
     },
     "paymentGateway": {
       "title": "Payment Gateway",
@@ -75,6 +78,17 @@
     "errors": {
       "fetchFailed": "Failed to fetch company details",
       "updateFailed": "Failed to update company"
+    },
+    "tabs": {
+      "faq": "FAQ"
+    },
+    "faqs": {
+      "add": "Add FAQ",
+      "question": "Question",
+      "answer": "Answer",
+      "questionPlaceholder": "Enter the question",
+      "answerPlaceholder": "Enter the answer",
+      "noFaqs": "No FAQs have been added yet."
     }
   },
   "common": {

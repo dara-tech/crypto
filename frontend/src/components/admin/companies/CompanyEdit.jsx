@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { FaBuilding, FaPen, FaPhoneAlt, FaGlobe, FaFile, FaCreditCard, FaChevronDown } from "react-icons/fa";
+import { FaBuilding, FaPen, FaPhoneAlt, FaGlobe, FaFile, FaCreditCard, FaChevronDown, FaQuestionCircle } from "react-icons/fa";
 import useCompanies from "../../../hooks/useCompanies";
 import LogoUpload from "./edit/LogoUpload";
 import BasicInfo from "./edit/BasicInfo";
@@ -10,6 +10,7 @@ import PaymentGateway from "./edit/PaymentGateway";
 import FormSection from "./edit/FormSection";
 import PrivacyPolicy from "./edit/PrivacyPolicy";
 import TermsAndConditions from "./edit/TermCondition";
+import FAQManager from "./edit/FAQManager";
 import { useTranslation } from "react-i18next";
 
 const CompanyEdit = () => {
@@ -49,7 +50,8 @@ const CompanyEdit = () => {
     paymentQR: "",
     heroImages: [],
     programsOffered: [],
-    testimonials: []
+    testimonials: [],
+    FAQs: []
   });
 
   const [loading, setLoading] = useState(true);
@@ -60,7 +62,8 @@ const CompanyEdit = () => {
     about: null,
     mission: null,
     vision: null,
-    heroImage: null
+    heroImage: null,
+    paymentQR: null
   });
 
   // Tab configuration
@@ -71,7 +74,8 @@ const CompanyEdit = () => {
     { id: 'social', label: t('company.sections.socialMedia') || 'Social Media', icon: <FaGlobe /> },
     { id: 'payment', label: 'Payment Gateway', icon: <FaCreditCard /> },
     { id: 'privacy', label: t('company.sections.privacyPolicy') || 'Privacy Policy', icon: <FaFile /> },
-    { id: 'terms', label: t('company.sections.termsAndConditions') || 'Terms & Conditions', icon: <FaFile /> }
+    { id: 'terms', label: t('company.sections.termsAndConditions') || 'Terms & Conditions', icon: <FaFile /> },
+    { id: 'faq', label: t('company.tabs.faq'), icon: <FaQuestionCircle /> }
   ];
 
   useEffect(() => {
@@ -108,7 +112,8 @@ const CompanyEdit = () => {
             paymentQR: companyData.paymentQR || "",
             heroImages: companyData.heroImages || [],
             programsOffered: companyData.programsOffered || [],
-            testimonials: companyData.testimonials || []
+            testimonials: companyData.testimonials || [],
+            FAQs: companyData.FAQs || []
           });
           if (companyData.logo) {
             setLogoPreview(companyData.logo);
@@ -191,6 +196,10 @@ const CompanyEdit = () => {
       ...prev,
       [field]: previewUrl
     }));
+  };
+
+  const handleFaqChange = (newFaqs) => {
+    setFormData(prev => ({ ...prev, FAQs: newFaqs }));
   };
 
   const handleSubmit = async (e) => {
@@ -283,12 +292,12 @@ const CompanyEdit = () => {
         });
       }
 
-      if (Array.isArray(formData.testimonials)) {
-        formData.testimonials.forEach((testimonial, index) => {
-          Object.entries(testimonial).forEach(([key, value]) => {
-            formDataToSend.append(`testimonials[${index}][${key}]`, value);
-          });
-        });
+      if (formData.testimonials && Array.isArray(formData.testimonials)) {
+        formDataToSend.append('testimonials', JSON.stringify(formData.testimonials));
+      }
+
+      if (formData.FAQs && Array.isArray(formData.FAQs)) {
+        formDataToSend.append('FAQs', JSON.stringify(formData.FAQs));
       }
 
       const updated = await updateCompany(id, formDataToSend);
@@ -358,6 +367,13 @@ const CompanyEdit = () => {
           <TermsAndConditions
             formData={formData}
             onInputChange={handleInputChange}
+          />
+        );
+      case 'faq':
+        return (
+          <FAQManager
+            faqs={formData.FAQs}
+            onFaqChange={handleFaqChange}
           />
         );
       default:

@@ -5,6 +5,7 @@
   "register": "ចុះឈ្មោះ",
   "Profile": "ប្រវត្តិរូប",
   "settings": "ការកំណត់",
+  "faq": "FAQ",
   "paymentViewer": { "title": "មើលព័ត៌មានការទូទាត់" },
   "paymentViewerPage": {
     "title": "ព័ត៌មានការទូទាត់",
@@ -82,6 +83,17 @@
     "errors": {
       "fetchFailed": "មិនអាចទាញយកព័ត៌មានក្រុមហ៊ុនបានទេ",
       "updateFailed": "មិនអាចធ្វើបច្ចុប្បន្នភាពក្រុមហ៊ុនបានទេ"
+    },
+    "tabs": {
+      "faq": "សំណួរគេសួរញឹកញាប់"
+    },
+    "faqs": {
+      "add": "បន្ថែមសំណួរ",
+      "question": "សំណួរ",
+      "answer": "ចម្លើយ",
+      "questionPlaceholder": "បញ្ចូលសំណួរ",
+      "answerPlaceholder": "បញ្ចូលចម្លើយ",
+      "noFaqs": "មិនទាន់មានសំណួរដែលគេសួរញឹកញាប់ត្រូវបានបន្ថែមនៅឡើយទេ។"
     }
   },
   "common": {

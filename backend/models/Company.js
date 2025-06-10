@@ -19,7 +19,12 @@ const companySchema = new mongoose.Schema({
   termsConditions: {
     type: String,
   },
-
+  FAQs: [
+    {
+      question: { type: String, required: true },
+      answer: { type: String, required: true }
+    }
+  ],
   aboutImage: {
     type: String,
     default: "",
