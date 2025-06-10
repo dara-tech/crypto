@@ -40,11 +40,11 @@ function App() {
             <Route path="/terms-conditions" element={<TermsAndConditions />} />
             <Route path="/faq" element={<FaqPage />} />
             <Route path="/" element={<Home />} />
+            <Route path="/setting" element={<SettingPage />} />
             
             {/* Protected routes - only accessible when authenticated */}
             <Route element={<ProtectedRoute allowedRoles={['admin', 'user', 'payment_viewer']} />}>
               <Route path="/profile" element={<Profile />} />
-              <Route path="/admin/setting" element={<SettingPage />} />
               <Route path="/admin/companies/:id" element={<CompanyEdit />} />
               <Route path="/admin/companies" element={<CompanyList />} />
             </Route>

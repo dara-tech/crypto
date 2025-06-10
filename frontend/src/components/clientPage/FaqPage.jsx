@@ -21,49 +21,51 @@ const FaqPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-base-200 flex items-center justify-center">
-        <span className="loading loading-lg"></span>
+      <div className="min-h-screen bg-base-100 flex items-center justify-center">
+        <span className="loading loading-ring loading-lg text-primary"></span>
       </div>
     );
   }
 
   if (error || !company) {
     return (
-      <div className="min-h-screen bg-base-200 flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-error">{t('company.errors.fetchFailed')}</h2>
-          <p>{error}</p>
-        </div>
+      <div className="min-h-screen bg-base-100 flex flex-col items-center justify-center text-center px-4">
+        <h2 className="text-2xl font-semibold text-error mb-2">{t('company.errors.fetchFailed')}</h2>
+        <p className="text-base text-base-content/70 max-w-md">{error}</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-base-200 py-12">
-      <div className="container mx-auto px-4 max-w-4xl">
+    <div className="min-h-screen bg-base-100 py-16 px-4">
+      <div className="max-w-3xl mx-auto">
         <div className="text-center mb-12">
-          {company && company.logo && (
-            <img src={company.logo} alt={`${company.name} Logo`} className="w-24 h-24 mx-auto mb-4 rounded-full object-cover" />
+          {company?.logo && (
+            <img
+              src={company.logo}
+              alt={`${company.name} Logo`}
+              className="w-20 h-20 mx-auto mb-4 rounded-full object-cover shadow-md"
+            />
           )}
-          <h1 className="text-4xl font-bold">{company?.name}</h1>
-          <p className="text-xl text-base-content mt-2">{t('company.tabs.faq')}</p>
+          <h1 className="text-3xl sm:text-4xl font-bold text-base-content">{company.name}</h1>
+          <p className="mt-2 text-base-content/70">{t('company.tabs.faq')}</p>
         </div>
 
         <div className="space-y-4">
-          {company?.FAQs && company.FAQs.length > 0 ? (
+          {company?.FAQs?.length > 0 ? (
             company.FAQs.map((faq, index) => (
-              <div key={index} tabIndex={0} className="collapse collapse-plus border border-base-300 bg-base-100 rounded-box">
-                <div className="collapse-title text-xl font-medium">
+              <details key={index} className="group border border-base-300 rounded-xl bg-base-200 transition-all duration-300 shadow-sm open:shadow-md">
+                <summary className="cursor-pointer px-6 py-4 text-lg font-medium text-base-content group-open:bg-base-300 rounded-t-xl transition">
                   {faq.question}
+                </summary>
+                <div className="px-6 pb-4 text-base-content/80">
+                  {faq.answer}
                 </div>
-                <div className="collapse-content">
-                  <p>{faq.answer}</p>
-                </div>
-              </div>
+              </details>
             ))
           ) : (
-            <div className="text-center py-10">
-              <p className="text-lg">{t('company.faqs.noFaqs')}</p>
+            <div className="text-center py-12">
+              <p className="text-base text-base-content/70">{t('company.faqs.noFaqs')}</p>
             </div>
           )}
         </div>
