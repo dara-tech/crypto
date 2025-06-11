@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { FaBuilding, FaPen, FaPhoneAlt, FaGlobe, FaFile, FaCreditCard, FaChevronDown, FaQuestionCircle } from "react-icons/fa";
+import { FaBuilding, FaPen, FaPhoneAlt, FaGlobe, FaFile, FaCreditCard, FaChevronDown, FaQuestionCircle, FaUserTie } from "react-icons/fa";
 import useCompanies from "../../../hooks/useCompanies";
 import LogoUpload from "./edit/LogoUpload";
 import BasicInfo from "./edit/BasicInfo";
@@ -11,6 +11,7 @@ import FormSection from "./edit/FormSection";
 import PrivacyPolicy from "./edit/PrivacyPolicy";
 import TermsAndConditions from "./edit/TermCondition";
 import FAQManager from "./edit/FAQManager";
+import ProfessionalsManager from './edit/ProfessionalsManager';
 import { useTranslation } from "react-i18next";
 
 const CompanyEdit = () => {
@@ -51,7 +52,8 @@ const CompanyEdit = () => {
     heroImages: [],
     programsOffered: [],
     testimonials: [],
-    FAQs: []
+    FAQs: [],
+    professionals: []
   });
 
   const [loading, setLoading] = useState(true);
@@ -72,10 +74,11 @@ const CompanyEdit = () => {
     { id: 'basic', label: t('company.sections.basicInfo') || 'Basic Info', icon: <FaPen /> },
     { id: 'contact', label: t('company.sections.contactInfo') || 'Contact Info', icon: <FaPhoneAlt /> },
     { id: 'social', label: t('company.sections.socialMedia') || 'Social Media', icon: <FaGlobe /> },
-    { id: 'payment', label: 'Payment Gateway', icon: <FaCreditCard /> },
+    { id: 'payment', label: t('company.sections.paymentGateway'), icon: <FaCreditCard /> },
     { id: 'privacy', label: t('company.sections.privacyPolicy') || 'Privacy Policy', icon: <FaFile /> },
     { id: 'terms', label: t('company.sections.termsAndConditions') || 'Terms & Conditions', icon: <FaFile /> },
-    { id: 'faq', label: t('company.tabs.faq'), icon: <FaQuestionCircle /> }
+    { id: 'faq', label: t('company.tabs.faq'), icon: <FaQuestionCircle /> },
+    { id: 'professionals', label: t('professionalsManager.title'), icon: <FaUserTie /> }
   ];
 
   useEffect(() => {
@@ -113,7 +116,8 @@ const CompanyEdit = () => {
             heroImages: companyData.heroImages || [],
             programsOffered: companyData.programsOffered || [],
             testimonials: companyData.testimonials || [],
-            FAQs: companyData.FAQs || []
+            FAQs: companyData.FAQs || [],
+            professionals: companyData.professionals || []
           });
           if (companyData.logo) {
             setLogoPreview(companyData.logo);
@@ -199,7 +203,17 @@ const CompanyEdit = () => {
   };
 
   const handleFaqChange = (newFaqs) => {
-    setFormData(prev => ({ ...prev, FAQs: newFaqs }));
+    setFormData(prev => ({
+      ...prev,
+      FAQs: newFaqs
+    }));
+  };
+
+  const handleProfessionalsChange = (newProfessionals) => {
+    setFormData(prev => ({
+      ...prev,
+      professionals: newProfessionals
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -300,6 +314,24 @@ const CompanyEdit = () => {
         formDataToSend.append('FAQs', JSON.stringify(formData.FAQs));
       }
 
+      // Append professionals data and images
+      if (formData.professionals) {
+        const professionalsData = formData.professionals.map(p => ({
+          name: p.name,
+          role: p.role,
+          email: p.email,
+          description: p.description,
+          image: p.newImageFile ? '' : p.image // Send existing image URL or empty if new one is uploaded
+        }));
+        formDataToSend.append('professionals', JSON.stringify(professionalsData));
+
+        formData.professionals.forEach((p, index) => {
+          if (p.newImageFile) {
+            formDataToSend.append('professionalImages', p.newImageFile);
+          }
+        });
+      }
+
       const updated = await updateCompany(id, formDataToSend);
       if (!updated) throw new Error(t('company.errors.updateFailed'));
 
@@ -374,6 +406,13 @@ const CompanyEdit = () => {
           <FAQManager
             faqs={formData.FAQs}
             onFaqChange={handleFaqChange}
+          />
+        );
+      case 'professionals':
+        return (
+          <ProfessionalsManager
+            professionals={formData.professionals}
+            onProfessionalsChange={handleProfessionalsChange}
           />
         );
       default:

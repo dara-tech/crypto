@@ -115,168 +115,107 @@ export const updateCompany = async (req, res) => {
       return res.status(404).json({ message: 'Company not found' });
     }
 
-    // Update basic fields from request body
-    const updateFields = [
-      'name',
-      'about',
-      'mission', 
-      'vision',
-      'privacyPolicy',
-      'contact',
-      'socialMedia',
-      'programsOffered',
-      'FAQs',
-      'termsConditions',
-      'paymentGateway'
-    ];
-
-    updateFields.forEach(field => {
+    // Handle text fields
+    const textFields = ['name', 'about', 'mission', 'vision', 'privacyPolicy', 'termsConditions', 'paymentGateway'];
+    textFields.forEach(field => {
       if (req.body[field] !== undefined) {
-        // Skip if the value is an empty array for heroImage
-        if (field === 'heroImage' && Array.isArray(req.body[field])) {
-          return; // Skip setting heroImage if it's an array
-        }
         company[field] = req.body[field];
       }
     });
 
-    // Handle heroImage specifically to prevent array assignment
-    if (req.body.heroImage && !Array.isArray(req.body.heroImage)) {
-      company.heroImage = req.body.heroImage;
-    }
+    // Handle fields that are sent as JSON strings
+    const jsonFields = ['contact', 'socialMedia', 'programsOffered', 'FAQs', 'testimonials'];
+    jsonFields.forEach(field => {
+      if (req.body[field]) {
+        try {
+          let parsedData;
+          if (typeof req.body[field] === 'string') {
+            parsedData = JSON.parse(req.body[field]);
+          } else {
+            parsedData = req.body[field]; // Already an object
+          }
+          company[field] = parsedData;
+          // For arrays of objects, it's safer to mark them as modified.
+          if (Array.isArray(parsedData)) {
+            company.markModified(field);
+          }
+        } catch (e) {
+          console.error(`Error parsing JSON for field ${field}:`, e);
+        }
+      }
+    });
 
-    // Handle single image uploads (logo, aboutImage, missionImage, visionImage, heroImage)
-    const singleImageFields = {
-      logo: 'company_logos',
-      aboutImage: 'company_about_images',
-      missionImage: 'company_mission_images',
-      visionImage: 'company_vision_images',
-      paymentQR: 'company_qr_image'
-      // Removed heroImage from here since it's handled separately
+    // --- Handle all image uploads ---
+    const uploadToCloudinary = (buffer, folder) => {
+      return new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream({ folder }, (error, result) => {
+          if (error) return reject(error);
+          resolve(result.secure_url);
+        });
+        uploadStream.end(buffer);
+      });
     };
 
-    // Process single image uploads
-    console.log('Files received:', Object.keys(req.files || {}));
-    for (const [field, folder] of Object.entries(singleImageFields)) {
-      if (req.files?.[field]?.[0]?.buffer) {
-        console.log(`Processing ${field} upload to folder:`, folder);
+    // Handle single image fields
+    const singleImageFields = ['logo', 'aboutImage', 'missionImage', 'visionImage', 'heroImage', 'paymentQR'];
+    for (const field of singleImageFields) {
+      if (req.files?.[field]?.[0]) {
         try {
-          const result = await new Promise((resolve, reject) => {
-            const uploadStream = cloudinary.uploader.upload_stream(
-              { folder },
-              (error, result) => {
-                if (error) reject(error);
-                else resolve(result);
-              }
-            );
-            uploadStream.end(req.files[field][0].buffer);
-          });
-          console.log(`Successfully uploaded ${field} to:`, result.secure_url);
-          company[field] = result.secure_url;
-        } catch (error) {
-          console.error(`Error uploading ${field} image:`, error);
-          // Don't fail the whole request if a single image upload fails
+          company[field] = await uploadToCloudinary(req.files[field][0].buffer, `company_${field.toLowerCase()}`);
+        } catch (e) {
+          console.error(`Error uploading ${field}:`, e);
         }
       }
     }
 
-    // Handle heroImage upload separately
-    if (req.files?.heroImage?.[0]?.buffer) {
-      try {
-        const result = await new Promise((resolve, reject) => {
-          const uploadStream = cloudinary.uploader.upload_stream(
-            { folder: 'company_hero_images' },
-            (error, result) => {
-              if (error) reject(error);
-              else resolve(result);
-            }
-          );
-          uploadStream.end(req.files.heroImage[0].buffer);
-        });
-        company.heroImage = result.secure_url;
-      } catch (error) {
-        console.error('Error uploading hero image:', error);
-        // Don't fail the whole request if hero image upload fails
-      }
-    }
-
-    // Handle hero images (array) update if present
+    // Handle multiple hero images
     if (req.files?.heroImages) {
-      // Filter out any empty values that might come from the form
-      const validHeroImages = req.files.heroImages.filter(img => img && img.buffer && img.buffer.length > 0);
-      
-      if (validHeroImages.length > 0) {
-        const heroImagePromises = validHeroImages.map(image => {
-          return new Promise((resolve, reject) => {
-            const uploadStream = cloudinary.uploader.upload_stream(
-              { folder: 'company_hero_images' },
-              (error, result) => {
-                if (error) reject(error);
-                else resolve(result.secure_url);
-              }
-            );
-            uploadStream.end(image.buffer);
-          });
-        });
-        
-        try {
-          const newHeroImageUrls = await Promise.all(heroImagePromises);
-          
-          // Initialize heroImages as array if it doesn't exist
-          if (!company.heroImages || !Array.isArray(company.heroImages)) {
-            company.heroImages = [];
-          }
-          
-          // Filter out any empty strings from existing heroImages
-          company.heroImages = company.heroImages.filter(Boolean);
-          
-          // Add new images to the array
-          company.heroImages = [...company.heroImages, ...newHeroImageUrls];
-        } catch (err) {
-          console.error('Error uploading hero images:', err);
-          // Don't fail the whole request if hero image upload fails
-        }
-      }
+      if (!Array.isArray(company.heroImages)) company.heroImages = [];
+      const heroImageUploads = req.files.heroImages.map(file => uploadToCloudinary(file.buffer, 'company_hero_images'));
+      const newHeroUrls = await Promise.all(heroImageUploads);
+      company.heroImages.push(...newHeroUrls);
     }
 
-    // Handle testimonials update
-    if (req.body.testimonials) {
-      const testimonials = JSON.parse(req.body.testimonials);
-      if (req.files?.testimonialImages) {
-        const testimonialImagePromises = req.files.testimonialImages.map(image => {
-          return new Promise((resolve, reject) => {
-            const uploadStream = cloudinary.uploader.upload_stream(
-              { folder: 'company_testimonial_images' },
-              (error, result) => {
-                if (error) reject(error);
-                else resolve(result.secure_url);
-              }
-            );
-            uploadStream.end(image.buffer);
-          });
-        });
-        const testimonialImageUrls = await Promise.all(testimonialImagePromises);
-        
-        company.testimonials = testimonials.map((testimonial, index) => ({
-          ...testimonial,
-          imageUrl: testimonialImageUrls[index] || testimonial.imageUrl
-        }));
-      } else {
-        company.testimonials = testimonials;
-      }
-    }
-
-    // Handle FAQs update
-    if (req.body.FAQs) {
+    // --- Handle Professionals Update with Logging ---
+    if (req.body.professionals) {
       try {
-        const faqs = JSON.parse(req.body.FAQs);
-        if (Array.isArray(faqs)) {
-          // Filter out any empty or invalid entries
-          company.FAQs = faqs.filter(faq => faq.question && faq.answer);
+        console.log('PROFESSIONALS_UPDATE: Received string:', req.body.professionals);
+        let professionals;
+        if (typeof req.body.professionals === 'string') {
+          try {
+            professionals = JSON.parse(req.body.professionals);
+          } catch (e) {
+            console.error('Error parsing professionals JSON:', e);
+            return res.status(400).json({ message: 'Invalid professionals JSON format.' });
+          }
+        } else {
+          professionals = req.body.professionals; // Already an object
         }
-      } catch (err) {
-        console.error('Error parsing FAQs JSON:', err);
-        // Don't fail the whole request, just log the error
+        console.log('PROFESSIONALS_UPDATE: Parsed array:', JSON.stringify(professionals, null, 2));
+
+        if (req.files?.professionalImages) {
+          console.log(`PROFESSIONALS_UPDATE: Found ${req.files.professionalImages.length} new image(s).`);
+          const professionalImageUrls = await Promise.all(
+            req.files.professionalImages.map(image => uploadToCloudinary(image.buffer, 'company_professionals'))
+          );
+          console.log('PROFESSIONALS_UPDATE: Uploaded image URLs:', professionalImageUrls);
+
+          let imageIndex = 0;
+          professionals = professionals.map(prof => {
+            // The marker for a new image from the frontend is an empty string for the 'image' field.
+            if (prof.image === '' && imageIndex < professionalImageUrls.length) {
+              prof.image = professionalImageUrls[imageIndex++];
+            }
+            return prof;
+          });
+        }
+        
+        company.professionals = professionals;
+        company.markModified('professionals');
+        console.log('PROFESSIONALS_UPDATE: Final array to be saved:', JSON.stringify(company.professionals, null, 2));
+      } catch (error) {
+        console.error('Error processing professionals update:', error);
+
       }
     }
 

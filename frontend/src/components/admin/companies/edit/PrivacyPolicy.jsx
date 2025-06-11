@@ -1,4 +1,5 @@
-import { useEffect } from 'react'
+import { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Underline from '@tiptap/extension-underline'
@@ -10,6 +11,7 @@ import Italic from '@tiptap/extension-italic'
 import Paragraph from '@tiptap/extension-paragraph'
 
 const Toolbar = ({ editor }) => {
+  const { t } = useTranslation();
   if (!editor) return null
 
   const buttonClass = (name) =>
@@ -17,16 +19,17 @@ const Toolbar = ({ editor }) => {
 
   return (
     <div className="flex flex-wrap gap-2 p-2 border-b rounded-t-md bg-gray-50">
-      <button type="button" className={buttonClass('bold')} onClick={() => editor.chain().focus().toggleBold().run()}>Bold</button>
-      <button type="button" className={buttonClass('italic')} onClick={() => editor.chain().focus().toggleItalic().run()}>Italic</button>
-      <button type="button" className={buttonClass('underline')} onClick={() => editor.chain().focus().toggleUnderline().run()}>Underline</button>
-      <button type="button" className={buttonClass('bulletList')} onClick={() => editor.chain().focus().toggleBulletList().run()}>• Bullet List</button>
-      <button type="button" className={buttonClass('orderedList')} onClick={() => editor.chain().focus().toggleOrderedList().run()}>1. Ordered List</button>
+      <button type="button" className={buttonClass('bold')} onClick={() => editor.chain().focus().toggleBold().run()}>{t('privacyPolicy.bold')}</button>
+      <button type="button" className={buttonClass('italic')} onClick={() => editor.chain().focus().toggleItalic().run()}>{t('privacyPolicy.italic')}</button>
+      <button type="button" className={buttonClass('underline')} onClick={() => editor.chain().focus().toggleUnderline().run()}>{t('privacyPolicy.underline')}</button>
+      <button type="button" className={buttonClass('bulletList')} onClick={() => editor.chain().focus().toggleBulletList().run()}>{t('privacyPolicy.bulletList')}</button>
+      <button type="button" className={buttonClass('orderedList')} onClick={() => editor.chain().focus().toggleOrderedList().run()}>{t('privacyPolicy.orderedList')}</button>
     </div>
   )
 }
 
 const PrivacyPolicy = ({ formData, onInputChange }) => {
+  const { t } = useTranslation();
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -61,7 +64,7 @@ const PrivacyPolicy = ({ formData, onInputChange }) => {
   return (
     <div className="space-y-4">
       <label className="label">
-        <span className="label-text font-bold text-lg">Privacy Policy</span>
+        <span className="label-text font-bold text-lg">{t('privacyPolicy.title')}</span>
       </label>
 
       <div className="rounded-md border shadow-sm">

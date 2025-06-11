@@ -1,8 +1,8 @@
 import express from 'express';
+import path from 'path';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
-import path from 'path';
 import { fileURLToPath } from 'url';
 import https from 'https'; // Added
 import authRoutes from './routes/authRoutes.js';

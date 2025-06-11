@@ -1,13 +1,52 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FaMapMarkerAlt, FaPhoneAlt, FaEnvelope, FaClock, FaFacebook, FaInstagram, FaLinkedin, FaPaperPlane, FaYoutube } from 'react-icons/fa';
+import {
+  FaMapMarkerAlt,
+  FaPhoneAlt,
+  FaEnvelope,
+  FaClock,
+  FaFacebook,
+  FaInstagram,
+  FaLinkedin,
+  FaPaperPlane,
+  FaYoutube,
+  FaGlobe,
+  FaBuilding
+} from 'react-icons/fa';
 import useCompanies from '../../hooks/useCompanies';
 
 const Contact = () => {
-  const { t } = useTranslation();
-  const { companies, loading, error } = useCompanies();
-  const company = companies?.[0]; // Get the first company if available
-  
+  const { t, i18n } = useTranslation();
+  const { companies, loading, error, getCompanies } = useCompanies();
+  const [company, setCompany] = useState(null);
+
+  // Default contact information
+  const defaultContact = {
+    address: 'Phnom Penh, Cambodia',
+    phone: '+855 23 123 4567',
+    email: 'info@khhara.com',
+    social: {
+      facebook: 'https://facebook.com/khhara',
+      instagram: 'https://instagram.com/khhara',
+      youtube: 'https://youtube.com/khhara',
+      linkedin: 'https://linkedin.com/company/khhara'
+    },
+    coordinates: {
+      lat: 11.5564,
+      lng: 104.9282,
+      zoom: 15
+    }
+  };
+
+  useEffect(() => {
+    // Fetch companies if not already loaded
+    if (!companies || companies.length === 0) {
+      getCompanies();
+    } else {
+      setCompany(companies[0]);
+    }
+  }, [companies, getCompanies]);
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -49,7 +88,7 @@ const Contact = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const errors = validateForm();
-    
+
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
       return;
@@ -62,7 +101,7 @@ const Contact = () => {
       // Replace with your actual API call
       // const response = await api.post('/contact', formData);
       await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate API call
-      
+
       setSubmitStatus({
         success: true,
         message: t('contactPage.form.success')
@@ -104,12 +143,45 @@ const Contact = () => {
     );
   }
 
+  const currentContact = company?.contact ? {
+    ...defaultContact,
+    ...company.contact,
+    social: {
+      ...defaultContact.social,
+      ...(company.contact.social || {})
+    },
+    coordinates: {
+      ...defaultContact.coordinates,
+      ...(company.contact.coordinates || {})
+    }
+  } : defaultContact;
+
+  // Generate Google Maps iframe URL without an API key
+  const mapUrl = `https://maps.google.com/maps?q=${currentContact.coordinates.lat},${currentContact.coordinates.lng}&z=${currentContact.coordinates.zoom || 15}&output=embed&language=${i18n.language}`;
+
   return (
     <div className="min-h-screen bg-base-200 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-primary mb-4">{t('contactPage.title')}</h1>
           <p className="text-lg text-base-content/70">{t('contactPage.subtitle')}</p>
+        </div>
+
+        {/* Map Section */}
+        <div className="mb-12 rounded-xl overflow-hidden shadow-xl">
+          <div className="aspect-w-16 aspect-h-9 w-full h-96 md:h-[500px]">
+            <iframe
+              title={t('contactPage.map.title')}
+              src={mapUrl}
+              width="100%"
+              height="100%"
+              style={{ border: 0 }}
+              allowFullScreen=""
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              className="w-full h-full"
+            ></iframe>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
@@ -129,7 +201,7 @@ const Contact = () => {
                 <span>{submitStatus.message}</span>
               </div>
             )}
-            
+
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="form-control">
@@ -233,99 +305,129 @@ const Contact = () => {
           {/* Contact Information */}
           <div className="space-y-8">
             <div className="bg-base-100 p-8 rounded-xl shadow-lg">
-              <h3 className="text-2xl font-bold mb-6">{t('contactPage.info.title')}</h3>
-              <div className="space-y-6">
-                <div className="flex items-start space-x-4">
-                  <div className="p-2 bg-primary/10 rounded-full">
-                    <FaMapMarkerAlt className="text-primary text-xl" />
+              <div className="flex items-center mb-6">
+                <FaBuilding className="text-primary text-2xl mr-3" />
+                <h3 className="text-2xl font-bold">{t('contactPage.info.title')}</h3>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Left Column */}
+                <div className="space-y-6">
+                  <div className="flex items-start space-x-4">
+                    <div className="p-2 bg-primary/10 rounded-full flex-shrink-0">
+                      <FaMapMarkerAlt className="text-primary text-xl" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold">{t('contactPage.info.addressTitle')}</h4>
+                      <p className="text-base-content/70">
+                        {currentContact.address}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="font-semibold">Address</h4>
-                    <p className="text-base-content/70">{company?.contact?.address || t('contactPage.info.address')}</p>
+
+                  <div className="flex items-start space-x-4">
+                    <div className="p-2 bg-primary/10 rounded-full flex-shrink-0">
+                      <FaPhoneAlt className="text-primary text-xl" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold">{t('contactPage.info.phoneTitle')}</h4>
+                      <a
+                        href={`tel:${currentContact.phone.replace(/\D/g, '')}`}
+                        className="text-base-content/70 hover:text-primary transition-colors"
+                      >
+                        {currentContact.phone}
+                      </a>
+                    </div>
                   </div>
                 </div>
 
-                <div className="flex items-start space-x-4">
-                  <div className="p-2 bg-primary/10 rounded-full">
-                    <FaPhoneAlt className="text-primary text-xl" />
+                {/* Right Column */}
+                <div className="space-y-6">
+                  <div className="flex items-start space-x-4">
+                    <div className="p-2 bg-primary/10 rounded-full flex-shrink-0">
+                      <FaEnvelope className="text-primary text-xl" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold">{t('contactPage.info.emailTitle')}</h4>
+                      <a
+                        href={`mailto:${currentContact.email}`}
+                        className="text-base-content/70 hover:text-primary transition-colors break-all"
+                      >
+                        {currentContact.email}
+                      </a>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="font-semibold">Phone</h4>
-                    <a href={`tel:${company?.contact?.phone?.replace(/\D/g, '') || '+85512345678'}`} className="text-base-content/70 hover:text-primary">
-                      {company?.contact?.phone || t('contactPage.info.phone')}
-                    </a>
-                  </div>
-                </div>
 
-                <div className="flex items-start space-x-4">
-                  <div className="p-2 bg-primary/10 rounded-full">
-                    <FaEnvelope className="text-primary text-xl" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold">Email</h4>
-                    <a href={`mailto:${company?.contact?.email || 'info@khhara.com'}`} className="text-base-content/70 hover:text-primary">
-                      {company?.contact?.email || t('contactPage.info.email')}
-                    </a>
-                  </div>
-                </div>
-
-                <div className="flex items-start space-x-4">
-                  <div className="p-2 bg-primary/10 rounded-full">
-                    <FaClock className="text-primary text-xl" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold">Working Hours</h4>
-                    <p className="text-base-content/70">{t('contactPage.info.hours')}</p>
+                  <div className="flex items-start space-x-4">
+                    <div className="p-2 bg-primary/10 rounded-full flex-shrink-0">
+                      <FaClock className="text-primary text-xl" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold">{t('contactPage.info.hoursTitle')}</h4>
+                      <p className="text-base-content/70 whitespace-pre-line">
+                        {t('contactPage.info.hours')}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
 
-           {/* Social Media Section */}
-<div className="bg-base-100 p-8 rounded-xl shadow-lg">
-  <h3 className="text-2xl font-bold mb-6">{t('contactPage.social.title')}</h3>
-  <div className="flex flex-wrap gap-4 justify-center">
-    <a 
-      href="https://facebook.com/bfis" 
-      target="_blank" 
-      rel="noopener noreferrer"
-      className="btn btn-ghost btn-circle hover:bg-base-200 transition-colors"
-      aria-label={t('contactPage.social.facebook')}
-    >
-      <FaFacebook className="text-2xl text-[#1877F2]" />
-    </a>
-    
-    <a 
-      href="https://instagram.com/bfis" 
-      target="_blank" 
-      rel="noopener noreferrer"
-      className="btn btn-ghost btn-circle hover:bg-base-200 transition-colors"
-      aria-label={t('contactPage.social.instagram')}
-    >
-      <FaInstagram className="text-2xl text-[#E1306C]" />
-    </a>
-    
-    <a 
-      href="https://youtube.com/@bfis" 
-      target="_blank" 
-      rel="noopener noreferrer"
-      className="btn btn-ghost btn-circle hover:bg-base-200 transition-colors"
-      aria-label={t('contactPage.social.youtube')}
-    >
-      <FaYoutube className="text-2xl text-[#FF0000]" />
-    </a>
-    
-    <a 
-      href="https://linkedin.com/school/bfis" 
-      target="_blank" 
-      rel="noopener noreferrer"
-      className="btn btn-ghost btn-circle hover:bg-base-200 transition-colors"
-      aria-label={t('contactPage.social.linkedin')}
-    >
-      <FaLinkedin className="text-2xl text-[#0077B6]" />
-    </a>
-  </div>
-</div>
+            {/* Social Media Section */}
+            <div className="bg-base-100 p-8 rounded-xl shadow-lg">
+              <div className="flex items-center mb-6">
+                <FaGlobe className="text-primary text-2xl mr-3" />
+                <h3 className="text-2xl font-bold">{t('contactPage.social.title')}</h3>
+              </div>
+              <div className="flex flex-wrap gap-4 justify-center md:justify-start">
+                {currentContact.social?.facebook && (
+                  <a
+                    href={currentContact.social.facebook}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn btn-ghost btn-circle hover:bg-base-200 transition-colors"
+                    aria-label={t('contactPage.social.facebook')}
+                  >
+                    <FaFacebook className="text-2xl text-[#1877F2]" />
+                  </a>
+                )}
+
+                {currentContact.social?.instagram && (
+                  <a
+                    href={currentContact.social.instagram}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn btn-ghost btn-circle hover:bg-base-200 transition-colors"
+                    aria-label={t('contactPage.social.instagram')}
+                  >
+                    <FaInstagram className="text-2xl text-[#E1306C]" />
+                  </a>
+                )}
+
+                {currentContact.social?.youtube && (
+                  <a
+                    href={currentContact.social.youtube}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn btn-ghost btn-circle hover:bg-base-200 transition-colors"
+                    aria-label={t('contactPage.social.youtube')}
+                  >
+                    <FaYoutube className="text-2xl text-[#FF0000]" />
+                  </a>
+                )}
+
+                {currentContact.social?.linkedin && (
+                  <a
+                    href={currentContact.social.linkedin}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn btn-ghost btn-circle hover:bg-base-200 transition-colors"
+                    aria-label={t('contactPage.social.linkedin')}
+                  >
+                    <FaLinkedin className="text-2xl text-[#0077B6]" />
+                  </a>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -334,4 +436,3 @@ const Contact = () => {
 };
 
 export default Contact;
-

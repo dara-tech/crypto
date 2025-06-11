@@ -15,43 +15,70 @@ const messageQueue = [];
 let isProcessing = false;
 let lastMessageTime = 0;
 const MIN_DELAY = 3000; // 3 seconds
+const MAX_RETRIES = 5; // Maximum retry attempts
+const PRIORITY_LEVELS = { high: 0, normal: 1, low: 2 };
+const ADAPTIVE_DELAY_FACTOR = 1.5; // Increase delay by 50% after each rate limit
+
+// Adaptive delay tracking
+let currentDelayMs = MIN_DELAY;
+let consecutiveRateLimits = 0;
 
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 /**
- * Internal function to handle queued Telegram messages with delay to prevent rate limits
+ * Smart queue processor with adaptive rate limiting and priority handling
  */
 async function processQueue() {
     if (isProcessing || messageQueue.length === 0) return;
 
     isProcessing = true;
+    
+    // Sort queue by priority level
+    messageQueue.sort((a, b) => (a.priority || PRIORITY_LEVELS.normal) - (b.priority || PRIORITY_LEVELS.normal));
 
     while (messageQueue.length > 0) {
-        const { message, chatId, resolve, reject } = messageQueue[0];
+        const { message, chatId, resolve, reject, retryCount = 0, priority } = messageQueue[0];
 
         const now = Date.now();
         const timeSinceLastMessage = now - lastMessageTime;
-        if (timeSinceLastMessage < MIN_DELAY) {
-            await delay(MIN_DELAY - timeSinceLastMessage);
+        if (timeSinceLastMessage < currentDelayMs) {
+            await delay(currentDelayMs - timeSinceLastMessage);
         }
 
         try {
             const result = await bot.sendMessage(chatId, message, { parse_mode: 'MarkdownV2' });
             messageQueue.shift();
             lastMessageTime = Date.now();
+            
+            // Gradually reduce delay if successful and we previously increased it
+            if (consecutiveRateLimits > 0 && currentDelayMs > MIN_DELAY) {
+                currentDelayMs = Math.max(MIN_DELAY, currentDelayMs / ADAPTIVE_DELAY_FACTOR);
+                consecutiveRateLimits = Math.max(0, consecutiveRateLimits - 1);
+            }
+            
             resolve(result);
         } catch (error) {
-            console.error('❌ Telegram send error:', error.message);
+            console.error(`❌ Telegram send error (attempt ${retryCount + 1}/${MAX_RETRIES}):`, error.message);
 
             // Rate limit (Too Many Requests)
             if (error.response?.statusCode === 429) {
                 const retryAfter = (error.response.body?.parameters?.retry_after || 30) * 1000;
-                console.warn(`⏳ Rate limited. Retrying in ${retryAfter / 1000} seconds...`);
+                consecutiveRateLimits++;
+                currentDelayMs = Math.min(60000, currentDelayMs * ADAPTIVE_DELAY_FACTOR); // Cap at 1 minute
+                
+                console.warn(`⏳ Rate limited. Retrying in ${retryAfter / 1000} seconds... (Adaptive delay: ${currentDelayMs}ms)`);
                 await delay(retryAfter);
-                continue; // Retry same message
+                
+                // Update retry count in the queue
+                messageQueue[0].retryCount = retryCount + 1;
+                
+                if (retryCount < MAX_RETRIES) {
+                    continue; // Retry same message
+                }
             }
 
-            messageQueue.shift(); // Drop failed message (non-retryable error)
+            // Either non-retryable error or max retries reached
+            messageQueue.shift();
             reject(error);
         }
     }
@@ -60,17 +87,28 @@ async function processQueue() {
 }
 
 /**
- * Send a basic alert message to Telegram (with queue + rate limit)
+ * Send a basic alert message to Telegram (with queue + adaptive rate limit)
  * @param {string} message - Telegram message (MarkdownV2 formatted)
  * @param {string} chatId - Telegram Chat ID
+ * @param {Object} [options] - Additional options
+ * @param {string} [options.priority='normal'] - Priority: 'high', 'normal', or 'low'
  */
-export const sendTelegramAlert = (message, chatId) => {
+export const sendTelegramAlert = (message, chatId, options = {}) => {
     if (!chatId) {
         throw new Error('❌ Chat ID is required to send a Telegram message.');
     }
 
+    const { priority = 'normal' } = options;
+    
     return new Promise((resolve, reject) => {
-        messageQueue.push({ message, chatId, resolve, reject });
+        messageQueue.push({ 
+            message, 
+            chatId, 
+            resolve, 
+            reject, 
+            priority: PRIORITY_LEVELS[priority] || PRIORITY_LEVELS.normal,
+            retryCount: 0
+        });
         processQueue();
     });
 };
@@ -82,16 +120,18 @@ export const sendTelegramAlert = (message, chatId) => {
  * @param {string} options.message - Body of the alert
  * @param {string} [options.type=info] - Type: info | warning | error
  * @param {string} options.chatId - Telegram Chat ID
+ * @param {string} [options.priority='normal'] - Priority: high | normal | low
  */
-export const sendFormattedAlert = async ({ title, message, type = 'info', chatId }) => {
+export const sendFormattedAlert = async ({ title, message, type = 'info', chatId, priority = 'normal' }) => {
     const emoji = {
         info: 'ℹ️',
         warning: '⚠️',
-        error: '🚨'
+        error: '🚨',
+        success: '✅'
     };
 
-    const formattedMessage = `${emoji[type]} *${escapeMarkdown(title)}*\n\n${escapeMarkdown(message)}`;
-    return sendTelegramAlert(formattedMessage, chatId);
+    const formattedMessage = `${emoji[type] || emoji.info} *${escapeMarkdown(title)}*\n\n${escapeMarkdown(message)}`;
+    return sendTelegramAlert(formattedMessage, chatId, { priority });
 };
 
 /**

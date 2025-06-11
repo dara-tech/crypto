@@ -20,6 +20,7 @@ import Home from './components/clientPage/Home';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import PaymentViewerPage from "./pages/PaymentViewerPage";
 import FaqPage from './components/clientPage/FaqPage';
+import ProfessionalPage from './components/clientPage/ProfessionalPage';
 
 function App() {
   const { theme } = useThemeStore()
@@ -41,6 +42,7 @@ function App() {
             <Route path="/faq" element={<FaqPage />} />
             <Route path="/" element={<Home />} />
             <Route path="/setting" element={<SettingPage />} />
+            <Route path="/professional" element={<ProfessionalPage />} />
             
             {/* Protected routes - only accessible when authenticated */}
             <Route element={<ProtectedRoute allowedRoles={['admin', 'user', 'payment_viewer']} />}>

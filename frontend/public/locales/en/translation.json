@@ -3,9 +3,101 @@
   "login": "Login",
   "home": "Home",
   "register": "Register",
+  "Professionals": "Professionals",
+  "professional": "Professionals",
   "privacy-policy": "Policy",
   "terms-conditions": "Terms",
   "faq": "FAQ",
+  "professionalsManager": {
+    "title": "Our Professionals",
+    "allProfessionals": "All Professionals",
+    "subtitle": "Meet the talented individuals driving our success.",
+    "fetchError": "Failed to fetch professionals.",
+    "searchPlaceholder": "Search by name, role...",
+    "allCompanies": "All Companies",
+    "noResults": "No professionals match your search.",
+    "addProfessional": "Add Professional",
+    "removeProfessional": "Remove Professional",
+    "noProfessionals": "No professionals are listed at the moment.",
+    "name": "Name",
+    "role": "Role",
+    "email": "Email",
+    "description": "Description",
+    "namePlaceholder": "Professional's Name",
+    "rolePlaceholder": "e.g., CEO, Lead Developer",
+    "emailPlaceholder": "Professional's Email",
+    "descriptionPlaceholder": "Brief description of their role and experience.",
+    "loading": "Loading..."
+  },
+  "logoUpload": {
+    "previewAlt": "Logo Preview",
+    "errorInvalidType": "Please upload a valid image file (PNG, JPG, GIF).",
+    "errorSizeTooLarge": "File size is too large. Please upload an image under 5MB.",
+    "errorTooSmall": "Image is too small. A minimum of 100x100 pixels is required.",
+    "errorCorrupted": "The selected file could not be loaded. It may be corrupted.",
+    "errorBgRemoval": "Background removal failed. This can happen with low-contrast images.",
+    "statusRemovingBg": "Removing background... {{progress}}%",
+    "statusAnalyzing": "Analyzing image...",
+    "statusSuccess": "Logo uploaded successfully!",
+    "statusIdle": "Drag & drop, or click the camera to upload.",
+    "title": "Company Logo",
+    "removeBgButton": "Remove Background",
+    "supportedFormats": "JPG, PNG, GIF formats supported • Max 5MB"
+  },
+  "basicInfo": {
+    "about": "About",
+    "aboutPlaceholder": "Tell us about your company...",
+    "aboutTooltip": "Share your company's story and unique features (max 500 characters)",
+    "aboutImage": "About Image",
+    "aboutImageTooltip": "Upload an image that represents your company's story",
+    "mission": "Mission",
+    "missionPlaceholder": "What is your company's mission?",
+    "missionTooltip": "Define your company's purpose and goals (max 200 characters)",
+    "missionImage": "Mission Image",
+    "missionImageTooltip": "Upload an image that represents your company's mission",
+    "vision": "Vision",
+    "visionPlaceholder": "What is your company's vision?",
+    "visionTooltip": "Describe your company's future aspirations (max 200 characters)",
+    "visionImage": "Vision Image",
+    "visionImageTooltip": "Upload an image that represents your company's vision"
+  },
+  "contactInfo": {
+    "address": "Address",
+    "addressPlaceholder": "Enter school address",
+    "phone": "Phone",
+    "phonePlaceholder": "Enter phone number",
+    "email": "Email",
+    "emailPlaceholder": "Enter email address",
+    "mapLocation": "Map Location",
+    "mapLocationPlaceholder": "Enter Google Maps link",
+    "mapLocationHelper": "Paste your Google Maps location URL here"
+  },
+  "socialMedia": {
+    "facebook": "Facebook",
+    "facebookPlaceholder": "https://facebook.com/your-page",
+    "instagram": "Instagram",
+    "instagramPlaceholder": "https://instagram.com/your-profile",
+    "youtube": "YouTube",
+    "youtubePlaceholder": "https://youtube.com/your-channel",
+    "linkedin": "LinkedIn",
+    "linkedinPlaceholder": "https://linkedin.com/company/your-company"
+  },
+  "privacyPolicy": {
+    "title": "Privacy Policy",
+    "bold": "Bold",
+    "italic": "Italic",
+    "underline": "Underline",
+    "bulletList": "Bullet List",
+    "orderedList": "Ordered List"
+  },
+  "termsAndConditions": {
+    "title": "Terms and Conditions",
+    "bold": "Bold",
+    "italic": "Italic",
+    "underline": "Underline",
+    "bulletList": "Bullet List",
+    "orderedList": "Ordered List"
+  },
   "profile": {
     "title": "Profile",
     "changePassword": "Change Password",
@@ -128,7 +220,6 @@
   "contact": "Contact",
   "about": "About Us",
   "mission": "Our Mission",
-  "privacyPolicy": "Privacy Policy",
   "vision": "Our Vision",
   "language": "Language",
   "english": "English",
@@ -165,6 +256,27 @@
   "contactPage": {
     "title": "Contact Us",
     "subtitle": "Get in touch with our team",
+    "map": {
+      "title": "Our Location"
+    },
+    "info": {
+      "title": "Contact Information",
+      "address": "123 Street Name, City, Country",
+      "phone": "+855 12 345 678",
+      "email": "info@khhara.com",
+      "hours": "Monday - Friday: 8:00 AM - 5:00 PM\nSaturday: 9:00 AM - 12:00 PM\nSunday: Closed",
+      "addressTitle": "Address",
+      "phoneTitle": "Phone",
+      "emailTitle": "Email",
+      "hoursTitle": "Working Hours"
+    },
+    "social": {
+      "title": "Connect With Us",
+      "facebook": "Visit our Facebook page",
+      "instagram": "Follow us on Instagram",
+      "youtube": "Watch us on YouTube",
+      "linkedin": "Connect on LinkedIn"
+    },
     "form": {
       "name": "Your Name",
       "email": "Email Address",
@@ -172,26 +284,12 @@
       "message": "Your Message",
       "submit": "Send Message",
       "sending": "Sending...",
-      "success": "Thank you for your message! We'll get back to you soon.",
-      "error": "Failed to send message. Please try again later.",
+      "success": "Your message has been sent successfully!",
+      "error": "Failed to send message. Please try again.",
       "validation": {
         "required": "This field is required",
         "email": "Please enter a valid email address"
       }
-    },
-    "info": {
-      "title": "Contact Information",
-      "address": "123 Street Name, City, Country",
-      "phone": "+855 12 345 678",
-      "email": "info@khhara.com",
-      "hours": "Mon - Fri: 9:00 - 18:00"
-    },
-    "social": {
-      "title": "Follow Us",
-      "facebook": "Facebook",
-      "twitter": "Twitter",
-      "instagram": "Instagram",
-      "linkedin": "LinkedIn"
     }
   },
   "hero": {

@@ -114,17 +114,17 @@ const BasicInfo = ({ formData, onInputChange, onImageChange, imagePreview }) => 
         <div className="space-y-4">
           {renderTextArea(
             'about',
-            'About',
-            'Tell us about your company...',
+            t('basicInfo.about'),
+            t('basicInfo.aboutPlaceholder'),
             500,
-            'Share your company\'s story and unique features (max 500 characters)'
+            t('basicInfo.aboutTooltip')
           )}
           <ImageUpload
             field="aboutImage"
-            label="About Image"
+            label={t('basicInfo.aboutImage')}
             currentImage={formData.aboutImage}
             onImageChange={onImageChange}
-            tooltip="Upload an image that represents your company's story"
+            tooltip={t('basicInfo.aboutImageTooltip')}
             aspectRatio="aspect-video"
           />
         </div>
@@ -132,17 +132,17 @@ const BasicInfo = ({ formData, onInputChange, onImageChange, imagePreview }) => 
         <div className="space-y-4">
           {renderTextArea(
             'mission',
-            'Mission',
-            'What is your company\'s mission?',
+            t('basicInfo.mission'),
+            t('basicInfo.missionPlaceholder'),
             200,
-            'Define your company\'s purpose and goals (max 200 characters)'
+            t('basicInfo.missionTooltip')
           )}
           <ImageUpload
             field="missionImage"
-            label="Mission Image"
+            label={t('basicInfo.missionImage')}
             currentImage={formData.missionImage}
             onImageChange={onImageChange}
-            tooltip="Upload an image that represents your company's mission"
+            tooltip={t('basicInfo.missionImageTooltip')}
             aspectRatio="aspect-video"
           />
         </div>
@@ -150,17 +150,17 @@ const BasicInfo = ({ formData, onInputChange, onImageChange, imagePreview }) => 
         <div className="space-y-4">
           {renderTextArea(
             'vision',
-            'Vision',
-            'What is your company\'s vision?',
+            t('basicInfo.vision'),
+            t('basicInfo.visionPlaceholder'),
             200,
-            'Describe your company\'s future aspirations (max 200 characters)'
+            t('basicInfo.visionTooltip')
           )}
           <ImageUpload
             field="visionImage"
-            label="Vision Image"
+            label={t('basicInfo.visionImage')}
             currentImage={formData.visionImage}
             onImageChange={onImageChange}
-            tooltip="Upload an image that represents your company's vision"
+            tooltip={t('basicInfo.visionImageTooltip')}
             aspectRatio="aspect-video"
           />
         </div>

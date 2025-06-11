@@ -1,7 +1,9 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { FaFacebook, FaInstagram, FaYoutube, FaLinkedin } from 'react-icons/fa';
 
 const SocialMedia = ({ formData, onInputChange }) => {
+  const { t } = useTranslation();
   const [focusedField, setFocusedField] = useState(null);
 
   const handleFocus = (fieldName) => {
@@ -12,29 +14,33 @@ const SocialMedia = ({ formData, onInputChange }) => {
     setFocusedField(null);
   };
 
-  const socialPlatforms = [
+    const socialPlatforms = [
     {
       name: 'facebook',
+      label: t('socialMedia.facebook'),
       icon: <FaFacebook className="text-[#1877F2] text-xl" />,
-      placeholder: 'https://facebook.com/your-school',
+      placeholder: t('socialMedia.facebookPlaceholder'),
       color: '#1877F2'
     },
     {
       name: 'instagram',
+      label: t('socialMedia.instagram'),
       icon: <FaInstagram className="text-[#E4405F] text-xl" />,
-      placeholder: 'https://instagram.com/your-school',
+      placeholder: t('socialMedia.instagramPlaceholder'),
       color: '#E4405F'
     },
     {
       name: 'youtube',
+      label: t('socialMedia.youtube'),
       icon: <FaYoutube className="text-[#FF0000] text-xl" />,
-      placeholder: 'https://youtube.com/your-school',
+      placeholder: t('socialMedia.youtubePlaceholder'),
       color: '#FF0000'
     },
     {
       name: 'linkedin',
+      label: t('socialMedia.linkedin'),
       icon: <FaLinkedin className="text-[#0A66C2] text-xl" />,
-      placeholder: 'https://linkedin.com/company/your-school',
+      placeholder: t('socialMedia.linkedinPlaceholder'),
       color: '#0A66C2'
     }
   ];
@@ -46,7 +52,7 @@ const SocialMedia = ({ formData, onInputChange }) => {
           <label className="label">
             <span className="label-text font-medium capitalize flex items-center gap-2">
               {platform.icon}
-              {platform.name}
+              {platform.label}
             </span>
           </label>
           <div className="relative group">

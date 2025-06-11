@@ -1,4 +1,5 @@
-import { useEffect } from 'react'
+import { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Underline from '@tiptap/extension-underline'
@@ -11,6 +12,7 @@ import Paragraph from '@tiptap/extension-paragraph'
 
 // 🎯 Toolbar with advanced controls
 const Toolbar = ({ editor }) => {
+  const { t } = useTranslation();
   if (!editor) return null
 
   return (
@@ -20,41 +22,42 @@ const Toolbar = ({ editor }) => {
         className={`btn btn-sm ${editor.isActive('bold') ? 'btn-accent' : 'btn-outline'}`}
         onClick={() => editor.chain().focus().toggleBold().run()}
       >
-        Bold
+        {t('termsAndConditions.bold')}
       </button>
       <button
         type="button"
         className={`btn btn-sm ${editor.isActive('italic') ? 'btn-accent' : 'btn-outline'}`}
         onClick={() => editor.chain().focus().toggleItalic().run()}
       >
-        Italic
+        {t('termsAndConditions.italic')}
       </button>
       <button
         type="button"
         className={`btn btn-sm ${editor.isActive('underline') ? 'btn-accent' : 'btn-outline'}`}
         onClick={() => editor.chain().focus().toggleUnderline().run()}
       >
-        Underline
+        {t('termsAndConditions.underline')}
       </button>
       <button
         type="button"
         className={`btn btn-sm ${editor.isActive('bulletList') ? 'btn-accent' : 'btn-outline'}`}
         onClick={() => editor.chain().focus().toggleBulletList().run()}
       >
-        • Bullet List
+        {t('termsAndConditions.bulletList')}
       </button>
       <button
         type="button"
         className={`btn btn-sm ${editor.isActive('orderedList') ? 'btn-accent' : 'btn-outline'}`}
         onClick={() => editor.chain().focus().toggleOrderedList().run()}
       >
-        1. Ordered List
+        {t('termsAndConditions.orderedList')}
       </button>
     </div>
   )
 }
 
 const TermsAndConditions = ({ formData, onInputChange }) => {
+  const { t } = useTranslation();
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -90,7 +93,7 @@ const TermsAndConditions = ({ formData, onInputChange }) => {
   return (
     <div className="space-y-4">
       <label className="label">
-        <span className="label-text font-bold text-lg">Terms and Conditions</span>
+        <span className="label-text font-bold text-lg">{t('termsAndConditions.title')}</span>
       </label>
 
       <div className="rounded-md border shadow-sm">

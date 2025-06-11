@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { FaUserCircle, FaBuilding, FaChevronDown, FaMoneyBillWave } from 'react-icons/fa';
+import { FaUserCircle, FaBuilding, FaChevronDown, FaMoneyBillWave, FaUserTie } from 'react-icons/fa';
 import axios from 'axios';
 import LanguageSwitcher from './LanguageSwitcher';
 import { MdOutlineHome, MdHome, MdOutlineMail, MdMail, MdPrivacyTip, MdOutlineDescription } from 'react-icons/md';
@@ -19,12 +19,15 @@ const Navbar = () => {
   const { companies, getCompanies, loading: companiesLoading } = useCompanies();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const [isAboutSubMenuOpen, setIsAboutSubMenuOpen] = useState(false);
+  const [openMobileSubMenu, setOpenMobileSubMenu] = useState(null);
   const [currentCompany, setCurrentCompany] = useState(null);
   const [language, setCurrentLanguage] = useState(i18n.language || 'en');
   const [isScrolled, setIsScrolled] = useState(false);
   const [userRole, setUserRole] = useState(null);
   const location = useLocation();
   const profileMenuRef = useRef(null);
+  const aboutSubMenuRef = useRef(null);
   const mobileMenuRef = useRef(null);
 
 useEffect(() => {
@@ -43,6 +46,9 @@ useEffect(() => {
     const handleClickOutside = (event) => {
       if (profileMenuRef.current && !profileMenuRef.current.contains(event.target)) {
         setIsProfileMenuOpen(false);
+      }
+      if (aboutSubMenuRef.current && !aboutSubMenuRef.current.contains(event.target)) {
+        setIsAboutSubMenuOpen(false);
       }
       if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target)) {
         setIsMenuOpen(false);
@@ -81,7 +87,19 @@ useEffect(() => {
   const toggleProfileMenu = (e) => {
     e.stopPropagation();
     setIsProfileMenuOpen(!isProfileMenuOpen);
+    setIsAboutSubMenuOpen(false);
   };
+
+  const toggleAboutSubMenu = (e) => {
+    e.stopPropagation();
+    setIsAboutSubMenuOpen(!isAboutSubMenuOpen);
+    setIsProfileMenuOpen(false);
+  };
+
+  const toggleMobileSubMenu = (label) => {
+    setOpenMobileSubMenu(openMobileSubMenu === label ? null : label);
+  };
+
   const handleLogout = () => {
     setIsProfileMenuOpen(false);
     logout();
@@ -89,12 +107,20 @@ useEffect(() => {
 
   const publicLinks = [
     { to: '/', label: t('home'), icon: <MdOutlineHome />, activeIcon: <MdHome /> },
-    // { to: '/companies', label: t('companies'), icon: <FaBuilding />, activeIcon: <FaBuilding /> },
-    { to: '/about', label: t('about'), icon: <IoInformationCircleOutline />, activeIcon: <IoInformationCircle /> },
+    {
+      label: t('about'),
+      icon: <IoInformationCircleOutline />,
+      activeIcon: <IoInformationCircle />,
+      isDropdown: true,
+      subMenu: [
+        { to: '/about', label: t('about'), icon: <IoInformationCircleOutline />, activeIcon: <IoInformationCircle /> },
+        { to: '/professional', label: t('professional'), icon: <FaUserTie />, activeIcon: <FaUserTie /> },
+        { to: '/faq', label: t('faq'), icon: <MdOutlineDescription />, activeIcon: <MdOutlineDescription /> },
+        { to: '/privacy-policy', label: t('privacy-policy'), icon: <MdPrivacyTip />, activeIcon: <MdPrivacyTip /> },
+        { to: '/terms-conditions', label: t('terms-conditions'), icon: <MdOutlineDescription />, activeIcon: <MdOutlineDescription /> },
+      ]
+    },
     { to: '/contact', label: t('contact'), icon: <MdOutlineMail />, activeIcon: <MdMail /> },
-    { to: '/privacy-policy', label: t('privacy-policy'), icon: <MdPrivacyTip />, activeIcon: <MdPrivacyTip /> },
-    { to: '/terms-conditions', label: t('terms-conditions'), icon: <MdOutlineDescription />, activeIcon: <MdOutlineDescription /> },
-    { to: '/faq', label: t('faq'), icon: <MdOutlineDescription /> },
   ];
 
   let linksForAuthenticatedUser = [];
@@ -102,10 +128,11 @@ useEffect(() => {
   const userProfileLinkItem = { to: '/profile', label: t('Profile'), icon: <BsPersonGear />, activeIcon: <BsPersonGear /> };
 
   if (userRole === 'admin') { // Condition for admin
+    const companyEditUrl = currentCompany ? `/admin/companies/${currentCompany._id}` : '/admin/companies';
     linksForAuthenticatedUser = [
       { to: '/admin/dashboard', label: t('dashboard'), icon: <RiDashboardLine />, activeIcon: <RiDashboardFill /> },
       paymentLinkItem,
-      { to: '/admin/companies', label: t('companies'), icon: <FaBuilding />, activeIcon: <FaBuilding /> },
+      { to: companyEditUrl, label: t('companies'), icon: <FaBuilding />, activeIcon: <FaBuilding /> },
       userProfileLinkItem,
     ];
   } else if (userRole === 'payment_viewer') { // Condition for payment_viewer
@@ -165,28 +192,73 @@ useEffect(() => {
           {/* Desktop Navigation */}
           <div className="hidden md:flex md:items-center md:space-x-1">
             {activeLinks.map(link => {
-              const isActive = link.to === '/' ? location.pathname === '/' : location.pathname.startsWith(link.to);
-              const Icon = isActive ? link.activeIcon : link.icon;
-              
-              return (
-                <Link
-                  key={link.to}
-                  to={link.to}
-                  className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2 group ${
-                    isActive
-                      ? ' bg-gradient-to-r from-blue-500/5 to-purple-500/5  '
-                      : ' hover:text-primary '
-                  }`}
-                >
-                  <span className={`transition-transform duration-200 ${isActive ? 'scale-110 text-primary ' : 'group-hover:scale-110 '}`}>
-                    {isActive ? link.activeIcon : link.icon}
-                  </span>
-                  {link.label}
-                  {isActive && (
-                    <div className="absolute  bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full" />
-                  )}
-                </Link>
-              );
+              if (link.isDropdown) {
+                const isDropdownActive = link.subMenu && link.subMenu.some(subLink => location.pathname.startsWith(subLink.to));
+                return (
+                  <div key={link.label} className="relative" ref={aboutSubMenuRef}>
+                    <button
+                      onClick={toggleAboutSubMenu}
+                      className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2 group ${
+                        isDropdownActive
+                          ? 'bg-gradient-to-r from-blue-500/5 to-purple-500/5 text-primary'
+                          : 'hover:text-primary'
+                      }`}
+                    >
+                      <span className={`transition-transform duration-200 ${isDropdownActive ? 'scale-110 text-primary' : 'group-hover:scale-110'}`}>
+                        {isDropdownActive ? link.activeIcon : link.icon}
+                      </span>
+                      {link.label}
+                      <FaChevronDown className={`w-3 h-3 transition-transform duration-200 ${isAboutSubMenuOpen ? 'rotate-180' : ''}`} />
+                      {isDropdownActive && (
+                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full" />
+                      )}
+                    </button>
+                    {isAboutSubMenuOpen && (
+                      <div className="absolute left-0 mt-2 w-56 rounded-xl shadow-lg bg-base-200 ring-1 ring-black ring-opacity-5 overflow-hidden animate-in slide-in-from-top-2 duration-200 z-50">
+                        <div className="py-1">
+                          {link.subMenu.map(subLink => {
+                            const isSubActive = location.pathname.startsWith(subLink.to);
+                            return (
+                              <Link
+                                key={subLink.to}
+                                to={subLink.to}
+                                onClick={() => setIsAboutSubMenuOpen(false)}
+                                className={`flex items-center gap-3 px-4 py-2 text-sm transition-colors duration-150 ${
+                                  isSubActive ? 'text-primary bg-base-300' : 'text-base-content/80 hover:bg-base-300 hover:text-primary'
+                                }`}
+                              >
+                                {isSubActive ? subLink.activeIcon : subLink.icon}
+                                {subLink.label}
+                              </Link>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              } else {
+                const isActive = link.to === '/' ? location.pathname === '/' : location.pathname.startsWith(link.to);
+                return (
+                  <Link
+                    key={link.to}
+                    to={link.to}
+                    className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2 group ${
+                      isActive
+                        ? 'bg-gradient-to-r from-blue-500/5 to-purple-500/5 text-primary'
+                        : 'hover:text-primary'
+                    }`}
+                  >
+                    <span className={`transition-transform duration-200 ${isActive ? 'scale-110 text-primary' : 'group-hover:scale-110'}`}>
+                      {isActive ? link.activeIcon : link.icon}
+                    </span>
+                    {link.label}
+                    {isActive && (
+                      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full" />
+                    )}
+                  </Link>
+                );
+              }
             })}
 
             {/* Language Switcher */}
@@ -350,24 +422,71 @@ useEffect(() => {
       } overflow-hidden`} ref={mobileMenuRef}>
         <div className="px-4 pt-2 pb-4 space-y-2 backdrop-blur-md">
           {activeLinks.map(link => {
-            const isActive = link.to === '/' ? location.pathname === '/' : location.pathname.startsWith(link.to);
-            return (
-              <Link
-                key={link.to}
-                to={link.to}
-                onClick={() => setIsMenuOpen(false)}
-                className={`flex items-center gap-3 px-4 py-3 rounded-lg text-base font-medium transition-all duration-200 ${
-                  isActive
-                    ? 'text-primary bg-gradient-to-r from-primary/5 to-accent/10'
-                    : 'text-base-content/100 hover:bg-base-300 hover:text-primary'
-                }`}
-              >
-                <span className={`transition-transform duration-200 ${isActive ? 'scale-110' : ''}`}>
-                  {isActive ? link.activeIcon : link.icon}
-                </span>
-                {link.label}
-              </Link>
-            );
+            if (link.isDropdown) {
+              const isDropdownActive = link.subMenu && link.subMenu.some(subLink => location.pathname.startsWith(subLink.to));
+              const isSubMenuOpen = openMobileSubMenu === link.label;
+              return (
+                <div key={link.label}>
+                  <button
+                    onClick={() => toggleMobileSubMenu(link.label)}
+                    className={`w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg text-base font-medium transition-all duration-200 ${
+                      isDropdownActive
+                        ? 'text-primary bg-gradient-to-r from-primary/5 to-accent/10'
+                        : 'text-base-content/100 hover:bg-base-300 hover:text-primary'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className={`transition-transform duration-200 ${isDropdownActive ? 'scale-110' : ''}`}>
+                        {isDropdownActive ? link.activeIcon : link.icon}
+                      </span>
+                      {link.label}
+                    </div>
+                    <FaChevronDown className={`w-3 h-3 transition-transform duration-200 ${isSubMenuOpen ? 'rotate-180' : ''}`} />
+                  </button>
+                  <div className={`transition-all duration-300 ease-in-out overflow-hidden ${isSubMenuOpen ? 'max-h-96' : 'max-h-0'}`}>
+                    <div className="pl-8 pt-2 space-y-1">
+                      {link.subMenu.map(subLink => {
+                        const isSubActive = location.pathname.startsWith(subLink.to);
+                        return (
+                          <Link
+                            key={subLink.to}
+                            to={subLink.to}
+                            onClick={() => setIsMenuOpen(false)}
+                            className={`flex items-center gap-3 px-4 py-2 rounded-lg text-base font-medium transition-all duration-200 ${
+                              isSubActive
+                                ? 'text-primary bg-base-300'
+                                : 'text-base-content/80 hover:bg-base-300 hover:text-primary'
+                            }`}
+                          >
+                            {isSubActive ? subLink.activeIcon : subLink.icon}
+                            {subLink.label}
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              );
+            } else {
+              const isActive = link.to === '/' ? location.pathname === '/' : location.pathname.startsWith(link.to);
+              return (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  onClick={() => setIsMenuOpen(false)}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-lg text-base font-medium transition-all duration-200 ${
+                    isActive
+                      ? 'text-primary bg-gradient-to-r from-primary/5 to-accent/10'
+                      : 'text-base-content/100 hover:bg-base-300 hover:text-primary'
+                  }`}
+                >
+                  <span className={`transition-transform duration-200 ${isActive ? 'scale-110' : ''}`}>
+                    {isActive ? link.activeIcon : link.icon}
+                  </span>
+                  {link.label}
+                </Link>
+              );
+            }
           })}
           
           {/* Mobile Language Switcher */}

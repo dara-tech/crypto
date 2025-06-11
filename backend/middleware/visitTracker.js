@@ -58,7 +58,11 @@ export const trackVisit = async (req, res, next) => {
             `• Time: ${escapeMarkdown(new Date().toLocaleString())}\n` +
             `• Protocol: ${escapeMarkdown(req.protocol.toUpperCase())}`;
 
-        await sendTelegramAlert(message, process.env.TELEGRAM_CHAT_ID);
+        // Fire-and-forget the Telegram alert without awaiting to avoid blocking the request.
+        sendTelegramAlert(message, process.env.TELEGRAM_CHAT_ID).catch(err => {
+            // Log errors but do not block the request.
+            console.error('Telegram alert failed to send:', err.message);
+        });
     } catch (error) {
         console.error('Failed to track visit:', error.message);
     }

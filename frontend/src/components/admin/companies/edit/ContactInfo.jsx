@@ -1,6 +1,8 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 const ContactInfo = ({ formData, onInputChange }) => {
+  const { t } = useTranslation();
   const [focusedField, setFocusedField] = useState(null);
 
   const handleFocus = (fieldName) => {
@@ -20,7 +22,7 @@ const ContactInfo = ({ formData, onInputChange }) => {
     <div className="space-y-4">
       <div className="form-control space-y-2">
         <label className="label">
-          <span className="label-text font-medium">Address</span>
+          <span className="label-text font-medium">{t('contactInfo.address')}</span>
         </label>
         <input
           name="contact.address"
@@ -29,13 +31,13 @@ const ContactInfo = ({ formData, onInputChange }) => {
           onFocus={() => handleFocus('address')}
           onBlur={handleBlur}
           className={inputClasses('address')}
-          placeholder="Enter school address"
+          placeholder={t('contactInfo.addressPlaceholder')}
         />
       </div>
 
       <div className="form-control space-y-2">
         <label className="label">
-          <span className="label-text font-medium">Phone</span>
+          <span className="label-text font-medium">{t('contactInfo.phone')}</span>
         </label>
         <div className="relative">
           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/50">
@@ -48,14 +50,14 @@ const ContactInfo = ({ formData, onInputChange }) => {
             onFocus={() => handleFocus('phone')}
             onBlur={handleBlur}
             className={`${inputClasses('phone')} pl-10`}
-            placeholder="Enter phone number"
+            placeholder={t('contactInfo.phonePlaceholder')}
           />
         </div>
       </div>
 
       <div className="form-control space-y-2">
         <label className="label">
-          <span className="label-text font-medium">Email</span>
+          <span className="label-text font-medium">{t('contactInfo.email')}</span>
         </label>
         <div className="relative">
           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/50">
@@ -69,14 +71,14 @@ const ContactInfo = ({ formData, onInputChange }) => {
             onBlur={handleBlur}
             className={`${inputClasses('email')} pl-10`}
             type="email"
-            placeholder="Enter email address"
+            placeholder={t('contactInfo.emailPlaceholder')}
           />
         </div>
       </div>
 
       <div className="form-control space-y-2    ">
         <label className="label">
-          <span className="label-text font-medium">Map Location</span>
+          <span className="label-text font-medium">{t('contactInfo.mapLocation')}</span>
         </label>
         <div className="relative">
           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/50">
@@ -89,12 +91,12 @@ const ContactInfo = ({ formData, onInputChange }) => {
             onFocus={() => handleFocus('mapLocation')}
             onBlur={handleBlur}
             className={`${inputClasses('mapLocation')} pl-10`}
-            placeholder="Enter Google Maps link"
+            placeholder={t('contactInfo.mapLocationPlaceholder')}
           />
         </div>
         <label className="label">
           <span className="label-text-alt text-base-content/50">
-            Paste your Google Maps location URL here
+            {t('contactInfo.mapLocationHelper')}
           </span>
         </label>
       </div>

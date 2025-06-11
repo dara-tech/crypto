@@ -1,12 +1,13 @@
 import { useState, useCallback, useMemo } from 'react';
 import axios from 'axios';
 import { FaCamera, FaImage, FaSpinner, FaTimes, FaExpand } from 'react-icons/fa';
+import { useTranslation } from 'react-i18next';
 
 // A dedicated component for the preview modal
-const PreviewModal = ({ src, onClose }) => (
+const PreviewModal = ({ src, onClose, altText }) => (
   <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
     <div className="relative p-4 bg-white rounded-lg shadow-xl max-w-lg w-full">
-      <img src={src} alt="Logo Preview" className="rounded-md w-full h-auto" />
+      <img src={src} alt={altText} className="rounded-md w-full h-auto" />
       <button
         onClick={onClose}
         className="absolute -top-2 -right-2 btn btn-circle btn-sm btn-ghost bg-white"
@@ -29,6 +30,7 @@ const LogoSkeleton = () => (
 );
 
 const LogoUpload = ({ logo, logoPreview, onLogoChange, error, setError }) => {
+  const { t } = useTranslation();
   const [isDragging, setIsDragging] = useState(false);
   const [isRemovingBg, setIsRemovingBg] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -46,11 +48,11 @@ const LogoUpload = ({ logo, logoPreview, onLogoChange, error, setError }) => {
   const validateAndSetFile = useCallback((file) => {
     setError(null);
     if (!file.type.startsWith('image/')) {
-      setError('Please upload a valid image file (PNG, JPG, GIF).');
+      setError(t('logoUpload.errorInvalidType'));
       return;
     }
     if (file.size > 5 * 1024 * 1024) { // 5MB
-      setError('File size is too large. Please upload an image under 5MB.');
+      setError(t('logoUpload.errorSizeTooLarge'));
       return;
     }
     checkImageSuitability(file);
@@ -61,7 +63,7 @@ const LogoUpload = ({ logo, logoPreview, onLogoChange, error, setError }) => {
     const img = new Image();
     img.onload = () => {
       if (img.width < 100 || img.height < 100) {
-        setError('Image is too small. A minimum of 100x100 pixels is required.');
+        setError(t('logoUpload.errorTooSmall'));
         setIsCheckingImage(false);
         return;
       }
@@ -69,7 +71,7 @@ const LogoUpload = ({ logo, logoPreview, onLogoChange, error, setError }) => {
       setIsCheckingImage(false);
     };
     img.onerror = () => {
-      setError('The selected file could not be loaded. It may be corrupted.');
+      setError(t('logoUpload.errorCorrupted'));
       setIsCheckingImage(false);
     };
     img.src = URL.createObjectURL(file);
@@ -111,25 +113,25 @@ const LogoUpload = ({ logo, logoPreview, onLogoChange, error, setError }) => {
       const newFile = new File([blob], logo.name.replace(/\.[^/.]+$/, '.png'), { type: 'image/png' });
       onLogoChange(newFile);
     } catch (err) {
-      setError('Background removal failed. This can happen with low-contrast images.');
+      setError(t('logoUpload.errorBgRemoval'));
       console.error('Background removal error:', err);
     } finally {
       setIsRemovingBg(false);
     }
   }, [logo, onLogoChange, setError]);
 
-  const statusMessage = useMemo(() => {
-    if (isRemovingBg) return `Removing background... ${uploadProgress}%`;
-    if (isCheckingImage) return 'Analyzing image...';
-    if (logo) return 'Logo uploaded successfully!';
-    return 'Drag & drop, or click the camera to upload.';
-  }, [isRemovingBg, isCheckingImage, logo, uploadProgress]);
+    const statusMessage = useMemo(() => {
+    if (isRemovingBg) return t('logoUpload.statusRemovingBg', { progress: uploadProgress });
+    if (isCheckingImage) return t('logoUpload.statusAnalyzing');
+    if (logo) return t('logoUpload.statusSuccess');
+    return t('logoUpload.statusIdle');
+  }, [isRemovingBg, isCheckingImage, logo, uploadProgress, t]);
 
   if (!onLogoChange) return <LogoSkeleton />;
 
   return (
     <>
-      {isPreviewOpen && logoPreview && <PreviewModal src={logoPreview} onClose={() => setIsPreviewOpen(false)} />}
+      {isPreviewOpen && logoPreview && <PreviewModal src={logoPreview} onClose={() => setIsPreviewOpen(false)} altText={t('logoUpload.previewAlt')} />}
       <div className="form-control w-full max-w-md mx-auto">
         <div
           className={`relative p-8 border-2 border-dashed rounded-xl transition-all duration-300 ${
@@ -145,7 +147,7 @@ const LogoUpload = ({ logo, logoPreview, onLogoChange, error, setError }) => {
               <div className="avatar">
                 <div className="w-48 h-48 rounded-full ring-4 ring-primary/20 ring-offset-base-100 ring-offset-4">
                   {logoPreview ? (
-                    <img src={logoPreview} alt="Logo Preview" className="object-cover w-full h-full" />
+                    <img src={logoPreview} alt={t('logoUpload.previewAlt')} className="object-cover w-full h-full" />
                   ) : (
                     <div className="bg-base-200 w-full h-full flex items-center justify-center text-5xl text-base-content/30">
                       <FaImage />
@@ -172,7 +174,7 @@ const LogoUpload = ({ logo, logoPreview, onLogoChange, error, setError }) => {
             
             <div className="text-center space-y-2">
               <p className="text-lg font-semibold text-base-content">
-                Company Logo
+                {t('logoUpload.title')}
               </p>
               <p className="text-sm text-base-content/70 px-4">
                 {statusMessage}
@@ -182,7 +184,7 @@ const LogoUpload = ({ logo, logoPreview, onLogoChange, error, setError }) => {
             {logo && (
               <button onClick={removeBackground} disabled={isRemovingBg} className="btn btn-secondary btn-sm group">
                 {isRemovingBg ? <FaSpinner className="animate-spin mr-2" /> : <FaImage className="mr-2" />}
-                Remove Background
+                {t('logoUpload.removeBgButton')}
               </button>
             )}
 
@@ -191,7 +193,7 @@ const LogoUpload = ({ logo, logoPreview, onLogoChange, error, setError }) => {
             )}
             
             <div className="text-xs text-base-content/50 pt-2">
-              JPG, PNG, GIF formats supported • Max 5MB
+              {t('logoUpload.supportedFormats')}
             </div>
           </div>
         </div>

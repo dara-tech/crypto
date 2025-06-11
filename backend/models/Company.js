@@ -25,6 +25,15 @@ const companySchema = new mongoose.Schema({
       answer: { type: String, required: true }
     }
   ],
+  professionals: [
+    {
+      name: String,
+      role: String,
+      email: String,
+      image: String,
+      description: String,
+    },
+  ],
   aboutImage: {
     type: String,
     default: "",

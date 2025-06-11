@@ -14,7 +14,8 @@ const uploadFields = [
   { name: 'heroImage', maxCount: 1 },
   { name: 'heroImages', maxCount: 5 },
   { name: 'testimonialImages', maxCount: 10 },
-  { name: 'paymentQR', maxCount: 1 }
+  { name: 'paymentQR', maxCount: 1 },
+  { name: 'professionalImages', maxCount: 10 }
 ];
 
 // Basic CRUD routes
