@@ -89,7 +89,7 @@ useEffect(() => {
 
   const publicLinks = [
     { to: '/', label: t('home'), icon: <MdOutlineHome />, activeIcon: <MdHome /> },
-    { to: '/companies', label: t('companies'), icon: <FaBuilding />, activeIcon: <FaBuilding /> },
+    // { to: '/companies', label: t('companies'), icon: <FaBuilding />, activeIcon: <FaBuilding /> },
     { to: '/about', label: t('about'), icon: <IoInformationCircleOutline />, activeIcon: <IoInformationCircle /> },
     { to: '/contact', label: t('contact'), icon: <MdOutlineMail />, activeIcon: <MdMail /> },
     { to: '/privacy-policy', label: t('privacy-policy'), icon: <MdPrivacyTip />, activeIcon: <MdPrivacyTip /> },

@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import { FaPlus, FaTrash } from 'react-icons/fa';
 
-const FAQManager = ({ faqs, onFaqChange }) => {
+const FAQManager = ({ faqs, onFaqChange, loading = false }) => {
   const { t } = useTranslation();
 
   const handleAddFaq = () => {
@@ -21,6 +21,30 @@ const FAQManager = ({ faqs, onFaqChange }) => {
     );
     onFaqChange(newFaqs);
   };
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex justify-end">
+          <div className="w-32 h-10 bg-base-300 animate-pulse rounded-md"></div>
+        </div>
+        <div className="space-y-4">
+          {[1, 2].map((item) => (
+            <div key={item} className="p-4 border rounded-lg bg-base-200 relative">
+              <div className="form-control">
+                <div className="w-32 h-5 bg-base-300 animate-pulse rounded mb-2"></div>
+                <div className="w-full h-10 bg-base-300 animate-pulse rounded"></div>
+              </div>
+              <div className="form-control mt-2">
+                <div className="w-32 h-5 bg-base-300 animate-pulse rounded mb-2"></div>
+                <div className="w-full h-24 bg-base-300 animate-pulse rounded"></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -105,6 +129,7 @@ FAQManager.propTypes = {
     })
   ),
   onFaqChange: PropTypes.func.isRequired,
+  loading: PropTypes.bool
 };
 
 export default FAQManager;

@@ -21,8 +21,28 @@ const FaqPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-base-100 flex items-center justify-center">
-        <span className="loading loading-ring loading-lg text-primary"></span>
+      <div className="min-h-screen bg-base-100 py-16 px-4">
+        <div className="max-w-3xl mx-auto">
+          <div className="text-center mb-12">
+            <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-base-300 animate-pulse"></div>
+            <div className="h-8 w-48 mx-auto bg-base-300 animate-pulse rounded"></div>
+            <div className="h-4 w-32 mx-auto mt-2 bg-base-300 animate-pulse rounded"></div>
+          </div>
+
+          <div className="space-y-4">
+            {[1, 2, 3, 4].map((item) => (
+              <div key={item} className="border border-base-300 rounded-xl bg-base-200 shadow-sm">
+                <div className="px-6 py-4">
+                  <div className="h-6 bg-base-300 animate-pulse rounded w-3/4"></div>
+                </div>
+                <div className="px-6 pb-4">
+                  <div className="h-4 bg-base-300 animate-pulse rounded w-full mb-2"></div>
+                  <div className="h-4 bg-base-300 animate-pulse rounded w-5/6"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     );
   }

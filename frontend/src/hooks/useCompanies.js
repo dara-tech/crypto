@@ -1,5 +1,4 @@
 import { useState, useCallback } from "react";
-
 import axios from "axios";
 
 const API_URL = import.meta.env.MODE === "development" ? "http://localhost:5001" : "https://crypto-nmz7.onrender.com";
@@ -23,6 +22,7 @@ const useCompanies = () => {
   // Get all companies
   const getCompanies = async () => {
     setLoading(true);
+    setError("");
     try {
       const { data } = await API.get("/api/companies");
       setCompanies(data);
@@ -35,9 +35,10 @@ const useCompanies = () => {
     }
   };
 
-
   // Get single company
   const getCompany = async (id) => {
+    setLoading(true);
+    setError("");
     try {
       const { data } = await API.get(`/api/companies/${id}`);
       console.log("Fetched company data:", data);
@@ -45,12 +46,15 @@ const useCompanies = () => {
     } catch (err) {
       setError(err?.response?.data?.message || "Failed to fetch company");
       return null;
+    } finally {
+      setLoading(false);
     }
   };
 
   // Create new company
   const createCompany = async (companyData) => {
     setLoading(true);
+    setError("");
     try {
       const formData = new FormData();
       
@@ -83,7 +87,7 @@ const useCompanies = () => {
       }
 
       const { data } = await API.post("/api/companies", formData);
-      setCompanies([...companies, data]);
+      setCompanies(prev => [...prev, data]);
       return data;
     } catch (err) {
       setError(err?.response?.data?.message || "Failed to create company");
@@ -96,6 +100,7 @@ const useCompanies = () => {
   // Update company
   const updateCompany = useCallback(async (id, companyData) => {
     setLoading(true);
+    setError("");
     try {
       // Convert FormData to regular object
       const formDataObj = {};
@@ -143,9 +148,10 @@ const useCompanies = () => {
   // Delete company
   const deleteCompany = async (id) => {
     setLoading(true);
+    setError("");
     try {
       await API.delete(`/api/companies/${id}`);
-      setCompanies(companies.filter(company => company._id !== id));
+      setCompanies(prev => prev.filter(company => company._id !== id));
       return true;
     } catch (err) {
       setError(err?.response?.data?.message || "Failed to delete company");
