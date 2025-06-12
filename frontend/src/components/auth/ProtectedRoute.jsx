@@ -30,7 +30,6 @@ const ProtectedRoute = ({ allowedRoles = ['admin', 'user', 'payment_view'] }) =>
         if (allowedRoles.includes(userRole)) {
           setIsAuthorized(true);
         } else {
-          console.log(`User role ${userRole} not in allowed roles:`, allowedRoles);
           toast.error(t('common.unauthorized'));
         }
       } catch (error) {

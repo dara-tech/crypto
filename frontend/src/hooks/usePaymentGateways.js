@@ -1,12 +1,31 @@
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 
-// Determine API_URL based on environment (consistent with useAuth.js)
-const API_URL = import.meta.env.MODE === 'development'
-  ? 'http://localhost:5001'
-  : 'https://crypto-nmz7.onrender.com'; // Replace with your actual production API URL
+// At the top of usePaymentGateways.js
+// At the top of usePaymentGateways.js
+let API_URL;
+if (process.env.NODE_ENV === 'test') {
+  API_URL = 'http://test-api';
+} else {
+  API_URL = import.meta.env.MODE === 'development'
+    ? 'http://localhost:5001'
+    : 'https://crypto-nmz7.onrender.com';
+}
 
 const API = axios.create({ baseURL: API_URL });
+
+// Interceptor to automatically attach JWT token to requests
+// This is important if the /api/payments endpoint requires authentication
+API.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
 // Interceptor to automatically attach JWT token to requests
 // This is important if the /api/payments endpoint requires authentication

@@ -1,5 +1,6 @@
 import { Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import './App.css';
 import LoginPage from './components/auth/loginPage';
 import RegisterPage from './components/auth/RegisterPage';
@@ -21,12 +22,25 @@ import ProtectedRoute from './components/auth/ProtectedRoute';
 import PaymentViewerPage from "./pages/PaymentViewerPage";
 import FaqPage from './components/clientPage/FaqPage';
 import ProfessionalPage from './components/clientPage/ProfessionalPage';
+import Chatbot from './components/chatbot/Chatbot';
+
+// Create a client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      retry: 1,
+    },
+  },
+});
 
 function App() {
   const { theme } = useThemeStore()
   return (
-    <div data-theme={theme}>
-      <BrowserRouter>
+    <QueryClientProvider client={queryClient}>
+      <div data-theme={theme}>
+        <BrowserRouter>
         {/* <Suspense fallback={<div>Loading...</div>}> */}
           <Navbar />
           <Routes>
@@ -60,9 +74,11 @@ function App() {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
           <Footer />
+          <Chatbot />
         {/* </Suspense> */}
-      </BrowserRouter>
-    </div>
+        </BrowserRouter>
+      </div>
+    </QueryClientProvider>
   )
 }
 

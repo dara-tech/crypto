@@ -136,12 +136,6 @@ const Profile = () => {
         }
       }
 
-      console.log('Submitting form data:', {
-        name: formData.name,
-        email: formData.email,
-        hasProfilePic: !!selectedImage || !!(formData.profilePic && formData.profilePic instanceof File)
-      });
-
       const response = await updateAdminProfile(formDataToSend)
       setSaveSuccess(true)
       

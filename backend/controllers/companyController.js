@@ -179,7 +179,6 @@ export const updateCompany = async (req, res) => {
     // --- Handle Professionals Update with Logging ---
     if (req.body.professionals) {
       try {
-        console.log('PROFESSIONALS_UPDATE: Received string:', req.body.professionals);
         let professionals;
         if (typeof req.body.professionals === 'string') {
           try {
@@ -191,14 +190,11 @@ export const updateCompany = async (req, res) => {
         } else {
           professionals = req.body.professionals; // Already an object
         }
-        console.log('PROFESSIONALS_UPDATE: Parsed array:', JSON.stringify(professionals, null, 2));
 
         if (req.files?.professionalImages) {
-          console.log(`PROFESSIONALS_UPDATE: Found ${req.files.professionalImages.length} new image(s).`);
           const professionalImageUrls = await Promise.all(
             req.files.professionalImages.map(image => uploadToCloudinary(image.buffer, 'company_professionals'))
           );
-          console.log('PROFESSIONALS_UPDATE: Uploaded image URLs:', professionalImageUrls);
 
           let imageIndex = 0;
           professionals = professionals.map(prof => {
@@ -212,7 +208,6 @@ export const updateCompany = async (req, res) => {
         
         company.professionals = professionals;
         company.markModified('professionals');
-        console.log('PROFESSIONALS_UPDATE: Final array to be saved:', JSON.stringify(company.professionals, null, 2));
       } catch (error) {
         console.error('Error processing professionals update:', error);
 

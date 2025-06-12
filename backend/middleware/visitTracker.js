@@ -4,7 +4,6 @@ import geoip from 'geoip-lite';
 import { UAParser } from 'ua-parser-js';
 
 export const trackVisit = async (req, res, next) => {
-    console.log(`[VisitTracker] Path: ${req.path}, Referrer: ${req.headers['referer']}`);
     const referrer = req.headers['referer'] || '';
     const isFrontendVisit =
         referrer.includes('localhost:5173') ||

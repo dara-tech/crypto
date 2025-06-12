@@ -35,7 +35,6 @@ export const initI18n = () => {
 
 i18n.on('languageChanged', (lng) => {
   if (import.meta.env.MODE === 'development') {
-    console.log('Language changed to:', lng);
   }
 
   const body = document.body;

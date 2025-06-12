@@ -13,13 +13,11 @@ const createPaymentViewer = async () => {
       useUnifiedTopology: true,
     });
 
-    console.log('Connected to MongoDB');
 
     // Check if user already exists
     const existingUser = await User.findOne({ email: 'payment.viewer@example.com' });
     
     if (existingUser) {
-      console.log('Payment viewer user already exists');
       await mongoose.connection.close();
       return;
     }
@@ -38,9 +36,6 @@ const createPaymentViewer = async () => {
     });
 
     await user.save();
-    console.log('✅ Payment viewer user created successfully');
-    console.log('Email: payment.viewer@example.com');
-    console.log('Password: PaymentViewer@123');
     
   } catch (error) {
     console.error('Error creating payment viewer user:', error);

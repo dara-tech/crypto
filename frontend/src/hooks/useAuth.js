@@ -37,7 +37,6 @@ const useAuth = () => {
   
     try {
       const { data } = await API.get("/api/auth/me");
-      console.log("📦 API Response:", data);
   
       // Support both formats: { user: { ... } } and { ... }
       const userData = data?.user || data;
@@ -102,7 +101,6 @@ const useAuth = () => {
 
     try {
       const response = await API.post("/api/auth/register", credentials);
-      console.log("Registration successful:", response.data);
       navigate("/login");
     } catch (error) {
       setError(error.response?.data?.message || "Registration failed. Please try again.");

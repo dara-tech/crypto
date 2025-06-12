@@ -25,7 +25,6 @@ const useSchools = () => {
     setLoading(true);
     try {
       const { data } = await API.get("/api/schools");
-      console.log("Fetched schools:", data);
       setSchools(data);
     } catch (err) {
       setError(err?.response?.data?.message || "Failed to fetch schools");
@@ -38,7 +37,6 @@ const useSchools = () => {
   const getSchool = async (id) => {
     try {
       const { data } = await API.get(`/api/schools/${id}`);
-      console.log("Fetched school data:", data);
       return data;
     } catch (err) {
       setError(err?.response?.data?.message || "Failed to fetch school");

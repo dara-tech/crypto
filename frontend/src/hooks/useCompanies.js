@@ -41,7 +41,6 @@ const useCompanies = () => {
     setError("");
     try {
       const { data } = await API.get(`/api/companies/${id}`);
-      console.log("Fetched company data:", data);
       return data;
     } catch (err) {
       setError(err?.response?.data?.message || "Failed to fetch company");
