@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area, Bar, BarChart } from 'recharts';
-import { RefreshCw, ZoomIn, ZoomOut, TrendingUp, TrendingDown, Activity, DollarSign, Calendar, BarChart3, Maximize2, Minimize2 } from 'lucide-react';
+import { RefreshCw, ZoomIn, ZoomOut, TrendingUp, TrendingDown, Activity, DollarSign, Calendar, BarChart3, Maximize2, Minimize2, ChevronDown } from 'lucide-react';
 
 // Mock data generator for demonstration
 const generateMockData = (coinId, days) => {
@@ -395,17 +395,33 @@ const AdvancedTradingChart = () => {
       <div className="p-6 border-b border-gray-100">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex flex-wrap items-center gap-3">
-            <select
-              value={selectedCoin}
-              onChange={(e) => setSelectedCoin(e.target.value)}
-              className="bg-white border border-gray-300 rounded-xl px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-            >
-              {POPULAR_COINS.map(coin => (
-                <option key={coin.id} value={coin.id}>
-                  {coin.logo} {coin.name} ({coin.symbol})
-                </option>
-              ))}
-            </select>
+            <div className="dropdown">
+              <div tabIndex={0} role="button" className="btn bg-white border border-gray-300 hover:bg-gray-50 hover:border-gray-300 rounded-xl px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all flex justify-between items-center w-56 normal-case font-normal shadow-none">
+                <div className="flex items-center gap-2 overflow-hidden">
+                  <span className="font-bold text-lg" style={{color: selectedCoinData?.color}}>{selectedCoinData?.logo}</span>
+                  <span className="truncate">{selectedCoinData?.name} ({selectedCoinData?.symbol})</span>
+                </div>
+                <ChevronDown className="w-4 h-4 text-gray-500 flex-shrink-0" />
+              </div>
+              <ul tabIndex={0} className="dropdown-content z-[10] menu p-2 shadow bg-base-100 rounded-box w-56 mt-2">
+                {POPULAR_COINS.map(coin => (
+                  <li key={coin.id}>
+                    <button 
+                      onClick={() => {
+                        setSelectedCoin(coin.id);
+                        if (document.activeElement) {
+                          document.activeElement.blur();
+                        }
+                      }} 
+                      className="flex items-center gap-2 w-full"
+                    >
+                      <span className="font-bold text-lg" style={{color: coin.color}}>{coin.logo}</span>
+                      <span>{coin.name} ({coin.symbol})</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
             
             <div className="flex bg-gray-100 rounded-xl p-1">
               {TIME_RANGES.map(range => (

@@ -16,7 +16,8 @@ import {
   Globe,
   AlertCircle,
   CheckCircle2,
-  Clock
+  Clock,
+  ChevronDown
 } from 'lucide-react';
 
 // Mock data generator for demonstration
@@ -419,16 +420,14 @@ const AdvancedCryptoTable = () => {
       <div className="p-6 border-b border-gray-100">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div className="flex flex-wrap items-center gap-3">
-            <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <input
                 type="text"
                 placeholder="Search cryptocurrencies..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                className="pl-10 pr-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
               />
-            </div>
 
             <div className="flex bg-gray-100 rounded-xl p-1">
               {[
@@ -455,17 +454,27 @@ const AdvancedCryptoTable = () => {
               ))}
             </div>
           </div>
-
+{/* 
           <div className="flex items-center space-x-3">
-            <select
-              value={viewMode}
-              onChange={(e) => setViewMode(e.target.value)}
-              className="border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="compact">Compact View</option>
-              <option value="detailed">Detailed View</option>
-            </select>
-          </div>
+            <div className="dropdown dropdown-end">
+              <div tabIndex={0} role="button" className="btn bg-white border-gray-300 hover:bg-gray-50 hover:border-gray-300 rounded-xl px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all flex items-center normal-case font-normal shadow-none h-auto min-h-0">
+                <span>{viewMode === 'compact' ? 'Compact View' : 'Detailed View'}</span>
+                <ChevronDown className="w-4 h-4 ml-2" />
+              </div>
+              <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-48 mt-2">
+                <li>
+                  <button className="w-full text-left" onClick={() => { setViewMode('compact'); if (document.activeElement) document.activeElement.blur(); }}>
+                    Compact View
+                  </button>
+                </li>
+                <li>
+                  <button className="w-full text-left" onClick={() => { setViewMode('detailed'); if (document.activeElement) document.activeElement.blur(); }}>
+                    Detailed View
+                  </button>
+                </li>
+              </ul>
+            </div>
+          </div> */}
         </div>
       </div>
 
