@@ -170,17 +170,20 @@ const Contact = () => {
         {/* Map Section */}
         <div className="mb-12 rounded-xl overflow-hidden shadow-xl">
           <div className="aspect-w-16 aspect-h-9 w-full h-96 md:h-[500px]">
-            <iframe
-              title={t('contactPage.map.title')}
-              src={mapUrl}
-              width="100%"
-              height="100%"
-              style={{ border: 0 }}
-              allowFullScreen=""
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-              className="w-full h-full"
-            ></iframe>
+          <iframe
+  title={t('contactPage.map.title')}
+  src={mapUrl}
+  width="100%"
+  height="100%"
+  style={{ border: 0 }}
+  // ADD THIS LINE:
+  allow="fullscreen"
+  // Keep allowFullScreen for broader compatibility and older browsers
+  allowFullScreen=""
+  loading="lazy"
+  referrerPolicy="no-referrer-when-downgrade"
+  className="w-full h-full"
+></iframe>
           </div>
         </div>
 

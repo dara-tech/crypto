@@ -1,11 +1,11 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  RefreshCw, 
-  Star, 
-  DollarSign, 
-  Search, 
+import {
+  TrendingUp,
+  TrendingDown,
+  RefreshCw,
+  Star,
+  DollarSign,
+  Search,
   Filter,
   ArrowUp,
   ArrowDown,
@@ -39,7 +39,7 @@ const generateMockCryptoData = () => {
     const priceChange = (Math.random() - 0.5) * 20;
     const volume = Math.random() * 10000000000;
     const marketCap = basePrice * (Math.random() * 100000000 + 10000000);
-    
+
     // CoinGecko image paths mapping with correct filenames
     const coinImageUrls = {
       'bitcoin': 'https://assets.coingecko.com/coins/images/1/large/bitcoin.png',
@@ -53,10 +53,10 @@ const generateMockCryptoData = () => {
       'avalanche': 'https://assets.coingecko.com/coins/images/12559/large/Avalanche_Circle_RedWhite_Trans.png',
       'chainlink': 'https://assets.coingecko.com/coins/images/877/large/chainlink-new-logo.png'
     };
-    
+
     // Get the correct image URL or fallback to a placeholder
     const imageUrl = coinImageUrls[crypto.id] || `https://cryptologos.cc/logos/${crypto.id}-${crypto.symbol.toLowerCase()}-logo.png`;
-    
+
     return {
       ...crypto,
       market_cap_rank: index + 1,
@@ -102,11 +102,11 @@ const formatVolume = (volume) => {
 
 const MiniSparkline = ({ data, isPositive, color }) => {
   if (!data || data.length === 0) return null;
-  
+
   const max = Math.max(...data);
   const min = Math.min(...data);
   const range = max - min;
-  
+
   const points = data.map((value, index) => {
     const x = (index / (data.length - 1)) * 60;
     const y = 20 - ((value - min) / range) * 20;
@@ -180,6 +180,65 @@ const StatCard = ({ icon: Icon, label, value, change, trend }) => (
   </div>
 );
 
+// CryptoLogo component definition
+const CryptoLogo = ({ crypto }) => {
+  const [imgSrc, setImgSrc] = useState(crypto.image);
+  const [hasError, setHasError] = useState(false);
+
+  // Reset imgSrc and hasError when crypto.image changes
+  useEffect(() => {
+    setImgSrc(crypto.image);
+    setHasError(false);
+  }, [crypto.image]);
+
+  const handleError = () => {
+    if (hasError) return;
+
+    const fallbacks = [
+      `https://cryptologos.cc/logos/${crypto.id}-${crypto.symbol.toLowerCase()}-logo.png`,
+      `https://www.cryptocompare.com/media/37746251/${crypto.symbol.toLowerCase()}.png`,
+      `https://cryptoicon-api.vercel.app/api/icon/${crypto.symbol.toLowerCase()}`,
+      `https://www.coinlore.com/img/32x32/${crypto.id}.png`
+    ];
+
+    const currentIndex = fallbacks.findIndex(url => url === imgSrc);
+
+    if (currentIndex < fallbacks.length - 1) {
+      setImgSrc(fallbacks[currentIndex + 1]);
+    } else {
+      setHasError(true);
+    }
+  };
+
+  if (hasError) {
+    return (
+      <div
+        className="h-8 w-8 md:h-10 md:w-10 rounded-full flex items-center justify-center font-bold text-sm text-white"
+        style={{ backgroundColor: crypto.color || '#6B7280' }}
+      >
+        {crypto.symbol.charAt(0).toUpperCase()}
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative">
+      <img
+        className="h-8 w-8 md:h-10 md:w-10 rounded-full shadow-sm ring-2 ring-white bg-white p-0.5 object-contain"
+        src={imgSrc}
+        alt={crypto.name}
+        onError={handleError}
+        loading="lazy"
+      />
+      <div
+        className="absolute -bottom-1 -right-1 w-3 h-3 md:w-3.5 md:h-3.5 rounded-full border-2 border-white"
+        style={{ backgroundColor: crypto.color || '#6B7280' }}
+      ></div>
+    </div>
+  );
+};
+
+
 const AdvancedCryptoTable = () => {
   const [cryptos, setCryptos] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -201,7 +260,7 @@ const AdvancedCryptoTable = () => {
         setLastUpdated(new Date());
       }, 1000);
     };
-    
+
     loadData();
     const interval = setInterval(loadData, 60000); // Update every minute
     return () => clearInterval(interval);
@@ -248,10 +307,10 @@ const AdvancedCryptoTable = () => {
       if (sortConfig.key === 'market_cap_rank') {
         return sortConfig.direction === 'asc' ? a[sortConfig.key] - b[sortConfig.key] : b[sortConfig.key] - a[sortConfig.key];
       }
-      
+
       const aVal = a[sortConfig.key];
       const bVal = b[sortConfig.key];
-      
+
       if (sortConfig.direction === 'asc') {
         return aVal > bVal ? 1 : -1;
       } else {
@@ -262,12 +321,12 @@ const AdvancedCryptoTable = () => {
 
   const marketStats = useMemo(() => {
     if (cryptos.length === 0) return null;
-    
+
     const totalMarketCap = cryptos.reduce((sum, crypto) => sum + crypto.market_cap, 0);
     const totalVolume = cryptos.reduce((sum, crypto) => sum + crypto.total_volume, 0);
     const avgChange = cryptos.reduce((sum, crypto) => sum + crypto.price_change_percentage_24h, 0) / cryptos.length;
     const gainers = cryptos.filter(crypto => crypto.price_change_percentage_24h > 0).length;
-    
+
     return {
       totalMarketCap,
       totalVolume,
@@ -277,7 +336,7 @@ const AdvancedCryptoTable = () => {
   }, [cryptos]);
 
   const SortableHeader = ({ children, column, className = "" }) => (
-    <th 
+    <th
       className={`px-6 py-3 text-left font-semibold text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors ${className}`}
       onClick={() => handleSort(column)}
     >
@@ -305,7 +364,7 @@ const AdvancedCryptoTable = () => {
               <p className="text-sm text-gray-600">Real-time market data and analytics</p>
             </div>
           </div>
-          
+
           <div className="flex items-center space-x-3">
             <div className="flex items-center space-x-2 text-sm text-gray-600">
               <div className="flex items-center">
@@ -370,7 +429,7 @@ const AdvancedCryptoTable = () => {
                 className="pl-10 pr-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
               />
             </div>
-            
+
             <div className="flex bg-gray-100 rounded-xl p-1">
               {[
                 { key: 'all', label: 'All Coins', icon: Globe },
@@ -396,7 +455,7 @@ const AdvancedCryptoTable = () => {
               ))}
             </div>
           </div>
-          
+
           <div className="flex items-center space-x-3">
             <select
               value={viewMode}
@@ -463,10 +522,10 @@ const AdvancedCryptoTable = () => {
                 const isPositive24h = crypto.price_change_percentage_24h >= 0;
                 const isPositive7d = crypto.price_change_percentage_7d >= 0;
                 const isInWatchlist = watchlist.has(crypto.id);
-                
+
                 return (
-                  <tr 
-                    key={crypto.id} 
+                  <tr
+                    key={crypto.id}
                     className="hover:bg-gray-50 transition-all duration-200 group cursor-pointer"
                   >
                     <td className="px-6 py-4">
@@ -477,8 +536,8 @@ const AdvancedCryptoTable = () => {
                             toggleWatchlist(crypto.id);
                           }}
                           className={`transition-colors ${
-                            isInWatchlist 
-                              ? 'text-yellow-500 hover:text-yellow-600' 
+                            isInWatchlist
+                              ? 'text-yellow-500 hover:text-yellow-600'
                               : 'text-gray-300 hover:text-yellow-400'
                           }`}
                         >
@@ -489,62 +548,32 @@ const AdvancedCryptoTable = () => {
                         </span>
                       </div>
                     </td>
-                    
-                    <td className="px-6 py-4">
+
+                    {/* Integrate CryptoLogo component here */}
+                    <td className="px-4 md:px-6 py-4">
                       <div className="flex items-center space-x-3">
-                        <div className="relative">
-                          <div className="relative">
-                            <img 
-                              className="h-10 w-10 rounded-full shadow-sm ring-2 ring-white bg-white p-0.5" 
-                              src={crypto.image} 
-                              alt={crypto.name}
-                              onError={(e) => {
-                                e.target.onerror = null;
-                                e.target.src = `https://cryptologos.cc/logos/${crypto.id}-${crypto.symbol.toLowerCase()}-logo.png`;
-                                e.target.onerror = () => {
-                                  e.target.src = `https://www.cryptocompare.com/media/37746251/${crypto.symbol.toLowerCase()}.png`;
-                                  e.target.onerror = () => {
-                                    e.target.src = `https://cryptoicon-api.vercel.app/api/icon/${crypto.symbol.toLowerCase()}`;
-                                    e.target.onerror = () => {
-                                      e.target.src = `https://www.coinlore.com/img/32x32/${crypto.id}.png`;
-                                      e.target.onerror = () => {
-                                        e.target.style.backgroundColor = crypto.color;
-                                        e.target.style.color = 'white';
-                                        e.target.textContent = crypto.symbol.charAt(0);
-                                        e.target.className = 'h-10 w-10 rounded-full shadow-sm ring-2 ring-white flex items-center justify-center font-bold text-sm';
-                                      };
-                                    };
-                                  };
-                                };
-                              }}
-                            />
-                            <div 
-                              className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white"
-                              style={{ backgroundColor: crypto.color }}
-                            ></div>
-                          </div>
-                        </div>
-                        <div>
-                          <div className="text-sm font-bold text-gray-900">
+                        <CryptoLogo crypto={crypto} />
+                        <div className="min-w-0">
+                          <div className="text-sm md:text-base font-semibold text-gray-900 truncate">
                             {crypto.symbol.toUpperCase()}
                           </div>
-                          <div className="text-xs text-gray-500 truncate max-w-[120px]">
+                          <div className="text-xs text-gray-500 truncate max-w-[100px] md:max-w-[150px]">
                             {crypto.name}
                           </div>
                         </div>
                       </div>
                     </td>
-                    
+
                     <td className="px-6 py-4 text-right">
                       <div className="text-sm font-bold text-gray-900">
                         {formatPrice(crypto.current_price)}
                       </div>
                     </td>
-                    
+
                     <td className="px-6 py-4 text-right">
                       <div className={`inline-flex items-center px-2.5 py-1.5 rounded-lg text-xs font-bold shadow-sm ${
-                        isPositive24h 
-                          ? 'bg-green-100 text-green-700 border border-green-200' 
+                        isPositive24h
+                          ? 'bg-green-100 text-green-700 border border-green-200'
                           : 'bg-red-100 text-red-700 border border-red-200'
                       }`}>
                         {isPositive24h ? (
@@ -555,7 +584,7 @@ const AdvancedCryptoTable = () => {
                         {Math.abs(crypto.price_change_percentage_24h).toFixed(2)}%
                       </div>
                     </td>
-                    
+
                     <td className="px-6 py-4 text-right">
                       <div className={`text-sm font-semibold ${
                         isPositive7d ? 'text-green-600' : 'text-red-600'
@@ -563,23 +592,23 @@ const AdvancedCryptoTable = () => {
                         {isPositive7d ? '+' : ''}{crypto.price_change_percentage_7d.toFixed(2)}%
                       </div>
                     </td>
-                    
+
                     <td className="px-6 py-4 text-right">
                       <div className="text-sm font-semibold text-gray-900">
                         {formatMarketCap(crypto.market_cap)}
                       </div>
                     </td>
-                    
+
                     <td className="px-6 py-4 text-right">
                       <div className="text-sm text-gray-700">
                         {formatVolume(crypto.total_volume)}
                       </div>
                     </td>
-                    
+
                     <td className="px-6 py-4 text-right">
                       <div className="flex justify-end">
-                        <MiniSparkline 
-                          data={crypto.sparkline_in_7d?.price} 
+                        <MiniSparkline
+                          data={crypto.sparkline_in_7d?.price}
                           isPositive={isPositive7d}
                           color={isPositive7d ? '#10B981' : '#EF4444'}
                         />

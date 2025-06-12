@@ -272,6 +272,7 @@
     },
     "social": {
       "title": "Connect With Us",
+      "subtitle": "Connect With Us via",
       "facebook": "Visit our Facebook page",
       "instagram": "Follow us on Instagram",
       "youtube": "Watch us on YouTube",
@@ -279,6 +280,8 @@
     },
     "form": {
       "name": "Your Name",
+      "title": "Our Contact",
+      "subtitle": "You can contact us here",
       "email": "Email Address",
       "subject": "Subject",
       "message": "Your Message",
