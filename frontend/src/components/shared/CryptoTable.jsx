@@ -17,66 +17,13 @@ import {
   AlertCircle,
   CheckCircle2,
   Clock,
-  ChevronDown
+  ChevronDown,
+  X,
+  Wifi,
+  WifiOff
 } from 'lucide-react';
-
-// Mock data generator for demonstration
-const generateMockCryptoData = () => {
-  const cryptoData = [
-    { id: 'bitcoin', name: 'Bitcoin', symbol: 'BTC', color: '#F7931A' },
-    { id: 'ethereum', name: 'Ethereum', symbol: 'ETH', color: '#627EEA' },
-    { id: 'binancecoin', name: 'BNB', symbol: 'BNB', color: '#F3BA2F' },
-    { id: 'solana', name: 'Solana', symbol: 'SOL', color: '#9945FF' },
-    { id: 'cardano', name: 'Cardano', symbol: 'ADA', color: '#0033AD' },
-    { id: 'ripple', name: 'XRP', symbol: 'XRP', color: '#23292F' },
-    { id: 'polkadot', name: 'Polkadot', symbol: 'DOT', color: '#E6007A' },
-    { id: 'dogecoin', name: 'Dogecoin', symbol: 'DOGE', color: '#C2A633' },
-    { id: 'avalanche', name: 'Avalanche', symbol: 'AVAX', color: '#E84142' },
-    { id: 'chainlink', name: 'Chainlink', symbol: 'LINK', color: '#375BD2' }
-  ];
-
-  return cryptoData.map((crypto, index) => {
-    const basePrice = Math.random() * 50000 + 100;
-    const priceChange = (Math.random() - 0.5) * 20;
-    const volume = Math.random() * 10000000000;
-    const marketCap = basePrice * (Math.random() * 100000000 + 10000000);
-
-    // CoinGecko image paths mapping with correct filenames
-    const coinImageUrls = {
-      'bitcoin': 'https://assets.coingecko.com/coins/images/1/large/bitcoin.png',
-      'ethereum': 'https://assets.coingecko.com/coins/images/279/large/ethereum.png',
-      'binancecoin': 'https://assets.coingecko.com/coins/images/825/large/bnb-icon2_2x.png',
-      'solana': 'https://assets.coingecko.com/coins/images/4128/large/solana.png',
-      'cardano': 'https://assets.coingecko.com/coins/images/975/large/cardano.png',
-      'ripple': 'https://assets.coingecko.com/coins/images/44/large/xrp-symbol-white-128.png',
-      'polkadot': 'https://assets.coingecko.com/coins/images/12171/large/polkadot.png',
-      'dogecoin': 'https://assets.coingecko.com/coins/images/5/large/dogecoin.png',
-      'avalanche': 'https://assets.coingecko.com/coins/images/12559/large/Avalanche_Circle_RedWhite_Trans.png',
-      'chainlink': 'https://assets.coingecko.com/coins/images/877/large/chainlink-new-logo.png'
-    };
-
-    // Get the correct image URL or fallback to a placeholder
-    const imageUrl = coinImageUrls[crypto.id] || `https://cryptologos.cc/logos/${crypto.id}-${crypto.symbol.toLowerCase()}-logo.png`;
-
-    return {
-      ...crypto,
-      market_cap_rank: index + 1,
-      current_price: basePrice,
-      price_change_percentage_24h: priceChange,
-      price_change_percentage_7d: (Math.random() - 0.5) * 30,
-      total_volume: volume,
-      market_cap: marketCap,
-      circulating_supply: Math.random() * 1000000000,
-      total_supply: Math.random() * 1000000000 + 500000000,
-      image: imageUrl,
-      image_small: `https://api.coingecko.com/api/v3/coins/${crypto.id}?localization=false&tickers=false&market_data=false&community_data=false&developer_data=false&sparkline=false`,
-      last_updated: new Date().toISOString(),
-      sparkline_in_7d: {
-        price: Array.from({ length: 7 }, () => basePrice + (Math.random() - 0.5) * basePrice * 0.1)
-      }
-    };
-  });
-};
+import { useFetch, API } from '../../utils/api';
+import { TableSkeleton, ErrorMessage } from './SkeletonLoader';
 
 const formatPrice = (price) => {
   return new Intl.NumberFormat('en-US', {
@@ -107,6 +54,8 @@ const MiniSparkline = ({ data, isPositive, color }) => {
   const max = Math.max(...data);
   const min = Math.min(...data);
   const range = max - min;
+
+  if (range === 0) return null;
 
   const points = data.map((value, index) => {
     const x = (index / (data.length - 1)) * 60;
@@ -163,59 +112,41 @@ const SkeletonRow = () => (
 );
 
 const StatCard = ({ icon: Icon, label, value, change, trend }) => (
-  <div className="bg-gradient-to-br from-white to-gray-50 p-4 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-200">
-    <div className="flex items-center justify-between mb-2">
-      <div className="flex items-center space-x-2">
-        <div className="p-2 rounded-lg bg-blue-50">
-          <Icon className="w-4 h-4 text-blue-600" />
+  <div className="card bg-base-100 shadow-sm hover:shadow-md transition-all duration-200">
+    <div className="card-body p-4">
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center space-x-2">
+          <div className="p-2 rounded-lg bg-primary/10">
+            <Icon className="w-4 h-4 text-primary" />
+          </div>
+          <span className="text-sm font-medium text-base-content/70">{label}</span>
         </div>
-        <span className="text-sm font-medium text-gray-600">{label}</span>
+        {trend !== undefined && (
+          <div className={`badge ${trend > 0 ? 'badge-success' : 'badge-error'}`}>
+            {trend > 0 ? '+' : ''}{trend.toFixed(1)}%
+          </div>
+        )}
       </div>
-      {trend && (
-        <div className={`text-xs px-2 py-1 rounded-full ${trend > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-          {trend > 0 ? '+' : ''}{trend.toFixed(1)}%
-        </div>
-      )}
+      <p className="text-lg font-bold text-base-content">{value}</p>
     </div>
-    <p className="text-lg font-bold text-gray-900">{value}</p>
   </div>
 );
 
-// CryptoLogo component definition
-const CryptoLogo = ({ crypto }) => {
-  const [imgSrc, setImgSrc] = useState(crypto.image);
+const CryptoLogo = ({ crypto, size = 'md' }) => {
+  const [imgSrc, setImgSrc] = useState(crypto.logo);
   const [hasError, setHasError] = useState(false);
-
-  // Reset imgSrc and hasError when crypto.image changes
-  useEffect(() => {
-    setImgSrc(crypto.image);
-    setHasError(false);
-  }, [crypto.image]);
 
   const handleError = () => {
     if (hasError) return;
-
-    const fallbacks = [
-      `https://cryptologos.cc/logos/${crypto.id}-${crypto.symbol.toLowerCase()}-logo.png`,
-      `https://www.cryptocompare.com/media/37746251/${crypto.symbol.toLowerCase()}.png`,
-      `https://cryptoicon-api.vercel.app/api/icon/${crypto.symbol.toLowerCase()}`,
-      `https://www.coinlore.com/img/32x32/${crypto.id}.png`
-    ];
-
-    const currentIndex = fallbacks.findIndex(url => url === imgSrc);
-
-    if (currentIndex < fallbacks.length - 1) {
-      setImgSrc(fallbacks[currentIndex + 1]);
-    } else {
-      setHasError(true);
-    }
+    setHasError(true);
+    setImgSrc(`https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/${crypto.symbol.toLowerCase().replace('usdt', '')}.png`);
   };
 
-  if (hasError) {
+  if (hasError || !imgSrc) {
     return (
       <div
-        className="h-8 w-8 md:h-10 md:w-10 rounded-full flex items-center justify-center font-bold text-sm text-white"
-        style={{ backgroundColor: crypto.color || '#6B7280' }}
+        className={`h-8 w-8 md:h-10 md:w-10 rounded-full flex items-center justify-center font-bold text-sm text-base-100 shadow-sm ring-2 ring-base-100`}
+        style={{ backgroundColor: crypto.color || 'hsl(var(--n))' }}
       >
         {crypto.symbol.charAt(0).toUpperCase()}
       </div>
@@ -225,55 +156,112 @@ const CryptoLogo = ({ crypto }) => {
   return (
     <div className="relative">
       <img
-        className="h-8 w-8 md:h-10 md:w-10 rounded-full shadow-sm ring-2 ring-white bg-white p-0.5 object-contain"
+        className={`h-8 w-8 md:h-10 md:w-10 rounded-full shadow-sm ring-2 ring-base-100 bg-base-100 p-0.5 object-contain`}
         src={imgSrc}
         alt={crypto.name}
         onError={handleError}
         loading="lazy"
       />
-      <div
-        className="absolute -bottom-1 -right-1 w-3 h-3 md:w-3.5 md:h-3.5 rounded-full border-2 border-white"
-        style={{ backgroundColor: crypto.color || '#6B7280' }}
-      ></div>
     </div>
   );
 };
 
+// Popular trading pairs with their logos
+const POPULAR_PAIRS = [
+  { 
+    symbol: 'BTCUSDT', 
+    name: 'Bitcoin', 
+    logo: 'https://assets.coingecko.com/coins/images/1/large/bitcoin.png',
+    color: '#F7931A'
+  },
+  { 
+    symbol: 'ETHUSDT', 
+    name: 'Ethereum', 
+    logo: 'https://assets.coingecko.com/coins/images/279/large/ethereum.png',
+    color: '#627EEA'
+  },
+  { 
+    symbol: 'BNBUSDT', 
+    name: 'Binance Coin', 
+    logo: 'https://assets.coingecko.com/coins/images/825/large/bnb-icon2_2x.png',
+    color: '#F3BA2F'
+  },
+  { 
+    symbol: 'SOLUSDT', 
+    name: 'Solana', 
+    logo: 'https://assets.coingecko.com/coins/images/4128/large/solana.png',
+    color: '#9945FF'
+  },
+  { 
+    symbol: 'XRPUSDT', 
+    name: 'XRP', 
+    logo: 'https://assets.coingecko.com/coins/images/44/large/xrp-symbol-white-128.png',
+    color: '#23292F'
+  },
+  { 
+    symbol: 'ADAUSDT', 
+    name: 'Cardano', 
+    logo: 'https://assets.coingecko.com/coins/images/975/large/cardano.png',
+    color: '#0033AD'
+  },
+  { 
+    symbol: 'DOGEUSDT', 
+    name: 'Dogecoin', 
+    logo: 'https://assets.coingecko.com/coins/images/5/large/dogecoin.png',
+    color: '#C2A633'
+  },
+  { 
+    symbol: 'DOTUSDT', 
+    name: 'Polkadot', 
+    logo: 'https://assets.coingecko.com/coins/images/12171/large/polkadot.png',
+    color: '#E6007A'
+  },
+  { 
+    symbol: 'MATICUSDT', 
+    name: 'Polygon', 
+    logo: 'https://assets.coingecko.com/coins/images/4713/large/matic-token-icon.png',
+    color: '#8247E5'
+  },
+  { 
+    symbol: 'LINKUSDT', 
+    name: 'Chainlink', 
+    logo: 'https://assets.coingecko.com/coins/images/877/large/chainlink-new-logo.png',
+    color: '#2A5ADA'
+  }
+];
 
 const AdvancedCryptoTable = () => {
-  const [cryptos, setCryptos] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isRefetching, setIsRefetching] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortConfig, setSortConfig] = useState({ key: 'market_cap_rank', direction: 'asc' });
+  const [sortConfig, setSortConfig] = useState({ key: 'volume', direction: 'desc' });
   const [watchlist, setWatchlist] = useState(new Set());
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [lastUpdated, setLastUpdated] = useState(new Date());
-  const [viewMode, setViewMode] = useState('compact'); // compact, detailed
 
-  // Mock data loading
+  // Network status monitoring
   useEffect(() => {
-    const loadData = () => {
-      setIsLoading(true);
-      setTimeout(() => {
-        setCryptos(generateMockCryptoData());
-        setIsLoading(false);
-        setLastUpdated(new Date());
-      }, 1000);
-    };
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
 
-    loadData();
-    const interval = setInterval(loadData, 60000); // Update every minute
-    return () => clearInterval(interval);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
   }, []);
 
+  // Fetch cryptocurrency data using our custom hook
+  const { data: cryptos, isLoading, error, retry } = useFetch(
+    API.getMarketData(),
+    { enabled: isOnline }
+  );
+
   const handleRefresh = () => {
-    setIsRefetching(true);
-    setTimeout(() => {
-      setCryptos(generateMockCryptoData());
-      setIsRefetching(false);
-      setLastUpdated(new Date());
-    }, 1000);
+    if (!isOnline) return;
+    retry();
+    setLastUpdated(new Date());
   };
 
   const handleSort = (key) => {
@@ -284,33 +272,32 @@ const AdvancedCryptoTable = () => {
     setSortConfig({ key, direction });
   };
 
-  const toggleWatchlist = (cryptoId) => {
+  const toggleWatchlist = (symbol) => {
     const newWatchlist = new Set(watchlist);
-    if (newWatchlist.has(cryptoId)) {
-      newWatchlist.delete(cryptoId);
+    if (newWatchlist.has(symbol)) {
+      newWatchlist.delete(symbol);
     } else {
-      newWatchlist.add(cryptoId);
+      newWatchlist.add(symbol);
     }
     setWatchlist(newWatchlist);
   };
 
   const filteredAndSortedCryptos = useMemo(() => {
-    let filtered = cryptos.filter(crypto =>
-      crypto.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    if (!Array.isArray(cryptos)) return [];
+    
+    // Filter only popular USDT pairs
+    let filtered = cryptos.filter(crypto => 
+      POPULAR_PAIRS.some(pair => pair.symbol === crypto.symbol) &&
       crypto.symbol.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     if (selectedCategory === 'watchlist') {
-      filtered = filtered.filter(crypto => watchlist.has(crypto.id));
+      filtered = filtered.filter(crypto => watchlist.has(crypto.symbol));
     }
 
     return filtered.sort((a, b) => {
-      if (sortConfig.key === 'market_cap_rank') {
-        return sortConfig.direction === 'asc' ? a[sortConfig.key] - b[sortConfig.key] : b[sortConfig.key] - a[sortConfig.key];
-      }
-
-      const aVal = a[sortConfig.key];
-      const bVal = b[sortConfig.key];
+      const aVal = parseFloat(a[sortConfig.key] || 0);
+      const bVal = parseFloat(b[sortConfig.key] || 0);
 
       if (sortConfig.direction === 'asc') {
         return aVal > bVal ? 1 : -1;
@@ -321,18 +308,22 @@ const AdvancedCryptoTable = () => {
   }, [cryptos, searchTerm, sortConfig, selectedCategory, watchlist]);
 
   const marketStats = useMemo(() => {
-    if (cryptos.length === 0) return null;
+    if (!Array.isArray(cryptos) || cryptos.length === 0) return null;
 
-    const totalMarketCap = cryptos.reduce((sum, crypto) => sum + crypto.market_cap, 0);
-    const totalVolume = cryptos.reduce((sum, crypto) => sum + crypto.total_volume, 0);
-    const avgChange = cryptos.reduce((sum, crypto) => sum + crypto.price_change_percentage_24h, 0) / cryptos.length;
-    const gainers = cryptos.filter(crypto => crypto.price_change_percentage_24h > 0).length;
+    // Filter only popular USDT pairs for stats
+    const popularPairs = cryptos.filter(crypto => 
+      POPULAR_PAIRS.some(pair => pair.symbol === crypto.symbol)
+    );
+    
+    const totalVolume = popularPairs.reduce((sum, crypto) => sum + parseFloat(crypto.volume || 0), 0);
+    const avgChange = popularPairs.reduce((sum, crypto) => sum + parseFloat(crypto.priceChangePercent || 0), 0) / popularPairs.length;
+    const gainers = popularPairs.filter(crypto => parseFloat(crypto.priceChangePercent || 0) > 0).length;
 
     return {
-      totalMarketCap,
       totalVolume,
       avgChange,
-      gainersPercentage: (gainers / cryptos.length) * 100
+      gainersPercentage: (gainers / popularPairs.length) * 100,
+      totalCoins: popularPairs.length
     };
   }, [cryptos]);
 
@@ -351,36 +342,55 @@ const AdvancedCryptoTable = () => {
     </th>
   );
 
+  if (error) {
+    return (
+      <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+        <ErrorMessage 
+          message={error.message} 
+          onRetry={handleRefresh}
+        />
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+        <TableSkeleton />
+      </div>
+    );
+  }
+
   return (
-    <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+    <div className="card bg-base-100 shadow-xl">
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 p-6 border-b border-gray-100">
+      <div className="card-body bg-gradient-to-r from-primary/5 via-secondary/5 to-accent/5 border-b border-base-200">
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
           <div className="flex items-center space-x-3">
-            <div className="p-3 bg-blue-600 rounded-xl shadow-lg">
-              <Activity className="w-6 h-6 text-white" />
+            <div className="p-3 bg-primary rounded-xl shadow-lg">
+              <Activity className="w-6 h-6 text-primary-content" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Cryptocurrency Market</h1>
-              <p className="text-sm text-gray-600">Real-time market data and analytics</p>
+              <h1 className="text-2xl font-bold text-base-content">Cryptocurrency Market</h1>
+              <p className="text-sm text-base-content/70">Real-time market data powered by Binance API</p>
             </div>
           </div>
 
           <div className="flex items-center space-x-3">
-            <div className="flex items-center space-x-2 text-sm text-gray-600">
+            <div className="flex items-center space-x-2 text-sm text-base-content/70">
               <div className="flex items-center">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse mr-2"></div>
-                <Clock className="w-4 h-4 mr-1" />
-                <span>Live</span>
+                <div className={`w-2 h-2 rounded-full mr-2 ${isOnline ? 'bg-success animate-pulse' : 'bg-error'}`}></div>
+                {isOnline ? <Wifi className="w-4 h-4 mr-1" /> : <WifiOff className="w-4 h-4 mr-1" />}
+                <span>{isOnline ? 'Online' : 'Offline'}</span>
               </div>
             </div>
             <button
               onClick={handleRefresh}
-              disabled={isRefetching}
-              className="p-2 text-gray-600 hover:text-blue-600 hover:bg-white/50 rounded-lg transition-all"
+              disabled={!isOnline}
+              className="btn btn-ghost btn-sm"
               title="Refresh data"
             >
-              <RefreshCw className={`w-5 h-5 ${isRefetching ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
             </button>
           </div>
         </div>
@@ -388,14 +398,8 @@ const AdvancedCryptoTable = () => {
 
       {/* Market Stats */}
       {marketStats && (
-        <div className="p-6 border-b border-gray-100">
+        <div className="card-body border-b border-base-200">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard
-              icon={DollarSign}
-              label="Total Market Cap"
-              value={formatMarketCap(marketStats.totalMarketCap)}
-              trend={marketStats.avgChange}
-            />
             <StatCard
               icon={BarChart3}
               label="24h Volume"
@@ -409,218 +413,174 @@ const AdvancedCryptoTable = () => {
             />
             <StatCard
               icon={Sparkles}
-              label="Active Coins"
-              value={cryptos.length.toString()}
+              label="Active Pairs"
+              value={marketStats.totalCoins.toString()}
             />
           </div>
         </div>
       )}
 
       {/* Controls */}
-      <div className="p-6 border-b border-gray-100">
+      <div className="card-body border-b border-base-200">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div className="flex flex-wrap items-center gap-3">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <input
-                type="text"
-                placeholder="Search cryptocurrencies..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-              />
+            <div className="form-control relative w-full max-w-xs">
+              <div className="relative">
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="Search cryptocurrencies..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="input input-bordered w-full pl-10 pr-10"
+                  />
+                  <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-base-content/50" />
+                  {searchTerm && (
+                    <button 
+                      onClick={() => setSearchTerm('')}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 btn btn-ghost btn-xs p-1 hover:bg-base-200 rounded-full"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
 
-            <div className="flex bg-gray-100 rounded-xl p-1">
+            <div className="join">
               {[
-                { key: 'all', label: 'All Coins', icon: Globe },
+                { key: 'all', label: 'All Pairs', icon: Globe },
                 { key: 'watchlist', label: 'Watchlist', icon: Star }
               ].map(({ key, label, icon: Icon }) => (
                 <button
                   key={key}
                   onClick={() => setSelectedCategory(key)}
-                  className={`flex items-center space-x-2 px-3 py-1.5 text-sm font-medium rounded-lg transition-all ${
+                  className={`join-item btn btn-sm ${
                     selectedCategory === key
-                      ? 'bg-white text-blue-600 shadow-sm'
-                      : 'text-gray-600 hover:text-gray-900'
+                      ? 'btn-primary'
+                      : 'btn-ghost'
                   }`}
                 >
                   <Icon className="w-4 h-4" />
                   <span>{label}</span>
                   {key === 'watchlist' && watchlist.size > 0 && (
-                    <span className="bg-blue-100 text-blue-600 text-xs px-1.5 py-0.5 rounded-full">
-                      {watchlist.size}
-                    </span>
+                    <div className="badge badge-primary badge-sm">{watchlist.size}</div>
                   )}
                 </button>
               ))}
             </div>
           </div>
-{/* 
-          <div className="flex items-center space-x-3">
-            <div className="dropdown dropdown-end">
-              <div tabIndex={0} role="button" className="btn bg-white border-gray-300 hover:bg-gray-50 hover:border-gray-300 rounded-xl px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all flex items-center normal-case font-normal shadow-none h-auto min-h-0">
-                <span>{viewMode === 'compact' ? 'Compact View' : 'Detailed View'}</span>
-                <ChevronDown className="w-4 h-4 ml-2" />
-              </div>
-              <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-48 mt-2">
-                <li>
-                  <button className="w-full text-left" onClick={() => { setViewMode('compact'); if (document.activeElement) document.activeElement.blur(); }}>
-                    Compact View
-                  </button>
-                </li>
-                <li>
-                  <button className="w-full text-left" onClick={() => { setViewMode('detailed'); if (document.activeElement) document.activeElement.blur(); }}>
-                    Detailed View
-                  </button>
-                </li>
-              </ul>
-            </div>
-          </div> */}
         </div>
       </div>
 
       {/* Table */}
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+        <table className="table table-zebra">
+          <thead>
             <tr>
-              <th className="px-6 py-3 text-left">
+              <th>
                 <div className="flex items-center space-x-2">
-                  <Star className="w-4 h-4 text-gray-400" />
-                  <span className="text-sm font-semibold text-gray-700">#</span>
+                  <Star className="w-4 h-4 text-base-content/50" />
+                  <span className="text-sm font-semibold">#</span>
                 </div>
               </th>
-              <SortableHeader column="name">
+              <SortableHeader column="symbol">
                 <span className="text-sm">Asset</span>
               </SortableHeader>
-              <SortableHeader column="current_price" className="text-right">
+              <SortableHeader column="lastPrice" className="text-right">
                 <DollarSign className="w-4 h-4" />
                 <span className="text-sm">Price</span>
               </SortableHeader>
-              <SortableHeader column="price_change_percentage_24h" className="text-right">
+              <SortableHeader column="priceChangePercent" className="text-right">
                 <span className="text-sm">24h</span>
               </SortableHeader>
-              <SortableHeader column="price_change_percentage_7d" className="text-right">
-                <span className="text-sm">7d</span>
-              </SortableHeader>
-              <SortableHeader column="market_cap" className="text-right">
-                <span className="text-sm">Market Cap</span>
-              </SortableHeader>
-              <SortableHeader column="total_volume" className="text-right">
+              <SortableHeader column="volume" className="text-right">
                 <span className="text-sm">Volume</span>
               </SortableHeader>
-              <th className="px-6 py-3 text-right">
-                <span className="text-sm font-semibold text-gray-700">7d Chart</span>
-              </th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-100">
-            {isLoading ? (
-              Array(10).fill(0).map((_, i) => <SkeletonRow key={i} />)
-            ) : filteredAndSortedCryptos.length === 0 ? (
+          <tbody>
+            {filteredAndSortedCryptos.length === 0 ? (
               <tr>
-                <td colSpan="8" className="px-6 py-12 text-center">
+                <td colSpan="8" className="text-center py-12">
                   <div className="flex flex-col items-center space-y-3">
-                    <AlertCircle className="w-12 h-12 text-gray-400" />
-                    <p className="text-gray-500">No cryptocurrencies found</p>
-                    <p className="text-sm text-gray-400">Try adjusting your search or filters</p>
+                    <AlertCircle className="w-12 h-12 text-base-content/30" />
+                    <p className="text-base-content/70">No cryptocurrencies found</p>
+                    <p className="text-sm text-base-content/50">Try adjusting your search or filters</p>
                   </div>
                 </td>
               </tr>
             ) : (
               filteredAndSortedCryptos.map((crypto) => {
-                const isPositive24h = crypto.price_change_percentage_24h >= 0;
-                const isPositive7d = crypto.price_change_percentage_7d >= 0;
-                const isInWatchlist = watchlist.has(crypto.id);
+                const isPositive24h = parseFloat(crypto.priceChangePercent || 0) >= 0;
+                const isInWatchlist = watchlist.has(crypto.symbol);
+                const pairInfo = POPULAR_PAIRS.find(pair => pair.symbol === crypto.symbol);
+                const symbol = crypto.symbol.replace('USDT', '');
 
                 return (
                   <tr
-                    key={crypto.id}
-                    className="hover:bg-gray-50 transition-all duration-200 group cursor-pointer"
+                    key={crypto.symbol}
+                    className="hover:bg-base-200 transition-all duration-200 cursor-pointer"
                   >
-                    <td className="px-6 py-4">
+                    <td>
                       <div className="flex items-center space-x-3">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            toggleWatchlist(crypto.id);
+                            toggleWatchlist(crypto.symbol);
                           }}
-                          className={`transition-colors ${
+                          className={`btn btn-ghost btn-sm ${
                             isInWatchlist
-                              ? 'text-yellow-500 hover:text-yellow-600'
-                              : 'text-gray-300 hover:text-yellow-400'
+                              ? 'text-warning'
+                              : 'text-base-content/30'
                           }`}
                         >
                           <Star className={`w-4 h-4 ${isInWatchlist ? 'fill-current' : ''}`} />
                         </button>
-                        <span className="text-sm font-semibold text-gray-700">
-                          {crypto.market_cap_rank}
+                        <span className="text-sm font-semibold">
+                          {symbol}
                         </span>
                       </div>
                     </td>
 
-                    {/* Integrate CryptoLogo component here */}
-                    <td className="px-4 md:px-6 py-4">
+                    <td>
                       <div className="flex items-center space-x-3">
-                        <CryptoLogo crypto={crypto} />
+                        <CryptoLogo crypto={pairInfo} />
                         <div className="min-w-0">
-                          <div className="text-sm md:text-base font-semibold text-gray-900 truncate">
-                            {crypto.symbol.toUpperCase()}
+                          <div className="text-sm md:text-base font-semibold truncate">
+                            {pairInfo?.name || symbol}
                           </div>
-                          <div className="text-xs text-gray-500 truncate max-w-[100px] md:max-w-[150px]">
-                            {crypto.name}
+                          <div className="text-xs text-base-content/50 truncate max-w-[100px] md:max-w-[150px]">
+                            {symbol}/USDT
                           </div>
                         </div>
                       </div>
                     </td>
 
-                    <td className="px-6 py-4 text-right">
-                      <div className="text-sm font-bold text-gray-900">
-                        {formatPrice(crypto.current_price)}
+                    <td className="text-right">
+                      <div className="text-sm font-bold">
+                        {formatPrice(parseFloat(crypto.lastPrice || 0))}
                       </div>
                     </td>
 
-                    <td className="px-6 py-4 text-right">
-                      <div className={`inline-flex items-center px-2.5 py-1.5 rounded-lg text-xs font-bold shadow-sm ${
+                    <td className="text-right">
+                      <div className={`badge ${
                         isPositive24h
-                          ? 'bg-green-100 text-green-700 border border-green-200'
-                          : 'bg-red-100 text-red-700 border border-red-200'
+                          ? 'badge-success'
+                          : 'badge-error'
                       }`}>
                         {isPositive24h ? (
                           <TrendingUp className="mr-1 w-3 h-3" />
                         ) : (
                           <TrendingDown className="mr-1 w-3 h-3" />
                         )}
-                        {Math.abs(crypto.price_change_percentage_24h).toFixed(2)}%
+                        {Math.abs(parseFloat(crypto.priceChangePercent || 0)).toFixed(2)}%
                       </div>
                     </td>
 
-                    <td className="px-6 py-4 text-right">
-                      <div className={`text-sm font-semibold ${
-                        isPositive7d ? 'text-green-600' : 'text-red-600'
-                      }`}>
-                        {isPositive7d ? '+' : ''}{crypto.price_change_percentage_7d.toFixed(2)}%
-                      </div>
-                    </td>
-
-                    <td className="px-6 py-4 text-right">
-                      <div className="text-sm font-semibold text-gray-900">
-                        {formatMarketCap(crypto.market_cap)}
-                      </div>
-                    </td>
-
-                    <td className="px-6 py-4 text-right">
-                      <div className="text-sm text-gray-700">
-                        {formatVolume(crypto.total_volume)}
-                      </div>
-                    </td>
-
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex justify-end">
-                        <MiniSparkline
-                          data={crypto.sparkline_in_7d?.price}
-                          isPositive={isPositive7d}
-                          color={isPositive7d ? '#10B981' : '#EF4444'}
-                        />
+                    <td className="text-right">
+                      <div className="text-sm">
+                        {formatVolume(parseFloat(crypto.volume || 0))}
                       </div>
                     </td>
                   </tr>
@@ -632,19 +592,20 @@ const AdvancedCryptoTable = () => {
       </div>
 
       {/* Footer */}
-      <div className="px-6 py-4 bg-gradient-to-r from-gray-50 to-white border-t border-gray-100">
-        <div className="flex flex-col md:flex-row justify-between items-center gap-3 text-sm text-gray-600">
+      <div className="card-body bg-base-200/50 border-t border-base-200">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-3 text-sm text-base-content/70">
           <div className="flex items-center space-x-4">
             <div className="flex items-center">
-              <CheckCircle2 className="w-4 h-4 text-green-500 mr-2" />
-              <span>Data updates every minute</span>
+              <CheckCircle2 className="w-4 h-4 text-success mr-2" />
+              <span>Data from Binance API</span>
             </div>
             <div className="flex items-center">
-              <Eye className="w-4 h-4 text-blue-500 mr-2" />
-              <span>Showing {filteredAndSortedCryptos.length} of {cryptos.length} coins</span>
+              <Eye className="w-4 h-4 text-primary mr-2" />
+              <span>Showing {filteredAndSortedCryptos.length} of {cryptos.length} pairs</span>
             </div>
           </div>
           <div className="flex items-center">
+            <Clock className="w-4 h-4 mr-2" />
             <span>Last updated: {lastUpdated.toLocaleTimeString()}</span>
           </div>
         </div>

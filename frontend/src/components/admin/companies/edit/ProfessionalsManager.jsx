@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
-import { FaPlus, FaTrash, FaUserCog } from 'react-icons/fa';
+import { FaPlus, FaTrash, FaUserCog, FaUser, FaBriefcase, FaEnvelope, FaAlignLeft } from 'react-icons/fa';
 import ImageUpload from './ImageUpload';
 
 const ProfessionalsManager = ({ professionals, onProfessionalsChange, loading = false }) => {
@@ -34,26 +34,44 @@ const ProfessionalsManager = ({ professionals, onProfessionalsChange, loading = 
   };
 
   if (loading) {
-    return <div>{t('professionalsManager.loading', 'Loading professionals...')}</div>; 
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="animate-pulse space-y-4 w-full max-w-3xl">
+          <div className="h-8 bg-base-300 rounded w-1/4"></div>
+          <div className="h-48 bg-base-300 rounded"></div>
+          <div className="h-48 bg-base-300 rounded"></div>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="flex justify-between items-center">
-        <h3 className="text-normal text-mute font-medium ">{t('professionalsManager.allProfessionals')}</h3>
+        <div className="space-y-1">
+          <h3 className="text-xl font-semibold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+            {t('professionalsManager.allProfessionals')}
+          </h3>
+          <p className="text-sm text-base-content/60">
+            {t('professionalsManager.description', 'Manage your team members and their roles')}
+          </p>
+        </div>
         <button
           type="button"
           onClick={handleAddProfessional}
-          className="btn btn-primary btn-sm gap-2"
+          className="btn btn-primary btn-sm gap-2 shadow-lg hover:shadow-primary/20 transition-all duration-300"
         >
-          <FaPlus />
+          <FaPlus className="text-sm" />
           {t('professionalsManager.addProfessional')}
         </button>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-6">
         {(professionals || []).map((prof, index) => (
-          <div key={index} className="p-4 border rounded-lg bg-base-200 relative grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div 
+            key={index} 
+            className="p-6 border border-base-300 rounded-xl bg-base-200/50 backdrop-blur-sm relative grid grid-cols-1 md:grid-cols-3 gap-6 shadow-lg hover:shadow-xl transition-all duration-300"
+          >
             <div className="form-control md:col-span-1">
               <ImageUpload 
                 field="image"
@@ -63,46 +81,66 @@ const ProfessionalsManager = ({ professionals, onProfessionalsChange, loading = 
               />
             </div>
 
-            <div className="md:col-span-2 space-y-2">
+            <div className="md:col-span-2 space-y-4">
               <div className="form-control">
-                <label className="label"><span className="label-text font-semibold">{t('professionalsManager.name')}</span></label>
+                <label className="label">
+                  <span className="label-text font-medium flex items-center gap-2">
+                    <FaUser className="text-primary" />
+                    {t('professionalsManager.name')}
+                  </span>
+                </label>
                 <input
                   type="text"
                   value={prof.name}
                   onChange={(e) => handleInputChange(index, 'name', e.target.value)}
-                  className="input input-bordered w-full"
+                  className="input input-bordered w-full focus:border-primary focus:ring-1 focus:ring-primary transition-all duration-300"
                   placeholder={t('professionalsManager.namePlaceholder')}
                 />
               </div>
 
               <div className="form-control">
-                <label className="label"><span className="label-text font-semibold">{t('professionalsManager.role')}</span></label>
+                <label className="label">
+                  <span className="label-text font-medium flex items-center gap-2">
+                    <FaBriefcase className="text-primary" />
+                    {t('professionalsManager.role')}
+                  </span>
+                </label>
                 <input
                   type="text"
                   value={prof.role}
                   onChange={(e) => handleInputChange(index, 'role', e.target.value)}
-                  className="input input-bordered w-full"
+                  className="input input-bordered w-full focus:border-primary focus:ring-1 focus:ring-primary transition-all duration-300"
                   placeholder={t('professionalsManager.rolePlaceholder')}
                 />
               </div>
+
               <div className="form-control">
-                <label className="label"><span className="label-text font-semibold">{t('professionalsManager.email')}</span></label>
+                <label className="label">
+                  <span className="label-text font-medium flex items-center gap-2">
+                    <FaEnvelope className="text-primary" />
+                    {t('professionalsManager.email')}
+                  </span>
+                </label>
                 <input
-                  type="text"
+                  type="email"
                   value={prof.email}
                   onChange={(e) => handleInputChange(index, 'email', e.target.value)}
-                  className="input input-bordered w-full"
+                  className="input input-bordered w-full focus:border-primary focus:ring-1 focus:ring-primary transition-all duration-300"
                   placeholder={t('professionalsManager.emailPlaceholder')}
                 />
               </div>
 
               <div className="form-control">
-                <label className="label"><span className="label-text font-semibold">{t('professionalsManager.description')}</span></label>
+                <label className="label">
+                  <span className="label-text font-medium flex items-center gap-2">
+                    <FaAlignLeft className="text-primary" />
+                    {t('professionalsManager.description')}
+                  </span>
+                </label>
                 <textarea
                   value={prof.description}
                   onChange={(e) => handleInputChange(index, 'description', e.target.value)}
-                  className="textarea textarea-bordered w-full h-45"
-                  rows="3"
+                  className="textarea textarea-bordered w-full h-32 focus:border-primary focus:ring-1 focus:ring-primary transition-all duration-300"
                   placeholder={t('professionalsManager.descriptionPlaceholder')}
                 ></textarea>
               </div>
@@ -111,7 +149,7 @@ const ProfessionalsManager = ({ professionals, onProfessionalsChange, loading = 
             <button
               type="button"
               onClick={() => handleRemoveProfessional(index)}
-              className="btn btn-ghost btn-sm btn-circle absolute top-2 right-2"
+              className="btn btn-ghost btn-sm btn-circle absolute top-4 right-4 hover:bg-error/10 transition-colors duration-300"
               aria-label={t('professionalsManager.removeProfessional')}
             >
               <FaTrash className="text-error" />
@@ -121,8 +159,17 @@ const ProfessionalsManager = ({ professionals, onProfessionalsChange, loading = 
       </div>
 
       {(!professionals || professionals.length === 0) && (
-        <div className="text-center py-8 text-base-content/60">
-          <p>{t('professionalsManager.noProfessionals')}</p>
+        <div className="text-center py-12 bg-base-200/50 rounded-xl border border-dashed border-base-300">
+          <FaUserCog className="mx-auto text-4xl text-base-content/30 mb-4" />
+          <p className="text-base-content/60 text-lg">{t('professionalsManager.noProfessionals')}</p>
+          <button
+            type="button"
+            onClick={handleAddProfessional}
+            className="btn btn-primary btn-sm gap-2 mt-4"
+          >
+            <FaPlus />
+            {t('professionalsManager.addFirstProfessional')}
+          </button>
         </div>
       )}
     </div>

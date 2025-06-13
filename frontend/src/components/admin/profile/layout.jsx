@@ -4,47 +4,70 @@ import { useTranslation } from 'react-i18next'
 import useAuth from "../../../hooks/useAuth"
 import ProfilePicture from "../../admin/profile/components/ProfilePicture"
 import ChangePassword from "./components/ChangePassword"
+import { motion, AnimatePresence } from "framer-motion"
 
 const ProfileSkeleton = () => {
   return (
-    <div className="container mx-auto px-4 py-8 min-h-screen bg-base-100">
+    <div className="container mx-auto px-4 py-8 min-h-screen bg-gradient-to-br from-base-100 via-base-200 to-base-300 pt-20">
       <div className="max-w-5xl mx-auto">
-        <div className="h-8 bg-base-300 rounded w-1/3 mb-8 animate-pulse"></div>
+        {/* Title Skeleton */}
+        <div className="h-10 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-xl w-1/3 mb-8 animate-pulse"></div>
 
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Sidebar Skeleton */}
           <div className="lg:w-1/4">
-            <div className="bg-base-200 rounded-lg p-6 shadow-md">
+            <div className="bg-base-100/50 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-primary/20">
               <ul className="menu menu-vertical w-full space-y-4">
-                <li><div className="h-10 bg-base-300 rounded animate-pulse"></div></li>
-                <li><div className="h-10 bg-base-300 rounded animate-pulse"></div></li>
+                <li>
+                  <div className="flex items-center gap-3">
+                    <div className="w-5 h-5 bg-primary/20 rounded-full animate-pulse"></div>
+                    <div className="h-6 bg-primary/20 rounded-lg w-24 animate-pulse"></div>
+                  </div>
+                </li>
+                <li>
+                  <div className="flex items-center gap-3">
+                    <div className="w-5 h-5 bg-primary/20 rounded-full animate-pulse"></div>
+                    <div className="h-6 bg-primary/20 rounded-lg w-24 animate-pulse"></div>
+                  </div>
+                </li>
               </ul>
             </div>
           </div>
 
           {/* Main content Skeleton */}
           <div className="lg:w-3/4">
-            <div className="bg-base-200 rounded-lg p-8 shadow-md space-y-8">
+            <div className="bg-base-100/50 backdrop-blur-sm rounded-xl p-8 shadow-lg border border-primary/20">
               {/* Profile Picture Skeleton */}
-              <div className="flex flex-col items-center">
-                <div className="w-32 h-32 rounded-full bg-base-300 animate-pulse"></div>
+              <div className="flex flex-col items-center mb-8">
+                <div className="w-32 h-32 rounded-full bg-gradient-to-r from-primary/20 to-secondary/20 animate-pulse relative">
+                  <div className="absolute inset-0 rounded-full bg-gradient-to-r from-primary/10 to-secondary/10 animate-pulse"></div>
+                </div>
+                <div className="h-4 bg-primary/20 rounded-lg w-32 mt-4 animate-pulse"></div>
               </div>
 
               {/* Form Skeleton */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <div className="h-5 bg-base-300 rounded w-1/4 animate-pulse"></div>
-                  <div className="h-12 bg-base-300 rounded animate-pulse"></div>
+                <div className="space-y-3">
+                  <div className="h-5 bg-primary/20 rounded-lg w-1/4 animate-pulse"></div>
+                  <div className="relative">
+                    <div className="h-12 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-lg animate-pulse"></div>
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 bg-primary/20 rounded-full animate-pulse"></div>
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <div className="h-5 bg-base-300 rounded w-1/4 animate-pulse"></div>
-                  <div className="h-12 bg-base-300 rounded animate-pulse"></div>
+                <div className="space-y-3">
+                  <div className="h-5 bg-primary/20 rounded-lg w-1/4 animate-pulse"></div>
+                  <div className="relative">
+                    <div className="h-12 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-lg animate-pulse"></div>
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 bg-primary/20 rounded-full animate-pulse"></div>
+                  </div>
                 </div>
               </div>
 
               {/* Button Skeleton */}
-              <div className="form-control mt-6">
-                <div className="h-12 bg-primary/50 rounded animate-pulse w-full"></div>
+              <div className="form-control mt-8">
+                <div className="h-12 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-lg animate-pulse relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-secondary/10 animate-pulse"></div>
+                </div>
               </div>
             </div>
           </div>
@@ -180,38 +203,65 @@ const Profile = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 min-h-screen bg-base-100">
+    <div className="container mx-auto px-4 py-8 min-h-screen bg-gradient-to-br from-base-100 via-base-200 to-base-300 pt-20">
       <div className="max-w-5xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8 text-primary">{t('update_profile')}</h1>
+        <motion.h1 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-3xl font-bold mb-8 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent"
+        >
+          {t('update_profile')}
+        </motion.h1>
         
-        {error && (
-          <div className="alert alert-error mb-6 shadow-lg">
-            <AlertCircle className="w-6 h-6" />
-            <span>{error}</span>
-          </div>
-        )}
+        <AnimatePresence mode="wait">
+          {error && (
+            <motion.div 
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="alert alert-error mb-6 shadow-lg"
+            >
+              <AlertCircle className="w-6 h-6" />
+              <span>{error}</span>
+            </motion.div>
+          )}
 
-        {saveError && (
-          <div className="alert alert-error mb-6 shadow-lg">
-            <AlertCircle className="w-6 h-6" />
-            <span>{saveError}</span>
-          </div>
-        )}
+          {saveError && (
+            <motion.div 
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="alert alert-error mb-6 shadow-lg"
+            >
+              <AlertCircle className="w-6 h-6" />
+              <span>{saveError}</span>
+            </motion.div>
+          )}
 
-        {saveSuccess && (
-          <div className="alert alert-success mb-6 shadow-lg">
-            <span>Profile updated successfully!</span>
-          </div>
-        )}
+          {saveSuccess && (
+            <motion.div 
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="alert alert-success mb-6 shadow-lg"
+            >
+              <span>Profile updated successfully!</span>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Sidebar */}
           <div className="lg:w-1/4">
-            <div className="bg-base-200 rounded-lg p-6 shadow-md">
+            <motion.div 
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="bg-base-100/50 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-primary/20"
+            >
               <ul className="menu menu-vertical w-full">
                 <li className={activeTab === "general" ? "bordered" : ""}>
                   <button 
-                    className="flex items-center gap-3 text-base font-medium" 
+                    className="flex items-center gap-3 text-base font-medium hover:bg-primary/10 transition-colors duration-300" 
                     onClick={() => setActiveTab("general")}
                   >
                     <User className="w-5 h-5" />
@@ -220,7 +270,7 @@ const Profile = () => {
                 </li>
                 <li className={activeTab === "security" ? "bordered" : ""}>
                   <button 
-                    className="flex items-center gap-3 text-base font-medium" 
+                    className="flex items-center gap-3 text-base font-medium hover:bg-primary/10 transition-colors duration-300" 
                     onClick={() => setActiveTab("security")}
                   >
                     <Shield className="w-5 h-5" />
@@ -228,36 +278,46 @@ const Profile = () => {
                   </button>
                 </li>
               </ul>
-            </div>
+            </motion.div>
           </div>
 
           {/* Main content */}
-          <div className="lg:w-3/4">
-            <div className="bg-base-200 rounded-lg p-8 shadow-md">
+          <motion.div 
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="lg:w-3/4"
+          >
+            <div className="bg-base-100/50 backdrop-blur-sm rounded-xl p-8 shadow-lg border border-primary/20">
               {activeTab === "general" && (
-                <form onSubmit={handleSubmit} className="space-y-6">
+                <motion.form 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  onSubmit={handleSubmit} 
+                  className="space-y-6"
+                >
                   <div className="mb-8">
                     <div className="flex flex-col items-center">
-                    <ProfilePicture
-                      imagePreview={imagePreview}
-                      handleFileChange={(file) => {
-                        if (file) {
-                          const previewUrl = URL.createObjectURL(file);
-                          setImagePreview(previewUrl);
-                          setSelectedImage(file); // Make sure to update the selectedImage state
-                          setFormData(prev => ({
-                            ...prev,
-                            profilePic: file
-                          }));
-                        }
-                      }}
-                      error={saveError}
-                      setError={setSaveError}
-                    />
-                    {saveError && (
-                      <p className="mt-2 text-sm text-error">{saveError}</p>
-                    )}
-                  </div>
+                      <ProfilePicture
+                        imagePreview={imagePreview}
+                        handleFileChange={(file) => {
+                          if (file) {
+                            const previewUrl = URL.createObjectURL(file);
+                            setImagePreview(previewUrl);
+                            setSelectedImage(file);
+                            setFormData(prev => ({
+                              ...prev,
+                              profilePic: file
+                            }));
+                          }
+                        }}
+                        error={saveError}
+                        setError={setSaveError}
+                      />
+                      {saveError && (
+                        <p className="mt-2 text-sm text-error">{saveError}</p>
+                      )}
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -265,17 +325,17 @@ const Profile = () => {
                       <label className="label">
                         <span className="label-text text-base font-medium">{t('form.name')}</span>
                       </label>
-                      <div className="relative">
+                      <div className="relative group">
                         <input
                           type="text"
                           name="name"
                           value={formData.name}
                           onChange={handleChange}
-                          className="input input-bordered focus:outline-none w-full pl-10"
+                          className="input input-bordered focus:outline-none w-full pl-10 bg-base-200/50 focus:bg-base-100 transition-all duration-300"
                           placeholder={t('form.enterName')}
                           required
                         />
-                        <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-base-content/50 w-5 h-5" />
+                        <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-base-content/50 group-focus-within:text-primary transition-colors duration-300 w-5 h-5" />
                       </div>
                     </div>
 
@@ -283,17 +343,17 @@ const Profile = () => {
                       <label className="label">
                         <span className="label-text text-base font-medium">{t('form.email')}</span>
                       </label>
-                      <div className="relative">
+                      <div className="relative group">
                         <input
                           type="email"
                           name="email"
                           value={formData.email}
                           onChange={handleChange}
-                          className="input input-bordered focus:outline-none w-full pl-10"
+                          className="input input-bordered focus:outline-none w-full pl-10 bg-base-200/50 focus:bg-base-100 transition-all duration-300"
                           placeholder={t('form.enterEmail')}
                           required
                         />
-                        <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-base-content/50 w-5 h-5" />
+                        <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-base-content/50 group-focus-within:text-primary transition-colors duration-300 w-5 h-5" />
                       </div>
                     </div>
                   </div>
@@ -301,30 +361,38 @@ const Profile = () => {
                   <div className="form-control mt-6">
                     <button 
                       type="submit" 
-                      className={`btn btn-primary w-full ${isSaving ? "loading" : ""}`}
+                      className={`btn btn-primary w-full relative overflow-hidden ${isSaving ? "loading" : ""}`}
                       disabled={isSaving}
                     >
-                      {isSaving ? (
-                        t('saving')
-                      ) : (
-                        <>
-                          <Save className="w-5 h-5 mr-2" />
-                          {t('saveChanges')}
-                        </>
-                      )}
+                      <span className="relative z-10">
+                        {isSaving ? (
+                          t('saving')
+                        ) : (
+                          <>
+                            <Save className="w-5 h-5 mr-2 inline" />
+                            {t('saveChanges')}
+                          </>
+                        )}
+                      </span>
                     </button>
                   </div>
-                </form>
+                </motion.form>
               )}
 
               {activeTab === "security" && (
-                <div>
-                  <h2 className="text-xl font-semibold mb-6">{t('profile.changePassword')}</h2>
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                >
+                  <h2 className="text-xl font-semibold mb-6 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                    {t('profile.changePassword')}
+                  </h2>
                   <ChangePassword onPasswordChange={handlePasswordUpdate} />
-                </div>
+                </motion.div>
               )}
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
     </div>

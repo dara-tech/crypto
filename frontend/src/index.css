@@ -5,7 +5,10 @@
 
 /* Base font styles */
 :root {
-  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-display: 'Orbitron', system-ui, -apple-system, sans-serif;
+  --font-accent: 'Rajdhani', system-ui, -apple-system, sans-serif;
+  --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
   --font-khmer: 'Hanuman', 'Kantumruy Pro', system-ui, -apple-system, sans-serif;
 }
 
@@ -16,16 +19,47 @@ html {
   text-rendering: optimizeLegibility;
 }
 
-/* Language-specific font classes */
-.font-en {
-  font-family: var(--font-khmer);
-  font-feature-settings: 'kern', 'liga', 'clig', 'calt';
+/* Font classes */
+.font-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+}
+
+.font-accent {
+  font-family: var(--font-accent);
+  letter-spacing: 0.02em;
+}
+
+.font-body {
+  font-family: var(--font-body);
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+  letter-spacing: -0.02em;
 }
 
 .font-km {
   font-family: var(--font-khmer);
-  font-feature-settings: 'kern', 'liga', 'clig', 'calt';
-  line-height: 1.7; /* Slightly more line height for Khmer text */
+  line-height: 1.7;
+}
+
+/* Crypto-specific styles */
+.crypto-heading {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+}
+
+.crypto-accent {
+  font-family: var(--font-accent);
+  letter-spacing: 0.02em;
+  font-weight: 600;
+}
+
+.crypto-mono {
+  font-family: var(--font-mono);
+  letter-spacing: -0.02em;
 }
 
 /* Ensure proper rendering for Khmer text */
@@ -40,11 +74,11 @@ html {
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
 }
+
 .ProseMirror:focus {
   outline: none;
   box-shadow: none;
 }
-
 
 body {
   min-height: 100vh;
@@ -52,11 +86,21 @@ body {
   color: hsl(var(--bc));
 }
 
-/* Fix for font loading */
-.font-loading {
+/* Font loading states */
+.fonts-loading {
   visibility: hidden;
 }
 
-.font-loaded {
+.fonts-loaded {
   visibility: visible;
+}
+
+/* Crypto-specific animations */
+@keyframes glow {
+  0%, 100% { text-shadow: 0 0 10px rgba(var(--p), 0.5); }
+  50% { text-shadow: 0 0 20px rgba(var(--p), 0.8); }
+}
+
+.crypto-glow {
+  animation: glow 2s ease-in-out infinite;
 }

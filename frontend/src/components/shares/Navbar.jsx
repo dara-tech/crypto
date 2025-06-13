@@ -1,7 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { FaUserCircle, FaBuilding, FaChevronDown, FaMoneyBillWave, FaUserTie } from 'react-icons/fa';
+import { FaUserCircle, FaBuilding, FaChevronDown, FaMoneyBillWave, FaUserTie, FaUserFriends } from 'react-icons/fa';
 import axios from 'axios';
 import LanguageSwitcher from './LanguageSwitcher';
 import { MdOutlineHome, MdHome, MdOutlineMail, MdMail, MdPrivacyTip, MdOutlineDescription } from 'react-icons/md';
@@ -30,11 +30,10 @@ const Navbar = () => {
   const aboutSubMenuRef = useRef(null);
   const mobileMenuRef = useRef(null);
 
-useEffect(() => {
-  const role = profile?.type || null;
-  setUserRole(role);
-}, [profile]);
-
+  useEffect(() => {
+    const role = profile?.type || null;
+    setUserRole(role);
+  }, [profile]);
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 10);
@@ -123,35 +122,63 @@ useEffect(() => {
     { to: '/contact', label: t('contact'), icon: <MdOutlineMail />, activeIcon: <MdMail /> },
   ];
 
-  let linksForAuthenticatedUser = [];
-  const paymentLinkItem = { to: '/payments', label: t('paymentViewer.title'), icon: <FaMoneyBillWave />, activeIcon: <FaMoneyBillWave /> };
-  const userProfileLinkItem = { to: '/profile', label: t('Profile'), icon: <BsPersonGear />, activeIcon: <BsPersonGear /> };
+   // Define common link items to avoid repetition
+   const commonLinks = useMemo(() => ({
+    payments: { 
+      to: '/payments', 
+      label: t('paymentViewer.title'), 
+      icon: <FaMoneyBillWave />, 
+      activeIcon: <FaMoneyBillWave /> 
+    },
+    profile: { 
+      to: '/profile', 
+      label: t('Profile'), 
+      icon: <BsPersonGear />, 
+      activeIcon: <BsPersonGear /> 
+    },
+    // You can add other common links here
+  }), [t]); // Dependency `t` ensures labels are re-translated on language change
 
-  if (userRole === 'admin') { // Condition for admin
-    const companyEditUrl = currentCompany ? `/admin/companies/${currentCompany._id}` : '/admin/companies';
-    linksForAuthenticatedUser = [
-      { to: '/admin/dashboard', label: t('dashboard'), icon: <RiDashboardLine />, activeIcon: <RiDashboardFill /> },
-      paymentLinkItem,
-      { to: companyEditUrl, label: t('companies'), icon: <FaBuilding />, activeIcon: <FaBuilding /> },
-      userProfileLinkItem,
-    ];
-  } else if (userRole === 'payment_viewer') { // Condition for payment_viewer
-    linksForAuthenticatedUser = [
-      paymentLinkItem,
-      userProfileLinkItem, 
-    ];
-  } else if (profile) { // Fallback for any other authenticated user
-    linksForAuthenticatedUser = [userProfileLinkItem]; 
-  }
+  // --- The Advanced Logic ---
+  // Use useMemo to calculate links only when dependencies change
+  const linksForAuthenticatedUser = useMemo(() => {
+    // A declarative map for role-based links. Easier to read and scale.
+    const roleConfig = {
+      admin: [
+        { to: '/dashboard', label: t('dashboard'), icon: <RiDashboardLine />, activeIcon: <RiDashboardFill /> },
+        commonLinks.payments,
+        // For dynamic links, we can use a function that resolves the URL
+        () => ({ 
+          to: currentCompany ? `/companies/${currentCompany._id}` : '/companies', 
+          label: t('companies'), 
+          icon: <FaBuilding />, 
+          activeIcon: <FaBuilding /> 
+        }),
+        { to: '/users', label: t('users'), icon: <FaUserFriends />, activeIcon: <FaUserFriends /> },
+        commonLinks.profile,
+      ],
+      payment_viewer: [
+        commonLinks.payments,
+        commonLinks.profile,
+      ],
+      // Default for any other authenticated user
+      default: [
+        commonLinks.profile,
+      ],
+    };
 
-  const activeLinks = profile ? linksForAuthenticatedUser : publicLinks;
-  // The mobileMenuItems array is not directly used for rendering mobile links in the current JSX,
-  // as the mobile menu iterates over `activeLinks`. This section is simplified.
-  // If mobileMenuItems were used elsewhere, it would need similar conditional logic.
+    // Get the links for the current user's role, or fall back to the default.
+    const links = roleConfig[userRole] || roleConfig.default;
 
+    // Process the array to resolve any function-based dynamic links
+    return links.map(link => (typeof link === 'function' ? link() : link));
+
+  }, [userRole, currentCompany, commonLinks, t]); // Dependencies for the memo
+
+  const activeLinks = profile ? linksForAuthenticatedUser : publicLinks
   return (
-    <nav className={`top-0 left-0 right-0 z-50 transition-all duration-300 ${
-      isScrolled 
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      isScrolled ? 'bg-base-100/80 backdrop-blur-md shadow-lg' : 'bg-transparent'
     }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
@@ -172,15 +199,15 @@ useEffect(() => {
                     }}
                   />
                 ) : (
-                  <div className="w-6 h-6 rounded  flex items-center justify-center font-bold text-sm">
+                  <div className="w-6 h-6 rounded flex items-center justify-center font-bold text-sm">
                     {currentCompany?.name.charAt(0).toUpperCase()}
                   </div>
                 )}
               </div>
               <div className="ml-3">
-                <span className="text-xl font-bold ">
+                <span className="text-xl font-bold">
                   {companiesLoading ? (
-                    <div className="h-6 w-32 animate-pulse  rounded" />
+                    <div className="h-6 w-32 animate-pulse rounded" />
                   ) : (
                     currentCompany?.name || t('appName')
                   )}
@@ -269,109 +296,119 @@ useEffect(() => {
             {/* Profile Section */}
             {profileLoading ? (
               <div className="flex items-center space-x-3 ml-4">
-                <div className="w-8 h-8 animate-pulse rounded-full" />
-                <div className="h-4 w-24 animate-pulse rounded" />
+                <div className="relative">
+                  <div className="w-9 h-9 rounded-full bg-gradient-to-r from-primary/20 to-secondary/20 animate-pulse"></div>
+                  <div className="absolute inset-0 rounded-full bg-[linear-gradient(90deg,transparent_0%,rgba(255,255,255,0.1)_50%,transparent_100%)] animate-shine"></div>
+                </div>
+                <div className="h-4 w-24 bg-gradient-to-r from-primary/20 to-secondary/20 rounded animate-pulse"></div>
               </div>
             ) : profile ? (
               <div className="relative ml-4" ref={profileMenuRef}>
                 <button
                   onClick={toggleProfileMenu}
-                  className="flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition-all duration-200 group"
+                  className="flex items-center space-x-3 px-3 py-2 rounded-xl text-sm font-medium hover:bg-base-200/50 transition-all duration-300 group"
                 >
                   <div className="relative">
-                    <div className="w-9 h-9 rounded-full overflow-hidden bg-gradient-to-br from-blue-400 to-purple-500 p-0.5">
-                      <div className="w-full h-full rounded-full overflow-hidden bg-white ">
+                    <div className="w-9 h-9 rounded-full overflow-hidden bg-gradient-to-br from-primary via-secondary to-primary p-[2px] group-hover:scale-105 transition-transform duration-300">
+                      <div className="w-full h-full rounded-full overflow-hidden bg-base-100">
                         {profile.profilePic ? (
                           <img
                             src={profile.profilePic}
                             alt={profile.name}
-                            className="w-full h-full object-cover "
+                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                             onError={(e) => {
                               e.target.onerror = null;
                               e.target.src = '/default-avatar.png';
                             }}
                           />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center">
-                            <FaUserCircle className="w-6 h-6 " />
+                          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10">
+                            <FaUserCircle className="w-6 h-6 text-primary" />
                           </div>
                         )}
                       </div>
                     </div>
-                    <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-400 border-2 rounded-full z-10"></div>
+                    <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-400 border-2 border-base-100 rounded-full z-10 animate-pulse"></div>
                   </div>
-                  <span className="max-w-[120px] truncate">
+                  <span className="max-w-[120px] truncate font-medium">
                     {profile.name}
                   </span>
-                  <FaChevronDown className={`w-3 h-3 transition-transform duration-200 ${
+                  <FaChevronDown className={`w-3 h-3 transition-transform duration-300 ${
                     isProfileMenuOpen ? 'rotate-180' : ''
                   }`} />
                 </button>
 
                 {/* Profile Dropdown */}
                 {isProfileMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-56 rounded-xl shadow-lg bg-base-200 overflow-hidden animate-in slide-in-from-top-2 duration-200 z-50">
-                    <div className="p-3 border-b ">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-blue-400 to-purple-500 p-0.5">
-                          <div className="w-full h-full rounded-full overflow-hidden">
-                            {profile.profilePic ? (
-                              <img
-                                src={profile.profilePic}
-                                alt={profile.name}
-                                className="w-full h-full object-cover bg-white"
-                              />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center">
-                                <FaUserCircle className="w-6 h-6 " />
-                              </div>
-                            )}
+                  <div className="absolute right-0 mt-2 w-72 rounded-xl shadow-lg bg-base-100/80 backdrop-blur-xl border border-base-300/50 overflow-hidden animate-in slide-in-from-top-2 duration-200 z-50">
+                    <div className="p-4 border-b border-base-300/50">
+                      <div className="flex items-center space-x-4">
+                        <div className="relative">
+                          <div className="w-12 h-12 rounded-full overflow-hidden bg-gradient-to-br from-primary via-secondary to-primary p-[2px]">
+                            <div className="w-full h-full rounded-full overflow-hidden bg-base-100">
+                              {profile.profilePic ? (
+                                <img
+                                  src={profile.profilePic}
+                                  alt={profile.name}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10">
+                                  <FaUserCircle className="w-8 h-8 text-primary" />
+                                </div>
+                              )}
+                            </div>
                           </div>
+                          <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-400 border-2 border-base-100 rounded-full z-10"></div>
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate">
+                          <p className="text-sm font-semibold truncate bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
                             {profile.name}
                           </p>
-                          <p className="text-xs text-base-content/50 truncate">
+                          <p className="text-xs text-base-content/60 truncate">
                             {profile.email}
                           </p>
+                          <div className="mt-1">
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
+                              {profile.type}
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </div>
                     
-                    <div className="py-1">
-                      {/* <Link
-                        to="/"
-                        onClick={() => setIsProfileMenuOpen(false)}
-                        className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-150"
-                      >
-                        <MdHome className="w-4 h-4 mr-3" />
-                        {t('menu.title') || 'Home'}
-                      </Link> */}
-                          {userRole === 'admin' && (
-                            <Link
-                              to="/admin/dashboard"
-                              onClick={() => setIsProfileMenuOpen(false)}
-                              className="flex items-center px-4 py-2 text-sm text-base-content/50 hover:bg-base-300  transition-colors duration-150"
-                            >
-                              <HiOutlineCog className="w-4 h-4 mr-3" />
-                            {t('menu.admin') || 'Admin Panel'}
-                          </Link>
+                    <div className="py-2">
+                      {userRole === 'admin' && (
+                        <Link
+                          to="/admin/dashboard"
+                          onClick={() => setIsProfileMenuOpen(false)}
+                          className="flex items-center px-4 py-2.5 text-sm text-base-content/70 hover:bg-base-200/50 hover:text-primary transition-all duration-200 group"
+                        >
+                          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center mr-3 group-hover:scale-110 transition-transform duration-200">
+                            <HiOutlineCog className="w-4 h-4 text-primary" />
+                          </div>
+                          <span>{t('menu.admin') || 'Admin Panel'}</span>
+                        </Link>
                       )}
                       <Link
                         to="/profile"
                         onClick={() => setIsProfileMenuOpen(false)}
-                        className="flex items-center px-4 py-2 text-sm text-base-content/50 hover:bg-base-300 transition-colors duration-150"
+                        className="flex items-center px-4 py-2.5 text-sm text-base-content/70 hover:bg-base-200/50 hover:text-primary transition-all duration-200 group"
                       >
-                        <HiOutlineUser className="w-4 h-4 mr-3 text-base-content/50" />
-                        {t('profile.settings') || 'Profile Settings'}
+                        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center mr-3 group-hover:scale-110 transition-transform duration-200">
+                          <HiOutlineUser className="w-4 h-4 text-primary" />
+                        </div>
+                        <span>{t('profile.settings') || 'Profile Settings'}</span>
                       </Link>
+                      <div className="border-t border-base-300/50 my-2"></div>
                       <button
                         onClick={handleLogout}
-                        className="flex items-center w-full px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50  transition-colors duration-150"
+                        className="flex items-center w-full px-4 py-2.5 text-sm text-error hover:bg-error/10 transition-all duration-200 group"
                       >
-                        <HiOutlineLogout className="w-4 h-4 mr-3" />
-                        {t('auth.logout') || 'Logout'}
+                        <div className="w-8 h-8 rounded-lg bg-error/10 flex items-center justify-center mr-3 group-hover:scale-110 transition-transform duration-200">
+                          <HiOutlineLogout className="w-4 h-4 text-error" />
+                        </div>
+                        <span>{t('auth.logout') || 'Logout'}</span>
                       </button>
                     </div>
                   </div>
@@ -380,7 +417,7 @@ useEffect(() => {
             ) : (
               <Link
                 to="/login"
-                className="ml-4 px-4 py-2 rounded-lg text-sm font-medium bg-gradient-to-r from-primary to-primary text-white hover:from-primary hover:to-primary transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105"
+                className="ml-4 px-4 py-2 rounded-xl text-sm font-medium bg-gradient-to-r from-primary to-secondary text-white hover:shadow-lg hover:shadow-primary/20 transition-all duration-300 transform hover:scale-105"
               >
                 {t('login') || 'Login'}
               </Link>

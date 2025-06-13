@@ -1,9 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { FiMessageSquare, FiX, FiSend, FiMaximize2, FiMinimize2 } from 'react-icons/fi';
+import { FiMessageSquare, FiX, FiSend, FiMaximize2, FiMinimize2, FiCopy, FiCheck } from 'react-icons/fi';
 import { useTranslation } from 'react-i18next';
 import Draggable from 'react-draggable';
-import ChatMessage from './ChatMessage';
 import useChat from '../../hooks/useChat';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import ReactMarkdown from 'react-markdown';
 
 const Chatbot = () => {
   const { t } = useTranslation();
@@ -12,6 +14,7 @@ const Chatbot = () => {
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [input, setInput] = useState('');
+  const [copiedCode, setCopiedCode] = useState(null);
   const inputRef = useRef(null);
   const messagesEndRef = useRef(null);
   const draggableRef = useRef(null);
@@ -23,8 +26,81 @@ const Chatbot = () => {
     clearMessages
   } = useChat();
   
+  const handleCopyCode = (code, index) => {
+    navigator.clipboard.writeText(code);
+    setCopiedCode(index);
+    setTimeout(() => setCopiedCode(null), 2000);
+  };
+
+  const renderMessageContent = (text) => {
+    if (!text) return null;
+
+    return (
+      <ReactMarkdown
+        components={{
+          code({ node, inline, className, children, ...props }) {
+            const match = /language-(\w+)/.exec(className || '');
+            const language = match ? match[1] : '';
+            const code = String(children).replace(/\n$/, '');
+            const index = Math.random().toString(36).substr(2, 9);
+
+            if (!inline && language) {
+              return (
+                <div className="relative group">
+                  <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      onClick={() => handleCopyCode(code, index)}
+                      className="p-1.5 rounded-lg bg-base-300/50 hover:bg-base-300 text-base-content/70 hover:text-base-content"
+                      title="Copy code"
+                    >
+                      {copiedCode === index ? <FiCheck size={16} /> : <FiCopy size={16} />}
+                    </button>
+                  </div>
+                  <SyntaxHighlighter
+                    language={language}
+                    style={vscDarkPlus}
+                    customStyle={{
+                      margin: 0,
+                      borderRadius: '0.5rem',
+                      background: 'hsl(var(--b2))',
+                    }}
+                    {...props}
+                  >
+                    {code}
+                  </SyntaxHighlighter>
+                </div>
+              );
+            }
+
+            return (
+              <code className="px-1.5 py-0.5 rounded bg-base-300/50 text-base-content/90" {...props}>
+                {children}
+              </code>
+            );
+          },
+          p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+          ul: ({ children }) => <ul className="list-disc list-inside mb-2 last:mb-0">{children}</ul>,
+          ol: ({ children }) => <ol className="list-decimal list-inside mb-2 last:mb-0">{children}</ol>,
+          li: ({ children }) => <li className="mb-1 last:mb-0">{children}</li>,
+          a: ({ href, children }) => (
+            <a href={href} className="text-primary hover:text-primary/80 underline" target="_blank" rel="noopener noreferrer">
+              {children}
+            </a>
+          ),
+          blockquote: ({ children }) => (
+            <blockquote className="border-l-4 border-base-300 pl-4 italic my-2">
+              {children}
+            </blockquote>
+          ),
+        }}
+      >
+        {text}
+      </ReactMarkdown>
+    );
+  };
+  
   const handleClearChat = () => {
-    if (window.confirm('Are you sure you want to clear the chat history?')) {
+    if (window.confirm(t('chat.confirmClear', 'Are you sure you want to clear the chat history?'))) {
       clearMessages();
     }
   };
@@ -78,7 +154,15 @@ const Chatbot = () => {
     }
   };
   
-  const chatWindowClass = `w-80 ${isExpanded ? 'h-[80vh]' : 'h-[500px]'} bg-white rounded-lg shadow-xl flex flex-col border border-gray-200 transition-all duration-200`;
+  const chatWindowClass = `
+    w-80 sm:w-96 md:w-[420px]
+    ${isExpanded ? 'h-[80vh]' : 'h-[500px]'}
+    bg-base-100/95 backdrop-blur-xl
+    rounded-xl shadow-xl
+    flex flex-col
+    border border-base-300/50
+    transition-all duration-300
+  `;
 
   return (
     <div className="fixed inset-0 z-50 pointer-events-none">
@@ -106,28 +190,31 @@ const Chatbot = () => {
             }}
           >
             {/* Header */}
-            <div className="chat-header p-3 bg-blue-600 text-white rounded-t-lg flex justify-between items-center">
-              <h3 className="font-medium">Chat Assistant</h3>
-              <div className="flex items-center space-x-2">
+            <div className="chat-header p-3 bg-gradient-to-r from-primary to-secondary text-white rounded-t-xl flex justify-between items-center">
+              <h3 className="font-medium flex items-center gap-2">
+                <FiMessageSquare size={18} />
+                <span className="truncate">{t('chat.title', 'Chat Assistant')}</span>
+              </h3>
+              <div className="flex items-center space-x-1">
                 <button 
                   onClick={toggleExpand}
-                  className="text-white hover:bg-blue-700 rounded p-1"
-                  title={isExpanded ? 'Minimize' : 'Maximize'}
+                  className="text-white/80 hover:text-white hover:bg-white/10 rounded-lg p-1.5 transition-all duration-200"
+                  title={isExpanded ? t('chat.minimize', 'Minimize') : t('chat.maximize', 'Maximize')}
                 >
                   {isExpanded ? <FiMinimize2 size={16} /> : <FiMaximize2 size={16} />}
                 </button>
                 <button 
                   onClick={handleClearChat}
-                  className="text-white hover:bg-blue-700 rounded p-1 text-sm"
-                  title="Clear chat"
+                  className="text-white/80 hover:text-white hover:bg-white/10 rounded-lg p-1.5 transition-all duration-200"
+                  title={t('chat.clear', 'Clear chat')}
                   disabled={messages.length === 0}
                 >
-                  Clear
+                  {t('chat.clear', 'Clear')}
                 </button>
                 <button 
                   onClick={toggleChat}
-                  className="text-white hover:bg-blue-700 rounded-full p-1"
-                  title="Close chat"
+                  className="text-white/80 hover:text-white hover:bg-white/10 rounded-lg p-1.5 transition-all duration-200"
+                  title={t('chat.close', 'Close chat')}
                 >
                   <FiX size={18} />
                 </button>
@@ -135,21 +222,25 @@ const Chatbot = () => {
             </div>
 
             {/* Messages */}
-            <div className="flex-1 p-4 overflow-y-auto bg-gray-50">
+            <div className="flex-1 p-4 overflow-y-auto bg-base-200/50">
               {messages.length === 0 ? (
                 <div className="h-full flex items-center justify-center text-center p-4">
                   <div>
-                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-3 mx-auto">
-                      <FiMessageSquare size={24} className="text-blue-600" />
+                    <div className="w-16 h-16 bg-gradient-to-br from-primary/10 to-secondary/10 rounded-full flex items-center justify-center mb-4 mx-auto">
+                      <FiMessageSquare size={28} className="text-primary" />
                     </div>
-                    <h3 className="font-medium text-gray-800 mb-1">How can I help you today?</h3>
-                    <p className="text-sm text-gray-500 mb-4">Ask me anything about our services</p>
+                    <h3 className="font-medium text-base-content mb-2">{t('chat.welcome', 'How can I help you today?')}</h3>
+                    <p className="text-sm text-base-content/60 mb-6">{t('chat.welcomeSubtitle', 'Ask me anything about our services')}</p>
                     <div className="grid gap-2">
-                      {['How do I get started?', 'What are your plans?', 'Contact support'].map((suggestion, i) => (
+                      {[
+                        t('chat.suggestions.getStarted', 'How do I get started?'),
+                        t('chat.suggestions.plans', 'What are your plans?'),
+                        t('chat.suggestions.support', 'Contact support')
+                      ].map((suggestion, i) => (
                         <button
                           key={i}
                           onClick={() => setInput(suggestion)}
-                          className="text-sm text-blue-600 hover:bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100"
+                          className="text-sm bg-base-100 hover:bg-base-200 text-base-content/70 hover:text-primary px-4 py-2 rounded-lg border border-base-300/50 transition-all duration-200"
                         >
                           {suggestion}
                         </button>
@@ -167,20 +258,20 @@ const Chatbot = () => {
                       <div 
                         className={`max-w-[80%] p-3 rounded-lg ${
                           msg.sender === 'user' 
-                            ? 'bg-blue-600 text-white rounded-br-none' 
-                            : 'bg-white border border-gray-200 rounded-bl-none'
+                            ? 'bg-primary hover:bg-primary/90 text-primary-content rounded-br-none' 
+                            : 'bg-base-100 border border-base-300/50 rounded-bl-none'
                         }`}
                       >
-                        <div className="break-words">
-                          {msg.text || (isLoading && '...')}
+                        <div className="break-words prose prose-sm max-w-none dark:prose-invert">
+                          {renderMessageContent(msg.text) || (isLoading && '...')}
                         </div>
                       </div>
                     </div>
                   ))}
                   {isLoading && (
                     <div className="flex justify-start">
-                      <div className="bg-white border border-gray-200 p-3 rounded-lg rounded-bl-none">
-                        <span className="loading loading-dots loading-sm"></span>
+                      <div className="bg-base-100 border border-base-300/50 p-3 rounded-lg rounded-bl-none">
+                        <span className="loading loading-dots loading-sm text-primary"></span>
                       </div>
                     </div>
                   )}
@@ -190,7 +281,7 @@ const Chatbot = () => {
             </div>
 
             {/* Input Area */}
-            <div className="p-3 border-t border-gray-200 bg-white">
+            <div className="p-3 border-t border-base-300/50 bg-base-100">
               <div className="relative">
                 <input
                   ref={inputRef}
@@ -198,14 +289,14 @@ const Chatbot = () => {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder="Type a message..."
-                  className="input input-bordered w-full pr-12"
+                  placeholder={t('chat.placeholder', 'Type a message...')}
+                  className="input input-bordered w-full pr-12 bg-base-100 focus:border-primary focus:ring-1 focus:ring-primary"
                   disabled={isLoading}
                 />
                 <button
                   onClick={handleSend}
                   disabled={!input.trim() || isLoading}
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-blue-600 hover:text-blue-700 disabled:text-gray-400"
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-primary hover:text-primary/80 disabled:text-base-content/30 transition-colors duration-200"
                 >
                   <FiSend size={20} />
                 </button>
@@ -220,8 +311,8 @@ const Chatbot = () => {
         >
           <button 
             onClick={toggleChat}
-            className="btn btn-circle bg-blue-600 text-white shadow-lg hover:bg-blue-700 border-0"
-            aria-label="Open chat"
+            className="btn btn-circle bg-gradient-to-r from-primary to-secondary text-white shadow-lg hover:shadow-primary/20 border-0 transition-all duration-300 transform hover:scale-105"
+            aria-label={t('chat.open', 'Open chat')}
           >
             <FiMessageSquare size={24} />
           </button>

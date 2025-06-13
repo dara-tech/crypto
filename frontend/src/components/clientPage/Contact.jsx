@@ -39,7 +39,6 @@ const Contact = () => {
   };
 
   useEffect(() => {
-    // Fetch companies if not already loaded
     if (!companies || companies.length === 0) {
       getCompanies();
     } else {
@@ -76,7 +75,6 @@ const Contact = () => {
       ...prev,
       [name]: value
     }));
-    // Clear error when user types
     if (formErrors[name]) {
       setFormErrors(prev => ({
         ...prev,
@@ -98,15 +96,11 @@ const Contact = () => {
     setSubmitStatus({ success: null, message: '' });
 
     try {
-      // Replace with your actual API call
-      // const response = await api.post('/contact', formData);
-      await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate API call
-
+      await new Promise(resolve => setTimeout(resolve, 1500));
       setSubmitStatus({
         success: true,
         message: t('contactPage.form.success')
       });
-      // Reset form on success
       setFormData({
         name: '',
         email: '',
@@ -126,19 +120,86 @@ const Contact = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <span className="loading loading-spinner loading-lg"></span>
+      <div className="min-h-screen bg-gradient-to-b from-base-200/50 to-base-100 py-12 px-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-20">
+            <div className="h-12 w-3/4 mx-auto bg-base-300 animate-pulse rounded-xl"></div>
+            <div className="h-6 w-1/2 mx-auto bg-base-300 animate-pulse rounded-lg mt-4"></div>
+          </div>
+
+          <div className="mb-12 rounded-xl overflow-hidden shadow-xl">
+            <div className="aspect-w-16 aspect-h-9 w-full h-96 md:h-[500px] bg-base-300 animate-pulse"></div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            <div className="bg-base-100 p-8 rounded-xl shadow-lg">
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <div className="h-4 w-1/3 bg-base-300 animate-pulse rounded"></div>
+                    <div className="h-12 bg-base-300 animate-pulse rounded-lg"></div>
+                  </div>
+                  <div className="space-y-4">
+                    <div className="h-4 w-1/3 bg-base-300 animate-pulse rounded"></div>
+                    <div className="h-12 bg-base-300 animate-pulse rounded-lg"></div>
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <div className="h-4 w-1/3 bg-base-300 animate-pulse rounded"></div>
+                  <div className="h-12 bg-base-300 animate-pulse rounded-lg"></div>
+                </div>
+                <div className="space-y-4">
+                  <div className="h-4 w-1/3 bg-base-300 animate-pulse rounded"></div>
+                  <div className="h-40 bg-base-300 animate-pulse rounded-lg"></div>
+                </div>
+                <div className="h-12 bg-base-300 animate-pulse rounded-lg"></div>
+              </div>
+            </div>
+
+            <div className="space-y-8">
+              <div className="bg-base-100 p-8 rounded-xl shadow-lg">
+                <div className="flex items-center mb-6">
+                  <div className="w-12 h-12 bg-base-300 animate-pulse rounded-full"></div>
+                  <div className="h-8 w-48 bg-base-300 animate-pulse rounded-lg ml-4"></div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {[...Array(4)].map((_, i) => (
+                    <div key={i} className="flex items-start space-x-4 p-4">
+                      <div className="w-10 h-10 bg-base-300 animate-pulse rounded-full"></div>
+                      <div className="space-y-2 flex-1">
+                        <div className="h-4 w-24 bg-base-300 animate-pulse rounded"></div>
+                        <div className="h-4 w-32 bg-base-300 animate-pulse rounded"></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="bg-base-100 p-8 rounded-xl shadow-lg">
+                <div className="flex items-center mb-6">
+                  <div className="w-12 h-12 bg-base-300 animate-pulse rounded-full"></div>
+                  <div className="h-8 w-48 bg-base-300 animate-pulse rounded-lg ml-4"></div>
+                </div>
+                <div className="flex flex-wrap gap-4 justify-center md:justify-start">
+                  {[...Array(4)].map((_, i) => (
+                    <div key={i} className="w-12 h-12 bg-base-300 animate-pulse rounded-full"></div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="alert alert-error max-w-4xl mx-auto my-8">
-        <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        <span>{error}</span>
+      <div className="min-h-screen bg-gradient-to-b from-base-200/50 to-base-100 flex flex-col justify-center items-center px-4">
+        <div className="bg-base-200/50 backdrop-blur-sm p-8 rounded-2xl shadow-xl text-center">
+          <FaExclamationTriangle className="text-error text-5xl mx-auto mb-6" />
+          <p className="text-xl text-error">{error}</p>
+        </div>
       </div>
     );
   }
@@ -156,19 +217,22 @@ const Contact = () => {
     }
   } : defaultContact;
 
-  // Generate Google Maps iframe URL without an API key
   const mapUrl = `https://maps.google.com/maps?q=${currentContact.coordinates.lat},${currentContact.coordinates.lng}&z=${currentContact.coordinates.zoom || 15}&output=embed&language=${i18n.language}`;
 
   return (
-    <div className="min-h-screen bg-base-200 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-b from-base-200/50 to-base-100 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-primary mb-4">{t('contactPage.title')}</h1>
-          <p className="text-lg text-base-content/70">{t('contactPage.subtitle')}</p>
+        <div className="text-center mb-20">
+          <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary/10 to-secondary bg-clip-text mb-4 my-20">
+            {t('contactPage.title')}
+          </h1>
+          <p className="text-lg text-base-content/70">
+            {t('contactPage.subtitle')}
+          </p>
         </div>
 
         {/* Map Section */}
-        <div className="mb-12 rounded-xl overflow-hidden shadow-xl">
+        <div className="mb-12 rounded-xl overflow-hidden shadow-xl hover:shadow-2xl transition-shadow duration-300">
           <div className="aspect-w-16 aspect-h-9 w-full h-96 md:h-[500px]">
             <iframe
               title={t('contactPage.map.title')}
@@ -186,7 +250,7 @@ const Contact = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Contact Form */}
-          <div className="bg-base-100 p-8 rounded-xl shadow-lg">
+          <div className="bg-base-100 p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300">
             {submitStatus.message && (
               <div className={`alert ${submitStatus.success ? 'alert-success' : 'alert-error'} mb-6`}>
                 {submitStatus.success ? (
@@ -206,14 +270,14 @@ const Contact = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="form-control">
                   <label className="label">
-                    <span className="label-text">{t('contactPage.form.name')}</span>
+                    <span className="label-text font-medium">{t('contactPage.form.name')}</span>
                   </label>
                   <input
                     type="text"
                     name="name"
                     value={formData.name}
                     onChange={handleChange}
-                    className={`input input-bordered w-full ${formErrors.name ? 'input-error' : ''}`}
+                    className={`input input-bordered w-full transition-all duration-200 ${formErrors.name ? 'input-error' : 'hover:border-primary focus:border-primary'}`}
                     placeholder={t('contactPage.form.name')}
                   />
                   {formErrors.name && (
@@ -225,14 +289,14 @@ const Contact = () => {
 
                 <div className="form-control">
                   <label className="label">
-                    <span className="label-text">{t('contactPage.form.email')}</span>
+                    <span className="label-text font-medium">{t('contactPage.form.email')}</span>
                   </label>
                   <input
                     type="email"
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
-                    className={`input input-bordered w-full ${formErrors.email ? 'input-error' : ''}`}
+                    className={`input input-bordered w-full transition-all duration-200 ${formErrors.email ? 'input-error' : 'hover:border-primary focus:border-primary'}`}
                     placeholder={t('contactPage.form.email')}
                   />
                   {formErrors.email && (
@@ -245,14 +309,14 @@ const Contact = () => {
 
               <div className="form-control">
                 <label className="label">
-                  <span className="label-text">{t('contactPage.form.subject')}</span>
+                  <span className="label-text font-medium">{t('contactPage.form.subject')}</span>
                 </label>
                 <input
                   type="text"
                   name="subject"
                   value={formData.subject}
                   onChange={handleChange}
-                  className={`input input-bordered w-full ${formErrors.subject ? 'input-error' : ''}`}
+                  className={`input input-bordered w-full transition-all duration-200 ${formErrors.subject ? 'input-error' : 'hover:border-primary focus:border-primary'}`}
                   placeholder={t('contactPage.form.subject')}
                 />
                 {formErrors.subject && (
@@ -264,13 +328,13 @@ const Contact = () => {
 
               <div className="form-control">
                 <label className="label">
-                  <span className="label-text">{t('contactPage.form.message')}</span>
+                  <span className="label-text font-medium">{t('contactPage.form.message')}</span>
                 </label>
                 <textarea
                   name="message"
                   value={formData.message}
                   onChange={handleChange}
-                  className={`textarea textarea-bordered w-full h-40 ${formErrors.message ? 'textarea-error' : ''}`}
+                  className={`textarea textarea-bordered w-full h-40 transition-all duration-200 ${formErrors.message ? 'textarea-error' : 'hover:border-primary focus:border-primary'}`}
                   placeholder={t('contactPage.form.message')}
                 ></textarea>
                 {formErrors.message && (
@@ -283,7 +347,7 @@ const Contact = () => {
               <div className="pt-2">
                 <button
                   type="submit"
-                  className="btn btn-primary w-full"
+                  className="btn btn-primary w-full hover:btn-secondary transition-all duration-200"
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? (
@@ -304,15 +368,19 @@ const Contact = () => {
 
           {/* Contact Information */}
           <div className="space-y-8">
-            <div className="bg-base-100 p-8 rounded-xl shadow-lg">
+            <div className="bg-base-100 p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300">
               <div className="flex items-center mb-6">
-                <FaBuilding className="text-primary text-2xl mr-3" />
-                <h3 className="text-2xl font-bold">{t('contactPage.info.title')}</h3>
+                <div className="p-3 bg-primary/10 rounded-full mr-4">
+                  <FaBuilding className="text-primary text-2xl" />
+                </div>
+                <h3 className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                  {t('contactPage.info.title')}
+                </h3>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Left Column */}
                 <div className="space-y-6">
-                  <div className="flex items-start space-x-4">
+                  <div className="flex items-start space-x-4 p-4 rounded-lg hover:bg-base-200/50 transition-all duration-200 hover:scale-[1.02]">
                     <div className="p-2 bg-primary/10 rounded-full flex-shrink-0">
                       <FaMapMarkerAlt className="text-primary text-xl" />
                     </div>
@@ -324,7 +392,7 @@ const Contact = () => {
                     </div>
                   </div>
 
-                  <div className="flex items-start space-x-4">
+                  <div className="flex items-start space-x-4 p-4 rounded-lg hover:bg-base-200/50 transition-all duration-200 hover:scale-[1.02]">
                     <div className="p-2 bg-primary/10 rounded-full flex-shrink-0">
                       <FaPhoneAlt className="text-primary text-xl" />
                     </div>
@@ -342,7 +410,7 @@ const Contact = () => {
 
                 {/* Right Column */}
                 <div className="space-y-6">
-                  <div className="flex items-start space-x-4">
+                  <div className="flex items-start space-x-4 p-4 rounded-lg hover:bg-base-200/50 transition-all duration-200 hover:scale-[1.02]">
                     <div className="p-2 bg-primary/10 rounded-full flex-shrink-0">
                       <FaEnvelope className="text-primary text-xl" />
                     </div>
@@ -357,7 +425,7 @@ const Contact = () => {
                     </div>
                   </div>
 
-                  <div className="flex items-start space-x-4">
+                  <div className="flex items-start space-x-4 p-4 rounded-lg hover:bg-base-200/50 transition-all duration-200 hover:scale-[1.02]">
                     <div className="p-2 bg-primary/10 rounded-full flex-shrink-0">
                       <FaClock className="text-primary text-xl" />
                     </div>
@@ -373,10 +441,14 @@ const Contact = () => {
             </div>
 
             {/* Social Media Section */}
-            <div className="bg-base-100 p-8 rounded-xl shadow-lg">
+            <div className="bg-base-100 p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300">
               <div className="flex items-center mb-6">
-                <FaGlobe className="text-primary text-2xl mr-3" />
-                <h3 className="text-2xl font-bold">{t('contactPage.social.title')}</h3>
+                <div className="p-3 bg-primary/10 rounded-full mr-4">
+                  <FaGlobe className="text-primary text-2xl" />
+                </div>
+                <h3 className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                  {t('contactPage.social.title')}
+                </h3>
               </div>
               <div className="flex flex-wrap gap-4 justify-center md:justify-start">
                 {currentContact.social?.facebook && (
@@ -384,7 +456,7 @@ const Contact = () => {
                     href={currentContact.social.facebook}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="btn btn-ghost btn-circle hover:bg-base-200 transition-colors"
+                    className="btn btn-ghost btn-circle hover:bg-base-200 transition-all duration-200 hover:scale-110"
                     aria-label={t('contactPage.social.facebook')}
                   >
                     <FaFacebook className="text-2xl text-[#1877F2]" />
@@ -396,7 +468,7 @@ const Contact = () => {
                     href={currentContact.social.instagram}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="btn btn-ghost btn-circle hover:bg-base-200 transition-colors"
+                    className="btn btn-ghost btn-circle hover:bg-base-200 transition-all duration-200 hover:scale-110"
                     aria-label={t('contactPage.social.instagram')}
                   >
                     <FaInstagram className="text-2xl text-[#E1306C]" />
@@ -408,7 +480,7 @@ const Contact = () => {
                     href={currentContact.social.youtube}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="btn btn-ghost btn-circle hover:bg-base-200 transition-colors"
+                    className="btn btn-ghost btn-circle hover:bg-base-200 transition-all duration-200 hover:scale-110"
                     aria-label={t('contactPage.social.youtube')}
                   >
                     <FaYoutube className="text-2xl text-[#FF0000]" />
@@ -420,7 +492,7 @@ const Contact = () => {
                     href={currentContact.social.linkedin}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="btn btn-ghost btn-circle hover:bg-base-200 transition-colors"
+                    className="btn btn-ghost btn-circle hover:bg-base-200 transition-all duration-200 hover:scale-110"
                     aria-label={t('contactPage.social.linkedin')}
                   >
                     <FaLinkedin className="text-2xl text-[#0077B6]" />

@@ -1,72 +1,30 @@
-import { Navigate, Outlet } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import { useEffect, useState } from 'react';
-import axios from 'axios';
-import { toast } from 'react-hot-toast';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import useAuth from '../../hooks/useAuth';
+import { Loader } from 'lucide-react';
 
-const ProtectedRoute = ({ allowedRoles = ['admin', 'user', 'payment_view'] }) => {
-  const { t } = useTranslation();
-  const [isLoading, setIsLoading] = useState(true);
-  const [isAuthorized, setIsAuthorized] = useState(false);
-  const token = localStorage.getItem('token');
+const ProtectedRoute = ({ allowedRoles }) => {
+  const { profile, isAuthenticated, loading } = useAuth();
+  const location = useLocation();
 
-  useEffect(() => {
-    const verifyAuth = async () => {
-      if (!token) {
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        // Get user info to check role
-        const response = await axios.get('/api/auth/current-user', {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-
-        const userRole = response.data?.type || 'user';
-        
-        if (allowedRoles.includes(userRole)) {
-          setIsAuthorized(true);
-        } else {
-          toast.error(t('common.unauthorized'));
-        }
-      } catch (error) {
-        console.error('Error verifying auth:', error);
-        if (error.response?.status === 401) {
-          localStorage.removeItem('token');
-          toast.error(t('common.sessionExpired'));
-        } else {
-          toast.error(t('common.authError'));
-        }
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    verifyAuth();
-  }, [token, allowedRoles, t]);
-
-  if (isLoading) {
+  if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      <div className="flex justify-center items-center h-screen">
+        <Loader className="animate-spin w-12 h-12 text-blue-500" />
       </div>
     );
   }
 
-  if (!token) {
-    // User not logged in, redirect to login page
-    return <Navigate to="/login" replace state={{ from: window.location.pathname }} />;
+  if (!isAuthenticated) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  if (!isAuthorized) {
-    // User not authorized for this route, redirect to home
+  const userHasRequiredRole = profile && allowedRoles?.includes(profile.type);
+
+  if (!userHasRequiredRole) {
+    // User is authenticated but does not have the required role, redirect to home.
     return <Navigate to="/" replace />;
   }
 
-  // User is authenticated and authorized, render the child routes
   return <Outlet />;
 };
 

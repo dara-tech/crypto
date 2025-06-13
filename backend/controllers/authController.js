@@ -270,6 +270,125 @@ export const getCurrentUser = async (req, res) => {
   }
 };
 
+export const getUsers = async (req, res) => {
+  try {
+    // Check if the authenticated user is an admin
+    if (req.user.type !== 'admin') {
+      return res.status(403).json({ message: 'Forbidden: This action requires admin privileges.' });
+    }
+
+    // Fetch all users but exclude their passwords
+    const users = await User.find().select('-password');
+
+    return res.status(200).json(users);
+
+  } catch (err) {
+    console.error('Get users error:', err);
+    res.status(500).json({ message: 'Server error while fetching users.' });
+  }
+};
+
+export const getUserById = async (req, res) => {
+  try {
+    // An admin should be able to fetch any user's details
+    if (req.user.type !== 'admin') {
+      return res.status(403).json({ message: 'Forbidden: Admin access required.' });
+    }
+
+    const { id } = req.params;
+    const user = await User.findById(id).select('-password');
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    return res.status(200).json(user);
+  } catch (err) {
+    console.error('Get user by ID error:', err);
+    res.status(500).json({ message: 'Server error while fetching user.' });
+  }
+};
+
+export const updateUserByAdmin = async (req, res) => {
+  try {
+    // Ensure the requester is an admin
+    if (req.user.type !== 'admin') {
+      return res.status(403).json({ message: 'Forbidden: Admin access required.' });
+    }
+
+    const { id } = req.params;
+    const { name, email, type } = req.body;
+
+    // Find the user to be updated
+    let userToUpdate = await User.findById(id);
+    if (!userToUpdate) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    // Prevent an admin from changing their own role to something else
+    if (req.user.id === id && type && userToUpdate.type !== type) {
+      return res.status(400).json({ message: 'Admins cannot change their own role.' });
+    }
+    
+    // Update fields
+    if (name) userToUpdate.name = name;
+    if (email) userToUpdate.email = email;
+    if (type) {
+      const validRoles = ['admin', 'user', 'payment_viewer'];
+      if (!validRoles.includes(type)) {
+        return res.status(400).json({ message: 'Invalid role specified.' });
+      }
+      userToUpdate.type = type;
+    }
+
+    const updatedUser = await userToUpdate.save();
+
+    // Return updated user, excluding password
+    const userResponse = updatedUser.toObject();
+    delete userResponse.password;
+    
+    return res.status(200).json({
+      message: 'User updated successfully.',
+      user: userResponse,
+    });
+
+  } catch (error) {
+    console.error('Error updating user by admin:', error);
+    res.status(500).json({ message: 'Server error while updating user.' });
+  }
+};
+
+export const deleteUser = async (req, res) => {
+  try {
+    // Check if the authenticated user is an admin. The user object is attached by the auth middleware.
+    if (req.user.type !== 'admin') {
+      return res.status(403).json({ message: 'Forbidden: This action requires admin privileges.' });
+    }
+
+    const { id } = req.params;
+
+    // Find the user to delete
+    const userToDelete = await User.findById(id);
+    if (!userToDelete) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    // Optional: Prevent admins from deleting other admins or themselves for safety
+    if (userToDelete.type === 'admin') {
+      return res.status(400).json({ message: 'Admins cannot be deleted through this endpoint.' });
+    }
+
+    // Delete the user
+    await User.findByIdAndDelete(id);
+
+    return res.status(200).json({ message: 'User deleted successfully.' });
+
+  } catch (err) {
+    console.error('Delete user error:', err);
+    res.status(500).json({ message: 'Server error while deleting user.' });
+  }
+};
+
 export const logoutUser = async (req, res) => {
   try {
     // Clear the token from the client-side

@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo, useCallback, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { FaBuilding, FaPen, FaPhoneAlt, FaGlobe, FaFile, FaCreditCard, FaChevronDown, FaQuestionCircle, FaUserTie } from "react-icons/fa";
+import { motion, AnimatePresence } from "framer-motion";
 import useCompanies from "../../../hooks/useCompanies";
 import LogoUpload from "./edit/LogoUpload";
 import BasicInfo from "./edit/BasicInfo";
@@ -13,6 +14,74 @@ import TermsAndConditions from "./edit/TermCondition";
 import FAQManager from "./edit/FAQManager";
 import ProfessionalsManager from './edit/ProfessionalsManager';
 import { useTranslation } from "react-i18next";
+
+// Optimized animation variants
+const fadeIn = {
+  initial: { opacity: 0 },
+  animate: { opacity: 1 },
+  exit: { opacity: 0 }
+};
+
+const slideUp = {
+  initial: { opacity: 0, y: 10 },
+  animate: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: -10 }
+};
+
+// Memoized Tab Button Component
+const TabButton = memo(({ tab, isActive, onClick }) => (
+  <motion.button
+    initial={{ opacity: 0, x: -10 }}
+    animate={{ opacity: 1, x: 0 }}
+    type="button"
+    onClick={onClick}
+    className={`tab tab-lg gap-2 transition-all duration-200 ${
+      isActive 
+        ? 'tab-active bg-gradient-to-r from-primary/10 to-secondary/10 border-b-2 border-primary text-primary shadow-lg' 
+        : 'hover:bg-primary/5'
+    }`}
+  >
+    {tab.icon}
+    <span className="hidden sm:inline">{tab.label}</span>
+  </motion.button>
+));
+
+// Memoized Loading Skeleton Component
+const LoadingSkeleton = memo(() => (
+  <div className="container mx-auto p-6 max-w-6xl min-h-screen bg-gradient-to-br from-base-100 via-base-200 to-base-300 pt-20">
+    <div className="max-w-6xl mx-auto">
+      {/* Header Skeleton */}
+      <div className="flex items-center justify-between mb-8">
+        <div className="h-10 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-xl w-64 animate-pulse"></div>
+        <div className="h-12 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-xl w-32 animate-pulse"></div>
+      </div>
+
+      {/* Tabs Skeleton */}
+      <div className="flex space-x-2 mb-8 overflow-x-auto pb-2">
+        {[1, 2, 3, 4, 5].map(i => (
+          <div key={i} className="flex-shrink-0 h-14 w-40 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-xl animate-pulse"></div>
+        ))}
+      </div>
+      
+      {/* Content Skeleton */}
+      <div className="bg-base-100/50 backdrop-blur-sm border border-primary/20 rounded-xl p-8 shadow-lg">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-8 h-8 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-full animate-pulse"></div>
+          <div className="h-8 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-xl w-48 animate-pulse"></div>
+        </div>
+        
+        <div className="space-y-6">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="space-y-3">
+              <div className="h-6 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-lg w-1/4 animate-pulse"></div>
+              <div className="h-12 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-lg animate-pulse"></div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+));
 
 const CompanyEdit = () => {
   const { id } = useParams();
@@ -344,7 +413,27 @@ const CompanyEdit = () => {
     }
   };
 
-  const renderTabContent = () => {
+  // Memoized handlers
+  const handleTabChange = useCallback((tabId) => {
+    setActiveTab(tabId);
+  }, []);
+
+  const handlePreviousTab = useCallback(() => {
+    const currentIndex = tabs.findIndex(tab => tab.id === activeTab);
+    if (currentIndex > 0) {
+      setActiveTab(tabs[currentIndex - 1].id);
+    }
+  }, [activeTab, tabs]);
+
+  const handleNextTab = useCallback(() => {
+    const currentIndex = tabs.findIndex(tab => tab.id === activeTab);
+    if (currentIndex < tabs.length - 1) {
+      setActiveTab(tabs[currentIndex + 1].id);
+    }
+  }, [activeTab, tabs]);
+
+  // Memoized tab content
+  const tabContent = useMemo(() => {
     switch (activeTab) {
       case 'logo':
         return (
@@ -418,179 +507,180 @@ const CompanyEdit = () => {
       default:
         return null;
     }
-  };
+  }, [activeTab, formData, logoPreview, error]);
 
   if (loading) {
-    return (
-      <div className="container mx-auto p-6 max-w-6xl">
-        <div className="flex items-center justify-between mb-8">
-          <div className="h-8 w-48 bg-base-200 animate-pulse rounded"></div>
-          <div className="h-10 w-32 bg-base-200 animate-pulse rounded"></div>
-        </div>
-
-        <div className="space-y-6">
-          {/* Tab skeleton */}
-          <div className="flex space-x-2 mb-6">
-            {[1, 2, 3, 4, 5].map(i => (
-              <div key={i} className="h-12 w-32 bg-base-200 animate-pulse rounded"></div>
-            ))}
-          </div>
-          
-          {/* Content skeleton */}
-          <div className="p-6 border rounded-lg bg-base-100">
-            <div className="h-6 w-32 bg-base-200 animate-pulse rounded mb-4"></div>
-            <div className="space-y-4">
-              {[1, 2, 3].map(i => (
-                <div key={i} className="h-10 bg-base-200 animate-pulse rounded"></div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
+    return <LoadingSkeleton />;
   }
 
   return (
-    <div className="container mx-auto p-6 max-w-6xl">
-      <div className="flex items-center justify-between mb-8">
-        <h2 className="text-3xl font-bold">{t('company.editTitle')}</h2>
-        <button 
-          onClick={() => navigate("/admin/companies")}
-          className="btn btn-ghost"
-        >
-          {t('company.backToCompanies')}
-        </button>
-      </div>
-
-      {error && (
-        <div className="alert alert-error mb-6">
-          <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <span>{error}</span>
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit} className="space-y-8">
-        {/* Desktop Tabs */}
-        <div className="hidden lg:block">
-          <div className="tabs tabs-boxed bg-base-200 p-1 mb-8">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setActiveTab(tab.id)}
-                className={`tab tab-lg gap-2 ${
-                  activeTab === tab.id ? 'tab-active' : ''
-                }`}
-              >
-                {tab.icon}
-                <span className="hidden sm:inline">{tab.label}</span>
-              </button>
-            ))}
-          </div>
+    <div className="container mx-auto p-6 max-w-6xl min-h-screen  pt-20">
+      <motion.div 
+        variants={fadeIn}
+        initial="initial"
+        animate="animate"
+        className="max-w-6xl mx-auto"
+      >
+        <div className="flex items-center justify-between mb-8">
+          <motion.h2 
+            variants={slideUp}
+            className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent"
+          >
+            {t('company.editTitle')}
+          </motion.h2>
+          <motion.button 
+            variants={slideUp}
+            onClick={() => navigate("/admin/companies")}
+            className="btn btn-ghost hover:bg-primary/10 transition-colors duration-200"
+          >
+            {t('company.backToCompanies')}
+          </motion.button>
         </div>
 
-        {/* Mobile Dropdown */}
-        <div className="lg:hidden mb-8">
-          <div className="dropdown dropdown-bottom w-full">
-            <div tabIndex={0} role="button" className="btn btn-outline w-full justify-between">
-              <div className="flex items-center gap-2">
-                {tabs.find(tab => tab.id === activeTab)?.icon}
-                <span>{tabs.find(tab => tab.id === activeTab)?.label}</span>
-              </div>
-              <FaChevronDown className="text-sm" />
-            </div>
-            <ul tabIndex={0} className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-full mt-1 z-10">
+        <AnimatePresence mode="wait">
+          {error && (
+            <motion.div 
+              variants={slideUp}
+              className="alert alert-error mb-6 shadow-lg"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span>{error}</span>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <form onSubmit={handleSubmit} className="space-y-8">
+          {/* Desktop Tabs */}
+          <div className="hidden lg:block">
+            <div className="tabs tabs-boxed bg-base-200/50 backdrop-blur-sm p-1 mb-8 rounded-xl border border-primary/20">
               {tabs.map((tab) => (
-                <li key={tab.id}>
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`flex items-center gap-2 ${
-                      activeTab === tab.id ? 'active' : ''
-                    }`}
-                  >
-                    {tab.icon}
-                    {tab.label}
-                  </button>
-                </li>
+                <TabButton
+                  key={tab.id}
+                  tab={tab}
+                  isActive={activeTab === tab.id}
+                  onClick={() => handleTabChange(tab.id)}
+                />
               ))}
-            </ul>
-          </div>
-        </div>
-
-        {/* Tab Content */}
-        <div className="bg-base-100 border rounded-lg p-6 min-h-[400px]">
-          <div className="flex items-center gap-2 mb-6">
-            {tabs.find(tab => tab.id === activeTab)?.icon}
-            <h3 className="text-2xl font-semibold">
-              {tabs.find(tab => tab.id === activeTab)?.label}
-            </h3>
-          </div>
-          
-          {renderTabContent()}
-        </div>
-
-        {/* Navigation Buttons */}
-        <div className="flex justify-between items-center">
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                const currentIndex = tabs.findIndex(tab => tab.id === activeTab);
-                if (currentIndex > 0) {
-                  setActiveTab(tabs[currentIndex - 1].id);
-                }
-              }}
-              className="btn btn-outline btn-sm"
-              disabled={activeTab === tabs[0].id}
-            >
-              Previous
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                const currentIndex = tabs.findIndex(tab => tab.id === activeTab);
-                if (currentIndex < tabs.length - 1) {
-                  setActiveTab(tabs[currentIndex + 1].id);
-                }
-              }}
-              className="btn btn-outline btn-sm"
-              disabled={activeTab === tabs[tabs.length - 1].id}
-            >
-              Next
-            </button>
+            </div>
           </div>
 
-          <div className="flex gap-4">
-            <button
-              type="button"
-              onClick={() => navigate("/admin/companies")}
-              className="btn btn-ghost"
-              disabled={submitting}
-            >
-              {t('company.cancel')}
-            </button>
-            <button
-              type="submit"
-              className="btn btn-primary"
-              disabled={submitting}
-            >
-              {submitting ? (
-                <>
-                  <span className="loading loading-spinner loading-sm"></span>
-                  {t('company.updating')}
-                </>
-              ) : (
-                t('company.updateCompany')
-              )}
-            </button>
-          </div>
-        </div>
-      </form>
+          {/* Mobile Dropdown */}
+          <motion.div 
+            variants={slideUp}
+            className="lg:hidden mb-8"
+          >
+            <div className="dropdown dropdown-bottom w-full">
+              <div tabIndex={0} role="button" className="btn btn-outline w-full justify-between bg-base-100/50 backdrop-blur-sm border-primary/20 hover:bg-primary/5 transition-colors duration-200">
+                <div className="flex items-center gap-2">
+                  {tabs.find(tab => tab.id === activeTab)?.icon}
+                  <span>{tabs.find(tab => tab.id === activeTab)?.label}</span>
+                </div>
+                <FaChevronDown className="text-sm" />
+              </div>
+              <ul tabIndex={0} className="dropdown-content menu p-2 shadow-lg bg-base-100/95 backdrop-blur-sm rounded-xl w-full mt-1 z-10 border border-primary/20">
+                {tabs.map((tab) => (
+                  <li key={tab.id}>
+                    <button
+                      type="button"
+                      onClick={() => handleTabChange(tab.id)}
+                      className={`flex items-center gap-2 hover:bg-primary/5 transition-colors duration-200 ${
+                        activeTab === tab.id ? 'bg-primary/10 text-primary' : ''
+                      }`}
+                    >
+                      {tab.icon}
+                      {tab.label}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </motion.div>
+
+          {/* Tab Content */}
+          <motion.div 
+            variants={fadeIn}
+            className="bg-base-100/50 backdrop-blur-sm border border-primary/20 rounded-xl p-8 shadow-lg min-h-[400px]"
+          >
+            <div className="flex items-center gap-2 mb-6">
+              {tabs.find(tab => tab.id === activeTab)?.icon}
+              <h3 className="text-2xl font-semibold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                {tabs.find(tab => tab.id === activeTab)?.label}
+              </h3>
+            </div>
+            
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeTab}
+                variants={slideUp}
+                className="relative"
+              >
+                {tabContent}
+              </motion.div>
+            </AnimatePresence>
+          </motion.div>
+
+          {/* Navigation Buttons */}
+          <motion.div 
+            variants={slideUp}
+            className="flex justify-between items-center"
+          >
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={handlePreviousTab}
+                className="btn btn-outline btn-sm hover:bg-primary/5 transition-colors duration-200"
+                disabled={activeTab === tabs[0].id}
+              >
+                Previous
+              </button>
+              <button
+                type="button"
+                onClick={handleNextTab}
+                className="btn btn-outline btn-sm hover:bg-primary/5 transition-colors duration-200"
+                disabled={activeTab === tabs[tabs.length - 1].id}
+              >
+                Next
+              </button>
+            </div>
+
+            <div className="flex gap-4">
+              <button
+                type="button"
+                onClick={() => navigate("/admin/companies")}
+                className="btn btn-ghost hover:bg-primary/10 transition-colors duration-200"
+                disabled={submitting}
+              >
+                {t('company.cancel')}
+              </button>
+              <button
+                type="submit"
+                className="btn btn-primary relative overflow-hidden group"
+                disabled={submitting}
+              >
+                <span className="relative z-10 flex items-center gap-2">
+                  {submitting ? (
+                    <>
+                      <span className="loading loading-spinner loading-sm"></span>
+                      {t('company.updating')}
+                    </>
+                  ) : (
+                    <>
+                      <span className="group-hover:scale-105 transition-transform duration-200">
+                        {t('company.updateCompany')}
+                      </span>
+                    </>
+                  )}
+                </span>
+                <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/20 to-primary/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500"></div>
+              </button>
+            </div>
+          </motion.div>
+        </form>
+      </motion.div>
     </div>
   );
 };
 
-export default CompanyEdit;
+export default memo(CompanyEdit);

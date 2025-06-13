@@ -1,59 +1,27 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area, Bar, BarChart } from 'recharts';
-import { RefreshCw, ZoomIn, ZoomOut, TrendingUp, TrendingDown, Activity, DollarSign, Calendar, BarChart3, Maximize2, Minimize2, ChevronDown } from 'lucide-react';
-
-// Mock data generator for demonstration
-const generateMockData = (coinId, days) => {
-  const now = Date.now();
-  const interval = days === '1' ? 3600000 : days === '7' ? 3600000 * 4 : 86400000;
-  const dataPoints = days === '1' ? 24 : days === '7' ? 42 : parseInt(days) || 30;
-  
-  const basePrice = {
-    'bitcoin': 45000,
-    'ethereum': 3000,
-    'binancecoin': 300,
-    'solana': 100,
-    'cardano': 0.5,
-    'ripple': 0.6,
-    'polkadot': 7,
-    'dogecoin': 0.08
-  }[coinId] || 1000;
-
-  const prices = [];
-  const volumes = [];
-  let currentPrice = basePrice;
-  
-  for (let i = 0; i < dataPoints; i++) {
-    const volatility = 0.02 + Math.random() * 0.03;
-    const change = (Math.random() - 0.5) * volatility;
-    currentPrice = Math.max(currentPrice * (1 + change), basePrice * 0.5);
-    
-    const timestamp = now - (dataPoints - i - 1) * interval;
-    prices.push([timestamp, currentPrice]);
-    volumes.push([timestamp, Math.random() * 1000000000]);
-  }
-  
-  return { prices, total_volumes: volumes };
-};
+import { RefreshCw, ZoomIn, ZoomOut, TrendingUp, TrendingDown, Activity, DollarSign, Calendar, BarChart3, Maximize2, Minimize2, ChevronDown, AlertCircle } from 'lucide-react';
+import { useFetch, API } from '../../utils/api';
+import { ChartSkeleton, ErrorMessage } from './SkeletonLoader';
 
 const POPULAR_COINS = [
-  { id: 'bitcoin', name: 'Bitcoin', symbol: 'BTC', color: '#F7931A', logo: '₿' },
-  { id: 'ethereum', name: 'Ethereum', symbol: 'ETH', color: '#627EEA', logo: 'Ξ' },
-  { id: 'binancecoin', name: 'Binance Coin', symbol: 'BNB', color: '#F3BA2F', logo: 'B' },
-  { id: 'solana', name: 'Solana', symbol: 'SOL', color: '#9945FF', logo: '◎' },
-  { id: 'cardano', name: 'Cardano', symbol: 'ADA', color: '#0033AD', logo: '₳' },
-  { id: 'ripple', name: 'XRP', symbol: 'XRP', color: '#23292F', logo: '✕' },
-  { id: 'polkadot', name: 'Polkadot', symbol: 'DOT', color: '#E6007A', logo: '●' },
-  { id: 'dogecoin', name: 'Dogecoin', symbol: 'DOGE', color: '#C2A633', logo: 'Ð' }
+  { id: 'BTCUSDT', name: 'Bitcoin', symbol: 'BTC', color: '#F7931A', logo: 'https://assets.coingecko.com/coins/images/1/large/bitcoin.png' },
+  { id: 'ETHUSDT', name: 'Ethereum', symbol: 'ETH', color: '#627EEA', logo: 'https://assets.coingecko.com/coins/images/279/large/ethereum.png' },
+  { id: 'BNBUSDT', name: 'Binance Coin', symbol: 'BNB', color: '#F3BA2F', logo: 'https://assets.coingecko.com/coins/images/825/large/bnb-icon2_2x.png' },
+  { id: 'SOLUSDT', name: 'Solana', symbol: 'SOL', color: '#9945FF', logo: 'https://assets.coingecko.com/coins/images/4128/large/solana.png' },
+  { id: 'ADAUSDT', name: 'Cardano', symbol: 'ADA', color: '#0033AD', logo: 'https://assets.coingecko.com/coins/images/975/large/cardano.png' },
+  { id: 'XRPUSDT', name: 'XRP', symbol: 'XRP', color: '#23292F', logo: 'https://assets.coingecko.com/coins/images/44/large/xrp-symbol-white-128.png' },
+  { id: 'DOTUSDT', name: 'Polkadot', symbol: 'DOT', color: '#E6007A', logo: 'https://assets.coingecko.com/coins/images/12171/large/polkadot.png' },
+  { id: 'DOGEUSDT', name: 'Dogecoin', symbol: 'DOGE', color: '#C2A633', logo: 'https://assets.coingecko.com/coins/images/5/large/dogecoin.png' }
 ];
 
 const TIME_RANGES = [
-  { value: '1', label: '24H', description: 'Last 24 hours' },
-  { value: '7', label: '7D', description: 'Last 7 days' },
-  { value: '30', label: '30D', description: 'Last 30 days' },
-  { value: '90', label: '90D', description: 'Last 90 days' },
-  { value: '365', label: '1Y', description: 'Last year' },
-  { value: 'max', label: 'ALL', description: 'All time' }
+  { value: '1h', label: '1H', description: 'Last hour', interval: '1m', limit: 60 },
+  { value: '1d', label: '24H', description: 'Last 24 hours', interval: '1h', limit: 24 },
+  { value: '7d', label: '7D', description: 'Last 7 days', interval: '4h', limit: 42 },
+  { value: '30d', label: '30D', description: 'Last 30 days', interval: '1d', limit: 30 },
+  { value: '90d', label: '90D', description: 'Last 90 days', interval: '1d', limit: 90 },
+  { value: '1y', label: '1Y', description: 'Last year', interval: '1d', limit: 365 }
 ];
 
 const CHART_TYPES = [
@@ -63,22 +31,24 @@ const CHART_TYPES = [
 ];
 
 const StatCard = ({ icon: Icon, label, value, change, isPositive }) => (
-  <div className="bg-gradient-to-br from-gray-50 to-white p-4 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-200">
-    <div className="flex items-center justify-between mb-2">
-      <div className="flex items-center space-x-2">
-        <div className="p-2 rounded-lg bg-blue-50">
-          <Icon className="w-4 h-4 text-blue-600" />
+  <div className="card bg-base-100 shadow-sm hover:shadow-md transition-all duration-200">
+    <div className="card-body p-4">
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center space-x-2">
+          <div className="p-2 rounded-lg bg-primary/10">
+            <Icon className="w-4 h-4 text-primary" />
+          </div>
+          <span className="text-sm font-medium text-base-content/70">{label}</span>
         </div>
-        <span className="text-sm font-medium text-gray-600">{label}</span>
+        {change !== null && change !== undefined && (
+          <div className={`badge ${isPositive ? 'badge-success' : 'badge-error'}`}>
+            {isPositive ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+            <span className="text-xs font-semibold">{Math.abs(change).toFixed(2)}%</span>
+          </div>
+        )}
       </div>
-      {change && (
-        <div className={`flex items-center space-x-1 ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
-          {isPositive ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-          <span className="text-xs font-semibold">{Math.abs(change).toFixed(2)}%</span>
-        </div>
-      )}
+      <p className="text-lg font-bold text-base-content">{value}</p>
     </div>
-    <p className="text-lg font-bold text-gray-900">{value}</p>
   </div>
 );
 
@@ -89,93 +59,171 @@ const CustomTooltip = ({ active, payload, label, chartType }) => {
   const date = new Date(label);
   
   return (
-    <div className="bg-white p-4 rounded-xl shadow-lg border border-gray-200 backdrop-blur-sm">
-      <p className="text-sm text-gray-600 mb-2">
-        {date.toLocaleDateString('en-US', { 
-          weekday: 'short', 
-          month: 'short', 
-          day: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit'
-        })}
-      </p>
-      <div className="space-y-1">
-        {payload.map((entry, index) => (
-          <div key={index} className="flex items-center justify-between space-x-4">
-            <div className="flex items-center space-x-2">
-              <div 
-                className="w-3 h-3 rounded-full" 
-                style={{ backgroundColor: entry.color }}
-              />
-              <span className="text-sm font-medium text-gray-700">{entry.name}</span>
+    <div className="card bg-base-100 shadow-lg border border-base-200 backdrop-blur-sm">
+      <div className="card-body p-4">
+        <p className="text-sm text-base-content/70 mb-2">
+          {date.toLocaleDateString('en-US', { 
+            weekday: 'short', 
+            month: 'short', 
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          })}
+        </p>
+        <div className="space-y-1">
+          {payload.map((entry, index) => (
+            <div key={index} className="flex items-center justify-between space-x-4">
+              <div className="flex items-center space-x-2">
+                <div 
+                  className="w-3 h-3 rounded-full" 
+                  style={{ backgroundColor: entry.color }}
+                />
+                <span className="text-sm font-medium text-base-content">{entry.name}</span>
+              </div>
+              <span className="text-sm font-bold text-base-content">
+                {entry.name.toLowerCase().includes('volume') 
+                  ? `$${(entry.value / 1000000).toFixed(2)}M`
+                  : `$${parseFloat(entry.value).toLocaleString()}`
+                }
+              </span>
             </div>
-            <span className="text-sm font-bold text-gray-900">
-              {entry.name.toLowerCase().includes('volume') 
-                ? `$${(entry.value / 1000000).toFixed(2)}M`
-                : `$${parseFloat(entry.value).toLocaleString()}`
-              }
-            </span>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );
 };
 
+const LoadingSpinner = () => (
+  <div className="flex items-center justify-center p-8">
+    <span className="loading loading-spinner loading-lg text-primary"></span>
+    <span className="ml-2 text-base-content/70">Loading market data...</span>
+  </div>
+);
+
+const CryptoLogo = ({ coin, size = 'md' }) => {
+  const [imgSrc, setImgSrc] = useState(coin.logo);
+  const [hasError, setHasError] = useState(false);
+
+  const handleError = () => {
+    if (hasError) return;
+    setHasError(true);
+    setImgSrc(`https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/${coin.symbol.toLowerCase()}.png`);
+  };
+
+  if (hasError || !imgSrc) {
+    return (
+      <div
+        className={`h-8 w-8 md:h-10 md:w-10 rounded-full flex items-center justify-center font-bold text-sm text-base-100 shadow-sm ring-2 ring-base-100`}
+        style={{ backgroundColor: coin.color || 'hsl(var(--n))' }}
+      >
+        {coin.symbol.charAt(0).toUpperCase()}
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative">
+      <img
+        className={`h-8 w-8 md:h-10 md:w-10 rounded-full shadow-sm ring-2 ring-base-100 bg-base-100 p-0.5 object-contain`}
+        src={imgSrc}
+        alt={coin.name}
+        onError={handleError}
+        loading="lazy"
+      />
+    </div>
+  );
+};
+
 const AdvancedTradingChart = () => {
-  const [selectedCoin, setSelectedCoin] = useState('bitcoin');
-  const [timeRange, setTimeRange] = useState('7');
+  const [selectedCoin, setSelectedCoin] = useState('BTCUSDT');
+  const [timeRange, setTimeRange] = useState('7d');
   const [chartType, setChartType] = useState('line');
   const [zoomLevel, setZoomLevel] = useState(1);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [lastUpdated, setLastUpdated] = useState(new Date());
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
 
-  // Mock data fetching
-  const data = useMemo(() => {
-    return generateMockData(selectedCoin, timeRange);
-  }, [selectedCoin, timeRange]);
+  // Network status monitoring
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
 
-  const formatChartData = useCallback((prices, volumes) => {
-    if (!prices || !volumes) return [];
-    return prices.map(([timestamp, price], index) => ({
-      date: new Date(timestamp),
-      timestamp,
-      price: parseFloat(price.toFixed(2)),
-      volume: volumes[index] ? volumes[index][1] : 0,
-    }));
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
   }, []);
 
-  const chartData = useMemo(() => 
-    formatChartData(data.prices, data.total_volumes), 
-    [data, formatChartData]
+  const selectedTimeRange = TIME_RANGES.find(r => r.value === timeRange);
+
+  // Fetch historical data
+  const { data: chartData, isLoading: isChartLoading, error: chartError, retry: retryChart } = useFetch(
+    API.getHistoricalData(selectedCoin, selectedTimeRange.interval, selectedTimeRange.limit),
+    { enabled: isOnline }
   );
 
-  const { priceChange, currentPrice, volume24h, marketCap } = useMemo(() => {
-    if (chartData.length < 2) return { priceChange: 0, currentPrice: 0, volume24h: 0, marketCap: 0 };
+  // Fetch coin details
+  const { data: coinData, isLoading: isCoinLoading, error: coinError, retry: retryCoin } = useFetch(
+    API.getCoinDetails(selectedCoin),
+    { enabled: isOnline }
+  );
+
+  const isLoading = isChartLoading || isCoinLoading;
+  const error = chartError || coinError;
+
+  const handleRefresh = () => {
+    if (!isOnline) return;
+    setZoomLevel(1); // Reset zoom level
+    retryChart();
+    retryCoin();
+  };
+
+  // Reset zoom level when data changes
+  useEffect(() => {
+    setZoomLevel(1);
+  }, [chartData, selectedCoin, timeRange]);
+
+  // Process chart data
+  const processedChartData = useMemo(() => {
+    if (!Array.isArray(chartData)) return [];
     
-    const firstPrice = chartData[0].price;
-    const lastPrice = chartData[chartData.length - 1].price;
-    const change = ((lastPrice - firstPrice) / firstPrice) * 100;
-    const totalVolume = chartData.reduce((sum, item) => sum + item.volume, 0);
-    
-    return {
-      priceChange: change,
-      currentPrice: lastPrice,
-      volume24h: totalVolume / chartData.length,
-      marketCap: lastPrice * 19500000 // Mock market cap calculation
-    };
+    return chartData.map(candle => ({
+      date: new Date(candle[0]),
+      timestamp: candle[0],
+      price: parseFloat(candle[4]), // Close price
+      volume: parseFloat(candle[5]), // Volume
+      open: parseFloat(candle[1]),
+      high: parseFloat(candle[2]),
+      low: parseFloat(candle[3])
+    }));
   }, [chartData]);
 
-  const selectedCoinData = POPULAR_COINS.find(coin => coin.id === selectedCoin);
+  // Calculate price statistics
+  const priceStats = useMemo(() => {
+    if (!processedChartData.length || !coinData) return { 
+      priceChange: 0, 
+      currentPrice: 0, 
+      volume24h: 0, 
+      marketCap: 0 
+    };
+    
+    const currentPrice = parseFloat(coinData.lastPrice);
+    const priceChange = parseFloat(coinData.priceChangePercent);
+    const volume24h = parseFloat(coinData.volume);
+    const marketCap = currentPrice * parseFloat(coinData.quoteVolume);
+    
+    return {
+      priceChange,
+      currentPrice,
+      volume24h,
+      marketCap
+    };
+  }, [processedChartData, coinData]);
 
-  const handleRefresh = useCallback(() => {
-    setIsLoading(true);
-    setTimeout(() => {
-      setLastUpdated(new Date());
-      setIsLoading(false);
-    }, 1000);
-  }, []);
+  const selectedCoinData = POPULAR_COINS.find(coin => coin.id === selectedCoin);
 
   const handleZoom = useCallback((direction) => {
     setZoomLevel(prev => {
@@ -186,8 +234,12 @@ const AdvancedTradingChart = () => {
   }, []);
 
   const renderChart = () => {
+    if (isLoading) return <ChartSkeleton />;
+    if (error) return <ErrorMessage message={error.message} onRetry={handleRefresh} />;
+    if (!processedChartData.length) return <div className="text-center p-8 text-gray-500">No data available</div>;
+
     const chartProps = {
-      data: chartData,
+      data: processedChartData,
       margin: { top: 20, right: 30, left: 20, bottom: 20 }
     };
 
@@ -196,7 +248,7 @@ const AdvancedTradingChart = () => {
       tick: { fontSize: 12, fill: '#6B7280' },
       tickFormatter: (value) => {
         const date = new Date(value);
-        return timeRange === '1' 
+        return timeRange === '1h' 
           ? date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
           : date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
       },
@@ -238,7 +290,6 @@ const AdvancedTradingChart = () => {
               fillOpacity={1}
               fill="url(#colorPrice)"
               strokeWidth={2}
-              animationDuration={300}
             />
           </AreaChart>
         );
@@ -265,7 +316,6 @@ const AdvancedTradingChart = () => {
               name="Volume (USD)"
               fill={selectedCoinData?.color}
               opacity={0.7}
-              animationDuration={300}
             />
           </BarChart>
         );
@@ -294,7 +344,6 @@ const AdvancedTradingChart = () => {
                 strokeWidth: 2,
                 className: 'drop-shadow-lg'
               }}
-              animationDuration={300}
             />
           </LineChart>
         );
@@ -302,26 +351,21 @@ const AdvancedTradingChart = () => {
   };
 
   return (
-    <div className={`bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden transition-all duration-300 ${isFullscreen ? 'fixed inset-4 z-50' : ''}`}>
+    <div className={`card bg-base-100 shadow-xl ${isFullscreen ? 'fixed inset-4 z-50' : ''}`}>
       {/* Header */}
-      <div className="bg-gradient-to-r from-gray-50 to-white p-6 border-b border-gray-100">
+      <div className="card-body bg-gradient-to-r from-primary/5 via-secondary/5 to-accent/5 border-b border-base-200">
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-3">
-              <div 
-                className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg"
-                style={{ backgroundColor: selectedCoinData?.color }}
-              >
-                {selectedCoinData?.logo}
-              </div>
+              <CryptoLogo coin={selectedCoinData} size="lg" />
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">
+                <h1 className="text-2xl font-bold text-base-content">
                   {selectedCoinData?.name}
                 </h1>
                 <div className="flex items-center space-x-2">
-                  <span className="text-sm text-gray-500">{selectedCoinData?.symbol}</span>
-                  <span className={`text-lg font-semibold ${priceChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {priceChange >= 0 ? '+' : ''}{priceChange.toFixed(2)}%
+                  <span className="text-sm text-base-content/70">{selectedCoinData?.symbol}</span>
+                  <span className={`badge ${priceStats.priceChange >= 0 ? 'badge-success' : 'badge-error'}`}>
+                    {priceStats.priceChange >= 0 ? '+' : ''}{priceStats.priceChange.toFixed(2)}%
                   </span>
                 </div>
               </div>
@@ -331,7 +375,7 @@ const AdvancedTradingChart = () => {
           <div className="flex items-center space-x-2">
             <button
               onClick={() => setIsFullscreen(!isFullscreen)}
-              className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+              className="btn btn-ghost btn-sm"
               title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
             >
               {isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
@@ -339,7 +383,7 @@ const AdvancedTradingChart = () => {
             <button
               onClick={() => handleZoom('out')}
               disabled={zoomLevel <= 0.5}
-              className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
+              className="btn btn-ghost btn-sm"
               title="Zoom out"
             >
               <ZoomOut className="w-5 h-5" />
@@ -347,61 +391,83 @@ const AdvancedTradingChart = () => {
             <button
               onClick={() => handleZoom('in')}
               disabled={zoomLevel >= 2}
-              className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
+              className="btn btn-ghost btn-sm"
               title="Zoom in"
             >
               <ZoomIn className="w-5 h-5" />
             </button>
             <button
               onClick={handleRefresh}
-              className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+              disabled={isLoading}
+              className="btn btn-ghost btn-sm"
               title="Refresh data"
             >
-              <RefreshCw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
+              <RefreshCw className="w-5 h-5" />
             </button>
           </div>
         </div>
       </div>
 
       {/* Stats Cards */}
-      <div className="p-6 border-b border-gray-100">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard
-            icon={DollarSign}
-            label="Current Price"
-            value={`$${currentPrice.toLocaleString()}`}
-            change={priceChange}
-            isPositive={priceChange >= 0}
-          />
-          <StatCard
-            icon={Activity}
-            label="24h Volume"
-            value={`$${(volume24h / 1000000).toFixed(2)}M`}
-          />
-          <StatCard
-            icon={TrendingUp}
-            label="Market Cap"
-            value={`$${(marketCap / 1000000000).toFixed(2)}B`}
-          />
-          <StatCard
-            icon={Calendar}
-            label="Period"
-            value={TIME_RANGES.find(r => r.value === timeRange)?.description}
-          />
-        </div>
+      <div className="card-body border-b border-base-200">
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[...Array(4)].map((_, i) => (
+              <div key={i}>
+                <div className="card bg-base-200">
+                  <div className="card-body p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center space-x-2">
+                        <div className="w-8 h-8 bg-base-300 rounded-lg"></div>
+                        <div className="h-4 bg-base-300 rounded w-20"></div>
+                      </div>
+                      <div className="h-4 bg-base-300 rounded w-12"></div>
+                    </div>
+                    <div className="h-6 bg-base-300 rounded w-24"></div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <StatCard
+              icon={DollarSign}
+              label="Current Price"
+              value={`${priceStats.currentPrice.toLocaleString()}`}
+              change={priceStats.priceChange}
+              isPositive={priceStats.priceChange >= 0}
+            />
+            <StatCard
+              icon={Activity}
+              label="24h Volume"
+              value={`${(priceStats.volume24h / 1000000).toFixed(2)}M`}
+            />
+            <StatCard
+              icon={TrendingUp}
+              label="Market Cap"
+              value={`${(priceStats.marketCap / 1000000000).toFixed(2)}B`}
+            />
+            <StatCard
+              icon={Calendar}
+              label="Period"
+              value={TIME_RANGES.find(r => r.value === timeRange)?.description}
+            />
+          </div>
+        )}
       </div>
 
       {/* Controls */}
-      <div className="p-6 border-b border-gray-100">
+      <div className="card-body border-b border-base-200">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex flex-wrap items-center gap-3">
-            <div className="dropdown">
-              <div tabIndex={0} role="button" className="btn bg-white border border-gray-300 hover:bg-gray-50 hover:border-gray-300 rounded-xl px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all flex justify-between items-center w-56 normal-case font-normal shadow-none">
+            <div className="dropdown dropdown-end">
+              <div tabIndex={0} role="button" className="btn btn-outline normal-case font-normal">
                 <div className="flex items-center gap-2 overflow-hidden">
-                  <span className="font-bold text-lg" style={{color: selectedCoinData?.color}}>{selectedCoinData?.logo}</span>
-                  <span className="truncate">{selectedCoinData?.name} ({selectedCoinData?.symbol})</span>
+                  <span className="font-bold text-lg" style={{color: selectedCoinData?.color}}>{selectedCoinData?.symbol}</span>
+                  <span className="truncate">{selectedCoinData?.name}</span>
                 </div>
-                <ChevronDown className="w-4 h-4 text-gray-500 flex-shrink-0" />
+                <ChevronDown className="w-4 h-4 text-base-content/50 flex-shrink-0" />
               </div>
               <ul tabIndex={0} className="dropdown-content z-[10] menu p-2 shadow bg-base-100 rounded-box w-56 mt-2">
                 {POPULAR_COINS.map(coin => (
@@ -415,7 +481,7 @@ const AdvancedTradingChart = () => {
                       }} 
                       className="flex items-center gap-2 w-full"
                     >
-                      <span className="font-bold text-lg" style={{color: coin.color}}>{coin.logo}</span>
+                      <CryptoLogo coin={coin} size="sm" />
                       <span>{coin.name} ({coin.symbol})</span>
                     </button>
                   </li>
@@ -423,15 +489,15 @@ const AdvancedTradingChart = () => {
               </ul>
             </div>
             
-            <div className="flex bg-gray-100 rounded-xl p-1">
+            <div className="join">
               {TIME_RANGES.map(range => (
                 <button
                   key={range.value}
                   onClick={() => setTimeRange(range.value)}
-                  className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-all ${
+                  className={`join-item btn btn-sm ${
                     timeRange === range.value
-                      ? 'bg-white text-blue-600 shadow-sm'
-                      : 'text-gray-600 hover:text-gray-900'
+                      ? 'btn-primary'
+                      : 'btn-ghost'
                   }`}
                 >
                   {range.label}
@@ -440,17 +506,17 @@ const AdvancedTradingChart = () => {
             </div>
           </div>
           
-          <div className="flex bg-gray-100 rounded-xl p-1">
+          <div className="join">
             {CHART_TYPES.map(type => {
               const Icon = type.icon;
               return (
                 <button
                   key={type.value}
                   onClick={() => setChartType(type.value)}
-                  className={`flex items-center space-x-2 px-3 py-1.5 text-sm font-medium rounded-lg transition-all ${
+                  className={`join-item btn btn-sm ${
                     chartType === type.value
-                      ? 'bg-white text-blue-600 shadow-sm'
-                      : 'text-gray-600 hover:text-gray-900'
+                      ? 'btn-primary'
+                      : 'btn-ghost'
                   }`}
                 >
                   <Icon className="w-4 h-4" />
@@ -463,9 +529,8 @@ const AdvancedTradingChart = () => {
       </div>
 
       {/* Chart */}
-      <div className="p-6">
+      <div className="card-body">
         <div 
-          className="transition-transform duration-300 ease-in-out"
           style={{ 
             transform: `scale(${zoomLevel})`, 
             transformOrigin: 'center',
@@ -479,13 +544,13 @@ const AdvancedTradingChart = () => {
       </div>
 
       {/* Footer */}
-      <div className="px-6 py-4 bg-gray-50 border-t border-gray-100">
-        <div className="flex justify-between items-center text-sm text-gray-500">
+      <div className="card-body bg-base-200/50 border-t border-base-200">
+        <div className="flex justify-between items-center text-sm text-base-content/70">
           <p className="flex items-center space-x-2">
-            <span>Powered by Advanced Trading Analytics</span>
-            <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+            <span>Powered by Binance API</span>
+            <span className={`w-2 h-2 rounded-full ${error ? 'bg-error' : 'bg-success'}`}></span>
           </p>
-          <p>Last updated: {lastUpdated.toLocaleString()}</p>
+          <p>Last updated: {new Date().toLocaleString()}</p>
         </div>
       </div>
     </div>

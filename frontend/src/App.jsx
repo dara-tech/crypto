@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import './App.css';
 import LoginPage from './components/auth/loginPage';
@@ -23,6 +23,8 @@ import PaymentViewerPage from "./pages/PaymentViewerPage";
 import FaqPage from './components/clientPage/FaqPage';
 import ProfessionalPage from './components/clientPage/ProfessionalPage';
 import Chatbot from './components/chatbot/Chatbot';
+import UserManagementPage from './components/admin/users/UserManagementPage';
+import EditUserPage from './components/admin/users/EditUserPage';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -40,10 +42,8 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <div data-theme={theme}>
-        <BrowserRouter>
-        {/* <Suspense fallback={<div>Loading...</div>}> */}
-          <Navbar />
-          <Routes>
+        <Navbar />
+        <Routes>
             {/* Public routes */}
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
@@ -59,24 +59,30 @@ function App() {
             <Route path="/professional" element={<ProfessionalPage />} />
             
             {/* Protected routes - only accessible when authenticated */}
+            {/* Generic Protected routes */}
             <Route element={<ProtectedRoute allowedRoles={['admin', 'user', 'payment_viewer']} />}>
               <Route path="/profile" element={<Profile />} />
-              <Route path="/admin/companies/:id" element={<CompanyEdit />} />
-              <Route path="/admin/companies" element={<CompanyList />} />
+            </Route>
+
+            {/* Admin-only routes */}
+            <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
+              <Route path="/dashboard" element={<UserManagementPage />} /> 
+              <Route path="/users" element={<UserManagementPage />} />
+              <Route path="/users/:userId/edit" element={<EditUserPage />} />
+              <Route path="/companies/:id" element={<CompanyEdit />} />
+              <Route path="/companies" element={<CompanyList />} />
             </Route>
             
             {/* Payment viewer route - accessible to payment_viewer and admin roles */}
-            {/* <Route element={<ProtectedRoute allowedRoles={['admin', 'payment_viewer']} />}> */}
+            <Route element={<ProtectedRoute allowedRoles={['admin', 'payment_viewer']} />}>
               <Route path="/payments" element={<PaymentViewerPage />} />
-            {/* </Route> */}
+            </Route>
 
             {/* Redirect to home for any unknown routes */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
           <Footer />
           <Chatbot />
-        {/* </Suspense> */}
-        </BrowserRouter>
       </div>
     </QueryClientProvider>
   )
