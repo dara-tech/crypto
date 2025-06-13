@@ -177,20 +177,20 @@ const Navbar = () => {
 
   const activeLinks = profile ? linksForAuthenticatedUser : publicLinks
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-      isScrolled ? 'bg-base-100/80 backdrop-blur-md shadow-lg' : 'bg-transparent'
+    <nav className={`fixed top-0 left-0 right-0 z-50 ${
+      isScrolled ? 'bg-base-100/80 backdrop-blur-xl shadow-lg border-b border-base-300/20' : 'bg-transparent'
     }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex justify-between items-center h-20">
           {/* Logo Section */}
           <div className="flex items-center">
             <Link to="/" className="flex-shrink-0 flex items-center group">
-              <div className="relative w-10 h-10 rounded-xl bg-transparent flex items-center justify-center group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
+              <div className="relative w-12 h-12 rounded-2xl bg-gradient-to-br from-base-200 to-base-300 flex items-center justify-center shadow-lg ring-1 ring-base-300/20">
                 {companiesLoading ? (
-                  <div className="w-8 h-8 animate-pulse rounded-lg" />
+                  <div className="w-10 h-10 rounded-xl bg-base-300/50" />
                 ) : currentCompany?.logo ? (
                   <img
-                    className="object-cover w-8 h-8 rounded-lg"
+                    className="object-cover w-10 h-10 rounded-xl"
                     src={currentCompany.logo}
                     alt={currentCompany.name}
                     onError={(e) => {
@@ -199,15 +199,15 @@ const Navbar = () => {
                     }}
                   />
                 ) : (
-                  <div className="w-6 h-6 rounded flex items-center justify-center font-bold text-sm">
+                  <div className="w-8 h-8 rounded-xl flex items-center justify-center font-bold text-lg bg-gradient-to-br from-primary to-secondary text-white shadow-lg">
                     {currentCompany?.name.charAt(0).toUpperCase()}
                   </div>
                 )}
               </div>
-              <div className="ml-3">
-                <span className="text-xl font-bold">
+              <div className="ml-4">
+                <span className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
                   {companiesLoading ? (
-                    <div className="h-6 w-32 animate-pulse rounded" />
+                    <div className="h-7 w-40 rounded bg-base-300/50" />
                   ) : (
                     currentCompany?.name || t('appName')
                   )}
@@ -217,7 +217,7 @@ const Navbar = () => {
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex md:items-center md:space-x-1">
+          <div className="hidden md:flex md:items-center md:space-x-2">
             {activeLinks.map(link => {
               if (link.isDropdown) {
                 const isDropdownActive = link.subMenu && link.subMenu.some(subLink => location.pathname.startsWith(subLink.to));
@@ -225,24 +225,21 @@ const Navbar = () => {
                   <div key={link.label} className="relative" ref={aboutSubMenuRef}>
                     <button
                       onClick={toggleAboutSubMenu}
-                      className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2 group ${
+                      className={`relative px-5 py-2.5 rounded-xl text-sm font-medium flex items-center gap-2.5 ${
                         isDropdownActive
-                          ? 'bg-gradient-to-r from-blue-500/5 to-purple-500/5 text-primary'
-                          : 'hover:text-primary'
+                          ? 'bg-gradient-to-r from-primary/10 to-secondary/10 text-primary'
+                          : 'hover:bg-base-200/80'
                       }`}
                     >
-                      <span className={`transition-transform duration-200 ${isDropdownActive ? 'scale-110 text-primary' : 'group-hover:scale-110'}`}>
+                      <span className={`text-lg ${isDropdownActive ? 'text-primary' : ''}`}>
                         {isDropdownActive ? link.activeIcon : link.icon}
                       </span>
                       {link.label}
-                      <FaChevronDown className={`w-3 h-3 transition-transform duration-200 ${isAboutSubMenuOpen ? 'rotate-180' : ''}`} />
-                      {isDropdownActive && (
-                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full" />
-                      )}
+                      <FaChevronDown className={`w-3 h-3 ${isAboutSubMenuOpen ? 'rotate-180' : ''}`} />
                     </button>
                     {isAboutSubMenuOpen && (
-                      <div className="absolute left-0 mt-2 w-56 rounded-xl shadow-lg bg-base-200 ring-1 ring-black ring-opacity-5 overflow-hidden animate-in slide-in-from-top-2 duration-200 z-50">
-                        <div className="py-1">
+                      <div className="absolute left-0 mt-2 w-64 rounded-2xl shadow-xl bg-base-100/95 backdrop-blur-xl border border-base-300/20 z-50">
+                        <div className="py-2">
                           {link.subMenu.map(subLink => {
                             const isSubActive = location.pathname.startsWith(subLink.to);
                             return (
@@ -250,11 +247,13 @@ const Navbar = () => {
                                 key={subLink.to}
                                 to={subLink.to}
                                 onClick={() => setIsAboutSubMenuOpen(false)}
-                                className={`flex items-center gap-3 px-4 py-2 text-sm transition-colors duration-150 ${
-                                  isSubActive ? 'text-primary bg-base-300' : 'text-base-content/80 hover:bg-base-300 hover:text-primary'
+                                className={`flex items-center gap-3 px-5 py-3 text-sm ${
+                                  isSubActive 
+                                    ? 'bg-gradient-to-r from-primary/10 to-secondary/10 text-primary' 
+                                    : 'text-base-content/80 hover:bg-base-200/80'
                                 }`}
                               >
-                                {isSubActive ? subLink.activeIcon : subLink.icon}
+                                <span className="text-lg">{isSubActive ? subLink.activeIcon : subLink.icon}</span>
                                 {subLink.label}
                               </Link>
                             );
@@ -270,295 +269,40 @@ const Navbar = () => {
                   <Link
                     key={link.to}
                     to={link.to}
-                    className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2 group ${
+                    className={`relative px-5 py-2.5 rounded-xl text-sm font-medium flex items-center gap-2.5 ${
                       isActive
-                        ? 'bg-gradient-to-r from-blue-500/5 to-purple-500/5 text-primary'
-                        : 'hover:text-primary'
+                        ? 'bg-gradient-to-r from-primary/10 to-secondary/10 text-primary'
+                        : 'hover:bg-base-200/80'
                     }`}
                   >
-                    <span className={`transition-transform duration-200 ${isActive ? 'scale-110 text-primary' : 'group-hover:scale-110'}`}>
+                    <span className={`text-lg ${isActive ? 'text-primary' : ''}`}>
                       {isActive ? link.activeIcon : link.icon}
                     </span>
                     {link.label}
-                    {isActive && (
-                      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full" />
-                    )}
                   </Link>
                 );
               }
             })}
 
             {/* Language Switcher */}
-            <div className="ml-2">
+            <div className="ml-3">
               <LanguageSwitcher />
             </div>
 
             {/* Profile Section */}
             {profileLoading ? (
               <div className="flex items-center space-x-3 ml-4">
-                <div className="relative">
-                  <div className="w-9 h-9 rounded-full bg-gradient-to-r from-primary/20 to-secondary/20 animate-pulse"></div>
-                  <div className="absolute inset-0 rounded-full bg-[linear-gradient(90deg,transparent_0%,rgba(255,255,255,0.1)_50%,transparent_100%)] animate-shine"></div>
-                </div>
-                <div className="h-4 w-24 bg-gradient-to-r from-primary/20 to-secondary/20 rounded animate-pulse"></div>
+                <div className="w-11 h-11 rounded-full bg-base-300/50" />
+                <div className="h-5 w-28 bg-base-300/50 rounded" />
               </div>
             ) : profile ? (
               <div className="relative ml-4" ref={profileMenuRef}>
                 <button
                   onClick={toggleProfileMenu}
-                  className="flex items-center space-x-3 px-3 py-2 rounded-xl text-sm font-medium hover:bg-base-200/50 transition-all duration-300 group"
+                  className="flex items-center space-x-3 px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-base-200/80"
                 >
                   <div className="relative">
-                    <div className="w-9 h-9 rounded-full overflow-hidden bg-gradient-to-br from-primary via-secondary to-primary p-[2px] group-hover:scale-105 transition-transform duration-300">
-                      <div className="w-full h-full rounded-full overflow-hidden bg-base-100">
-                        {profile.profilePic ? (
-                          <img
-                            src={profile.profilePic}
-                            alt={profile.name}
-                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                            onError={(e) => {
-                              e.target.onerror = null;
-                              e.target.src = '/default-avatar.png';
-                            }}
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10">
-                            <FaUserCircle className="w-6 h-6 text-primary" />
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-400 border-2 border-base-100 rounded-full z-10 animate-pulse"></div>
-                  </div>
-                  <span className="max-w-[120px] truncate font-medium">
-                    {profile.name}
-                  </span>
-                  <FaChevronDown className={`w-3 h-3 transition-transform duration-300 ${
-                    isProfileMenuOpen ? 'rotate-180' : ''
-                  }`} />
-                </button>
-
-                {/* Profile Dropdown */}
-                {isProfileMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-72 rounded-xl shadow-lg bg-base-100/80 backdrop-blur-xl border border-base-300/50 overflow-hidden animate-in slide-in-from-top-2 duration-200 z-50">
-                    <div className="p-4 border-b border-base-300/50">
-                      <div className="flex items-center space-x-4">
-                        <div className="relative">
-                          <div className="w-12 h-12 rounded-full overflow-hidden bg-gradient-to-br from-primary via-secondary to-primary p-[2px]">
-                            <div className="w-full h-full rounded-full overflow-hidden bg-base-100">
-                              {profile.profilePic ? (
-                                <img
-                                  src={profile.profilePic}
-                                  alt={profile.name}
-                                  className="w-full h-full object-cover"
-                                />
-                              ) : (
-                                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10">
-                                  <FaUserCircle className="w-8 h-8 text-primary" />
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                          <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-400 border-2 border-base-100 rounded-full z-10"></div>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold truncate bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                            {profile.name}
-                          </p>
-                          <p className="text-xs text-base-content/60 truncate">
-                            {profile.email}
-                          </p>
-                          <div className="mt-1">
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
-                              {profile.type}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="py-2">
-                      {userRole === 'admin' && (
-                        <Link
-                          to="/admin/dashboard"
-                          onClick={() => setIsProfileMenuOpen(false)}
-                          className="flex items-center px-4 py-2.5 text-sm text-base-content/70 hover:bg-base-200/50 hover:text-primary transition-all duration-200 group"
-                        >
-                          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center mr-3 group-hover:scale-110 transition-transform duration-200">
-                            <HiOutlineCog className="w-4 h-4 text-primary" />
-                          </div>
-                          <span>{t('menu.admin') || 'Admin Panel'}</span>
-                        </Link>
-                      )}
-                      <Link
-                        to="/profile"
-                        onClick={() => setIsProfileMenuOpen(false)}
-                        className="flex items-center px-4 py-2.5 text-sm text-base-content/70 hover:bg-base-200/50 hover:text-primary transition-all duration-200 group"
-                      >
-                        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center mr-3 group-hover:scale-110 transition-transform duration-200">
-                          <HiOutlineUser className="w-4 h-4 text-primary" />
-                        </div>
-                        <span>{t('profile.settings') || 'Profile Settings'}</span>
-                      </Link>
-                      <div className="border-t border-base-300/50 my-2"></div>
-                      <button
-                        onClick={handleLogout}
-                        className="flex items-center w-full px-4 py-2.5 text-sm text-error hover:bg-error/10 transition-all duration-200 group"
-                      >
-                        <div className="w-8 h-8 rounded-lg bg-error/10 flex items-center justify-center mr-3 group-hover:scale-110 transition-transform duration-200">
-                          <HiOutlineLogout className="w-4 h-4 text-error" />
-                        </div>
-                        <span>{t('auth.logout') || 'Logout'}</span>
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <Link
-                to="/login"
-                className="ml-4 px-4 py-2 rounded-xl text-sm font-medium bg-gradient-to-r from-primary to-secondary text-white hover:shadow-lg hover:shadow-primary/20 transition-all duration-300 transform hover:scale-105"
-              >
-                {t('login') || 'Login'}
-              </Link>
-            )}
-          </div>
-
-          {/* Mobile menu button */}
-          <div className="md:hidden flex items-center">
-            <button
-              onClick={toggleMenu}
-              className="inline-flex items-center justify-center p-2 rounded-lg transition-colors duration-200"
-            >
-              <span className="sr-only">{t('menu.open') || 'Open menu'}</span>
-              <div className="relative w-6 h-6">
-                <span className={`absolute inset-0 transform transition-all duration-300 ${
-                  isMenuOpen ? 'rotate-45 translate-y-0' : 'rotate-0 -translate-y-2'
-                }`}>
-                  <span className="block absolute h-0.5 w-6 bg-current transform transition-all duration-300" />
-                </span>
-                <span className={`absolute inset-0 transform transition-all duration-300 ${
-                  isMenuOpen ? 'opacity-0' : 'opacity-100'
-                }`}>
-                  <span className="block absolute h-0.5 w-6 bg-current transform transition-all duration-300" />
-                </span>
-                <span className={`absolute inset-0 transform transition-all duration-300 ${
-                  isMenuOpen ? '-rotate-45 translate-y-0' : 'rotate-0 translate-y-2'
-                }`}>
-                  <span className="block absolute h-0.5 w-6 bg-current transform transition-all duration-300" />
-                </span>
-              </div>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Mobile menu */}
-      <div className={`md:hidden fixed inset-0 z-40 transition-all duration-300 ease-in-out ${
-        isMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible'
-      }`}>
-        {/* Backdrop */}
-        <div 
-          className={`absolute inset-0 bg-base-300/50 backdrop-blur-sm transition-opacity duration-300 ${
-            isMenuOpen ? 'opacity-100' : 'opacity-0'
-          }`}
-          onClick={() => setIsMenuOpen(false)}
-        />
-        
-        {/* Menu Content */}
-        <div 
-          className={`absolute right-0 top-16 w-full max-w-sm bg-base-100 shadow-xl transform transition-transform duration-300 ease-in-out ${
-            isMenuOpen ? 'translate-x-0' : 'translate-x-full'
-          }`}
-          ref={mobileMenuRef}
-        >
-          <div className="h-[calc(100vh-4rem)] overflow-y-auto">
-            <div className="px-4 pt-4 pb-6 space-y-1">
-              {activeLinks.map(link => {
-                if (link.isDropdown) {
-                  const isDropdownActive = link.subMenu && link.subMenu.some(subLink => location.pathname.startsWith(subLink.to));
-                  const isSubMenuOpen = openMobileSubMenu === link.label;
-                  return (
-                    <div key={link.label} className="border-b border-base-300/50 last:border-0">
-                      <button
-                        onClick={() => toggleMobileSubMenu(link.label)}
-                        className={`w-full flex items-center justify-between gap-3 px-4 py-3.5 rounded-lg text-base font-medium transition-all duration-200 ${
-                          isDropdownActive
-                            ? 'text-primary bg-gradient-to-r from-primary/5 to-accent/10'
-                            : 'text-base-content/100 hover:bg-base-200'
-                        }`}
-                      >
-                        <div className="flex items-center gap-3">
-                          <span className={`transition-transform duration-200 ${isDropdownActive ? 'scale-110' : ''}`}>
-                            {isDropdownActive ? link.activeIcon : link.icon}
-                          </span>
-                          {link.label}
-                        </div>
-                        <FaChevronDown className={`w-3 h-3 transition-transform duration-200 ${isSubMenuOpen ? 'rotate-180' : ''}`} />
-                      </button>
-                      <div className={`transition-all duration-300 ease-in-out overflow-hidden ${isSubMenuOpen ? 'max-h-96' : 'max-h-0'}`}>
-                        <div className="pl-12 pt-1 pb-2 space-y-1">
-                          {link.subMenu.map(subLink => {
-                            const isSubActive = location.pathname.startsWith(subLink.to);
-                            return (
-                              <Link
-                                key={subLink.to}
-                                to={subLink.to}
-                                onClick={() => setIsMenuOpen(false)}
-                                className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
-                                  isSubActive
-                                    ? 'text-primary bg-base-200'
-                                    : 'text-base-content/80 hover:bg-base-200 hover:text-primary'
-                                }`}
-                              >
-                                {isSubActive ? subLink.activeIcon : subLink.icon}
-                                {subLink.label}
-                              </Link>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                } else {
-                  const isActive = link.to === '/' ? location.pathname === '/' : location.pathname.startsWith(link.to);
-                  return (
-                    <Link
-                      key={link.to}
-                      to={link.to}
-                      onClick={() => setIsMenuOpen(false)}
-                      className={`flex items-center gap-3 px-4 py-3.5 rounded-lg text-base font-medium transition-all duration-200 ${
-                        isActive
-                          ? 'text-primary bg-gradient-to-r from-primary/5 to-accent/10'
-                          : 'text-base-content/100 hover:bg-base-200 hover:text-primary'
-                      }`}
-                    >
-                      <span className={`transition-transform duration-200 ${isActive ? 'scale-110' : ''}`}>
-                        {isActive ? link.activeIcon : link.icon}
-                      </span>
-                      {link.label}
-                    </Link>
-                  );
-                }
-              })}
-              
-              {/* Mobile Language Switcher */}
-              <div className="border-t border-base-300/50 pt-4 mt-4">
-                <div className="px-4">
-                  <LanguageSwitcher />
-                </div>
-              </div>
-
-              {/* Mobile Profile Section */}
-              {profileLoading ? (
-                <div className="flex items-center space-x-3 px-4 py-3.5">
-                  <div className="w-10 h-10 animate-pulse rounded-full bg-base-300" />
-                  <div className="h-4 w-24 animate-pulse rounded bg-base-300" />
-                </div>
-              ) : profile ? (
-                <div className="border-t border-base-300/50 pt-4 mt-4 space-y-1">
-                  <div className="flex items-center space-x-3 px-4 py-3.5">
-                    <div className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-primary via-secondary to-primary p-[2px]">
+                    <div className="w-11 h-11 rounded-full overflow-hidden bg-gradient-to-br from-primary to-secondary p-[2px] shadow-lg">
                       <div className="w-full h-full rounded-full overflow-hidden bg-base-100">
                         {profile.profilePic ? (
                           <img
@@ -572,52 +316,377 @@ const Navbar = () => {
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10">
-                            <FaUserCircle className="w-6 h-6 text-primary" />
+                            <FaUserCircle className="w-7 h-7 text-primary" />
                           </div>
                         )}
                       </div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-base font-medium text-primary truncate">
-                        {profile.name}
-                      </p>
-                      <p className="text-sm text-base-content/60 truncate">
-                        {profile.email}
-                      </p>
+                    <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-green-400 border-2 border-base-100 rounded-full z-10 shadow-lg"></div>
+                  </div>
+                  <span className="max-w-[140px] truncate font-medium">
+                    {profile.name}
+                  </span>
+                  <FaChevronDown className={`w-3 h-3 ${isProfileMenuOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {/* Profile Dropdown */}
+                {isProfileMenuOpen && (
+                  <div className="absolute right-0 mt-2 w-80 rounded-2xl shadow-xl bg-base-100/95 backdrop-blur-xl border border-base-300/20 z-50">
+                    <div className="p-5 border-b border-base-300/20">
+                      <div className="flex items-center space-x-4">
+                        <div className="relative">
+                          <div className="w-14 h-14 rounded-full overflow-hidden bg-gradient-to-br from-primary to-secondary p-[2px] shadow-lg">
+                            <div className="w-full h-full rounded-full overflow-hidden bg-base-100">
+                              {profile.profilePic ? (
+                                <img
+                                  src={profile.profilePic}
+                                  alt={profile.name}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10">
+                                  <FaUserCircle className="w-9 h-9 text-primary" />
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-400 border-2 border-base-100 rounded-full z-10 shadow-lg"></div>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-base font-semibold truncate bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                            {profile.name}
+                          </p>
+                          <p className="text-sm text-base-content/60 truncate mt-0.5">
+                            {profile.email}
+                          </p>
+                          <div className="mt-2">
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-primary/10 to-secondary/10 text-primary">
+                              {profile.type}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="py-2">
+                      {userRole === 'admin' && (
+                        <Link
+                          to="/admin/dashboard"
+                          onClick={() => setIsProfileMenuOpen(false)}
+                          className="flex items-center px-5 py-3 text-sm text-base-content/70 hover:bg-base-200/80"
+                        >
+                          <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-primary/10 to-secondary/10 flex items-center justify-center mr-3 shadow-sm">
+                            <HiOutlineCog className="w-5 h-5 text-primary" />
+                          </div>
+                          <span>{t('menu.admin') || 'Admin Panel'}</span>
+                        </Link>
+                      )}
+                      <Link
+                        to="/profile"
+                        onClick={() => setIsProfileMenuOpen(false)}
+                        className="flex items-center px-5 py-3 text-sm text-base-content/70 hover:bg-base-200/80"
+                      >
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-primary/10 to-secondary/10 flex items-center justify-center mr-3 shadow-sm">
+                          <HiOutlineUser className="w-5 h-5 text-primary" />
+                        </div>
+                        <span>{t('profile.settings') || 'Profile Settings'}</span>
+                      </Link>
+                      <div className="border-t border-base-300/20 my-2"></div>
+                      <button
+                        onClick={handleLogout}
+                        className="flex items-center w-full px-5 py-3 text-sm text-error hover:bg-error/10"
+                      >
+                        <div className="w-10 h-10 rounded-xl bg-error/10 flex items-center justify-center mr-3 shadow-sm">
+                          <HiOutlineLogout className="w-5 h-5 text-error" />
+                        </div>
+                        <span>{t('auth.logout') || 'Logout'}</span>
+                      </button>
                     </div>
                   </div>
-                  
-                  <Link
-                    to="/profile"
-                    onClick={() => setIsMenuOpen(false)}
-                    className="flex items-center gap-3 px-4 py-3.5 rounded-lg text-base font-medium text-base-content/80 hover:bg-base-200 hover:text-primary transition-all duration-200"
-                  >
-                    <HiOutlineUser className="w-5 h-5" />
-                    {t('profile.settings') || 'Profile Settings'}
-                  </Link>
-                  
-                  <button
-                    onClick={() => {
-                      setIsMenuOpen(false);
-                      logout();
-                    }}
-                    className="flex items-center gap-3 w-full px-4 py-3.5 rounded-lg text-base font-medium text-error hover:bg-error/10 transition-all duration-200"
-                  >
-                    <HiOutlineLogout className="w-5 h-5" />
-                    {t('auth.logout') || 'Logout'}
-                  </button>
+                )}
+              </div>
+            ) : (
+              <Link
+                to="/login"
+                className="ml-4 px-6 py-2.5 rounded-xl text-sm font-medium bg-gradient-to-r from-primary to-secondary text-white shadow-lg hover:shadow-primary/20"
+              >
+                {t('login') || 'Login'}
+              </Link>
+            )}
+          </div>
+
+          {/* Mobile menu button */}
+          <div className="md:hidden flex items-center">
+            <button
+              onClick={toggleMenu}
+              className="inline-flex items-center justify-center p-2.5 rounded-xl hover:bg-base-200/80"
+            >
+              <span className="sr-only">{t('menu.open') || 'Open menu'}</span>
+              <div className="relative w-6 h-6">
+                <span className={`absolute inset-0 ${isMenuOpen ? 'rotate-45 translate-y-0' : 'rotate-0 -translate-y-2'}`}>
+                  <span className="block absolute h-0.5 w-6 bg-current" />
+                </span>
+                <span className={`absolute inset-0 ${isMenuOpen ? 'opacity-0' : 'opacity-100'}`}>
+                  <span className="block absolute h-0.5 w-6 bg-current" />
+                </span>
+                <span className={`absolute inset-0 ${isMenuOpen ? '-rotate-45 translate-y-0' : 'rotate-0 translate-y-2'}`}>
+                  <span className="block absolute h-0.5 w-6 bg-current" />
+                </span>
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile menu */}
+      <div className={`md:hidden fixed inset-0 z-40 ${isMenuOpen ? 'visible' : 'invisible'}`}>
+        {/* Backdrop */}
+        <div 
+          className={`absolute inset-0 bg-base-200 transition-opacity duration-300 ${
+            isMenuOpen ? 'opacity-100' : 'opacity-0'
+          }`}
+          onClick={() => setIsMenuOpen(false)}
+        />
+        
+        {/* Menu Content */}
+        <div 
+          className={` inset-0 w-full bg-base-200 shadow-2xl transition-transform duration-300 ease-in-out ${
+            isMenuOpen ? 'translate-x-0' : 'translate-x-full'
+          }`}
+          ref={mobileMenuRef}
+        >
+          <div className="h-screen overflow-y-auto">
+            {/* Mobile Close Button Only */}
+            <div className="sticky top-0 z-10 bg-base-200 border-b border-base-300/20 flex justify-end px-4 py-3">
+              <button
+                onClick={() => setIsMenuOpen(false)}
+                className="p-2 rounded-xl hover:bg-base-200/80"
+              >
+                <span className="sr-only">Close menu</span>
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="px-4 pt-4 pb-6 space-y-1">
+              {/* Profile Section */}
+              {profileLoading ? (
+                <div className="flex items-center space-x-3 px-5 py-4">
+                  <div className="w-12 h-12 rounded-full bg-base-300/50" />
+                  <div className="h-5 w-32 bg-base-300/50 rounded" />
+                </div>
+              ) : profile ? (
+                <div className="mb-6">
+                  <div className="px-5 py-4">
+                    <div className="flex items-center space-x-4">
+                      <div className="relative">
+                        <div className="w-16 h-16 rounded-full overflow-hidden bg-gradient-to-br from-primary to-secondary p-[2px] shadow-lg">
+                          <div className="w-full h-full rounded-full overflow-hidden bg-base-100">
+                            {profile.profilePic ? (
+                              <img
+                                src={profile.profilePic}
+                                alt={profile.name}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  e.target.onerror = null;
+                                  e.target.src = '/default-avatar.png';
+                                }}
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10">
+                                <FaUserCircle className="w-9 h-9 text-primary" />
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-400 border-2 border-base-100 rounded-full z-10 shadow-lg"></div>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-lg font-semibold text-primary truncate">
+                          {profile.name}
+                        </p>
+                        <p className="text-sm text-base-content/60 truncate mt-0.5">
+                          {profile.email}
+                        </p>
+                        <div className="flex items-center gap-2 mt-2">
+                          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-primary/10 to-secondary/10 text-primary">
+                            {profile.type}
+                          </span>
+                          {profile.company && (
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-base-200/80 text-base-content/70">
+                              {profile.company.name}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Quick Stats */}
+                  <div className="px-5 py-3">
+                    <div className="grid grid-cols-3 gap-2">
+                      <div className="flex flex-col items-center p-3 rounded-xl bg-gradient-to-br from-primary/5 to-secondary/5">
+                        <span className="text-sm font-medium text-primary">Last Login</span>
+                        <span className="text-xs text-base-content/60 mt-1">
+                          {profile.lastLogin ? new Date(profile.lastLogin).toLocaleDateString() : 'N/A'}
+                        </span>
+                      </div>
+                      <div className="flex flex-col items-center p-3 rounded-xl bg-gradient-to-br from-primary/5 to-secondary/5">
+                        <span className="text-sm font-medium text-primary">Status</span>
+                        <span className="text-xs text-base-content/60 mt-1">
+                          {profile.status || 'Active'}
+                        </span>
+                      </div>
+                      <div className="flex flex-col items-center p-3 rounded-xl bg-gradient-to-br from-primary/5 to-secondary/5">
+                        <span className="text-sm font-medium text-primary">Role</span>
+                        <span className="text-xs text-base-content/60 mt-1">
+                          {profile.role || profile.type}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Action Buttons as List */}
+                  <div className="divide-y divide-base-200 rounded-xl overflow-hidden shadow-sm bg-base-100 mt-4 mb-2">
+                    <Link
+                      to="/profile"
+                      onClick={() => setIsMenuOpen(false)}
+                      className="flex items-center gap-3 px-5 py-4 text-base font-medium text-base-content hover:bg-base-200/60"
+                    >
+                      <HiOutlineUser className="w-6 h-6 text-primary" />
+                      {t('profile.settings') || 'Profile Settings'}
+                    </Link>
+                    <Link
+                      to="/settings"
+                      onClick={() => setIsMenuOpen(false)}
+                      className="flex items-center gap-3 px-5 py-4 text-base font-medium text-base-content hover:bg-base-200/60"
+                    >
+                      <HiOutlineCog className="w-6 h-6 text-primary" />
+                      {t('settings') || 'Settings'}
+                    </Link>
+                    {userRole === 'admin' && (
+                      <Link
+                        to="/admin/dashboard"
+                        onClick={() => setIsMenuOpen(false)}
+                        className="flex items-center gap-3 px-5 py-4 text-base font-medium text-base-content hover:bg-base-200/60"
+                      >
+                        <HiOutlineCog className="w-6 h-6 text-primary" />
+                        {t('menu.admin') || 'Admin Panel'}
+                      </Link>
+                    )}
+                    <button
+                      onClick={() => {
+                        setIsMenuOpen(false);
+                        logout();
+                      }}
+                      className="flex items-center gap-3 w-full px-5 py-4 text-base font-medium text-error hover:bg-error/10"
+                    >
+                      <HiOutlineLogout className="w-6 h-6" />
+                      {t('auth.logout') || 'Logout'}
+                    </button>
+                  </div>
                 </div>
               ) : (
-                <div className="border-t border-base-300/50 pt-4 mt-4 px-4">
+                <div className="mb-6 px-5">
                   <Link
                     to="/login"
                     onClick={() => setIsMenuOpen(false)}
-                    className="flex items-center justify-center px-4 py-3.5 rounded-lg text-base font-medium bg-gradient-to-r from-primary to-secondary text-white hover:shadow-lg hover:shadow-primary/20 transition-all duration-300"
+                    className="flex items-center justify-center px-5 py-4 rounded-xl text-base font-medium bg-gradient-to-r from-primary to-secondary text-white shadow-lg hover:shadow-primary/20"
                   >
                     {t('login') || 'Login'}
                   </Link>
                 </div>
               )}
+
+              {/* Navigation Links */}
+              <div className="space-y-1 mt-2">
+                {activeLinks.map(link => {
+                  if (link.isDropdown) {
+                    const isDropdownActive = link.subMenu && link.subMenu.some(subLink => location.pathname.startsWith(subLink.to));
+                    const isSubMenuOpen = openMobileSubMenu === link.label;
+                    return (
+                      <div key={link.label} className="border-b border-base-300/20 last:border-0">
+                        <button
+                          onClick={() => toggleMobileSubMenu(link.label)}
+                          className={`w-full flex items-center justify-between gap-3 px-5 py-4 rounded-xl text-base font-medium ${
+                            isDropdownActive
+                              ? 'bg-gradient-to-r from-primary/10 to-secondary/10 text-primary'
+                              : 'text-base-content/100 hover:bg-base-200/80'
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <span className={`text-xl ${isDropdownActive ? 'text-primary' : ''}`}>
+                              {isDropdownActive ? link.activeIcon : link.icon}
+                            </span>
+                            {link.label}
+                          </div>
+                          <FaChevronDown className={`w-3 h-3 transition-transform duration-200 ${isSubMenuOpen ? 'rotate-180' : ''}`} />
+                        </button>
+                        <div 
+                          className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                            isSubMenuOpen ? 'max-h-96' : 'max-h-0'
+                          }`}
+                        >
+                          <div className="pl-14 pt-1 pb-2 space-y-1">
+                            {link.subMenu.map(subLink => {
+                              const isSubActive = location.pathname.startsWith(subLink.to);
+                              return (
+                                <Link
+                                  key={subLink.to}
+                                  to={subLink.to}
+                                  onClick={() => setIsMenuOpen(false)}
+                                  className={`flex items-center gap-3 px-5 py-3 rounded-xl text-sm font-medium ${
+                                    isSubActive
+                                      ? 'bg-gradient-to-r from-primary/10 to-secondary/10 text-primary'
+                                      : 'text-base-content/80 hover:bg-base-200/80'
+                                  }`}
+                                >
+                                  <span className="text-lg">{isSubActive ? subLink.activeIcon : subLink.icon}</span>
+                                  {subLink.label}
+                                </Link>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  } else {
+                    const isActive = link.to === '/' ? location.pathname === '/' : location.pathname.startsWith(link.to);
+                    return (
+                      <Link
+                        key={link.to}
+                        to={link.to}
+                        onClick={() => setIsMenuOpen(false)}
+                        className={`flex items-center gap-3 px-5 py-4 rounded-xl text-base font-medium ${
+                          isActive
+                            ? 'bg-gradient-to-r from-primary/10 to-secondary/10 text-primary'
+                            : 'text-base-content/100 hover:bg-base-200/80'
+                        }`}
+                      >
+                        <span className={`text-xl ${isActive ? 'text-primary' : ''}`}>
+                          {isActive ? link.activeIcon : link.icon}
+                        </span>
+                        {link.label}
+                      </Link>
+                    );
+                  }
+                })}
+              </div>
+              
+              {/* Mobile Language Switcher */}
+              <div className="border-t border-base-300/20 pt-4 mt-4">
+                <div className="px-5">
+                  <LanguageSwitcher />
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div className="mt-6 px-5">
+                <div className="text-center text-xs text-base-content/40">
+                  <p>© 2024 Your Company</p>
+                  <p className="mt-1">Version 1.0.0</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>

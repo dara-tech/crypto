@@ -2,7 +2,6 @@ import React, { useEffect } from 'react'
 import useCompanies from '../../hooks/useCompanies'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { motion } from 'framer-motion'
 import AdvancedLoading from '../shared/AdvancedLoading'
 
 const Vision = () => {
@@ -30,43 +29,18 @@ const Vision = () => {
 
   const company = companies[0]
 
-  const fadeInUp = {
-    initial: { opacity: 0, y: 20 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.5 }
-  }
-
-  const staggerContainer = {
-    animate: {
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
-  }
-
   return (
     <div className="flex flex-col bg-gradient-to-b from-base-200/50 to-base-100">
       {/* Hero Section */}
-      <motion.div 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.8 }}
-        className="relative h-[600px] w-full overflow-hidden"
-      >
+      <div className="relative h-[600px] w-full overflow-hidden">
         {company?.visionImage ? (
-          <motion.img 
-            initial={{ scale: 1.1 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 1.5 }}
+          <img 
             src={company.visionImage}
             alt="Vision Banner"
             className="w-full h-full object-cover"
           />
         ) : company?.heroImages?.[0] ? (
-          <motion.img 
-            initial={{ scale: 1.1 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 1.5 }}
+          <img 
             src={company.heroImages[0]}
             alt="Company Banner"
             className="w-full h-full object-cover"
@@ -74,62 +48,38 @@ const Vision = () => {
         ) : null}
         
         <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-black/40 flex flex-col items-center justify-center text-white px-6 text-center">
-          <motion.div 
-            variants={staggerContainer}
-            initial="initial"
-            animate="animate"
-            className="max-w-4xl mx-auto"
-          >
+          <div className="max-w-4xl mx-auto">
             {company?.logo && (
-              <motion.img 
-                variants={fadeInUp}
+              <img 
                 src={company.logo}
                 alt={`${company.name} logo`}
                 className="w-28 h-28 object-contain mb-6 mx-auto bg-white/10 p-2 rounded-full hover:scale-110 transition-transform duration-300"
               />
             )}
-            <motion.h1 
-              variants={fadeInUp}
-              className="text-5xl md:text-6xl font-bold mb-6 text-center bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent"
-            >
+            <h1 className="text-5xl md:text-6xl font-bold mb-6 text-center bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
               {company?.name}
-            </motion.h1>
-            <motion.p 
-              variants={fadeInUp}
-              className="text-xl md:text-2xl max-w-3xl mx-auto leading-relaxed"
-            >
+            </h1>
+            <p className="text-xl md:text-2xl max-w-3xl mx-auto leading-relaxed">
               {company?.vision}
-            </motion.p>
-          </motion.div>
+            </p>
+          </div>
         </div>
-      </motion.div>
+      </div>
 
       {/* Cards Section */}
       <div className="container mx-auto px-4 py-16">
-        <motion.h2 
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-3xl md:text-4xl font-bold text-center mb-12"
-        >
+        <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
           Our Philosophy
-        </motion.h2>
+        </h2>
         <div className="grid md:grid-cols-2 gap-10 max-w-5xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-          >
+          <div>
             <Link to="/mission" className="card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden group">
               <figure className="relative h-72">
                 {company?.missionImage ? (
-                  <motion.img 
-                    whileHover={{ scale: 1.1 }}
-                    transition={{ duration: 0.3 }}
+                  <img 
                     src={company.missionImage}
                     alt="Mission"
-                    className="w-full h-full object-cover transition-transform duration-300"
+                    className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
                   />
                 ) : (
                   <div className="w-full h-full bg-primary/10 flex items-center justify-center">
@@ -148,23 +98,16 @@ const Vision = () => {
                 </div>
               </div>
             </Link>
-          </motion.div>
+          </div>
           
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-          >
+          <div>
             <Link to="/about" className="card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden group">
               <figure className="relative h-72">
                 {company?.aboutImage ? (
-                  <motion.img 
-                    whileHover={{ scale: 1.1 }}
-                    transition={{ duration: 0.3 }}
+                  <img 
                     src={company.aboutImage}
                     alt="About"
-                    className="w-full h-full object-cover transition-transform duration-300"
+                    className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
                   />
                 ) : (
                   <div className="w-full h-full bg-secondary/10 flex items-center justify-center">
@@ -183,7 +126,7 @@ const Vision = () => {
                 </div>
               </div>
             </Link>
-          </motion.div>
+          </div>
         </div>
       </div>
     </div>
