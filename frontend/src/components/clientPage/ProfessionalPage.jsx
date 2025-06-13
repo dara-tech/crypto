@@ -106,7 +106,7 @@ const ProfessionalPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-base-100 to-base-200 py-16 px-4">
+    <div className="min-h-screen bg-gradient-to-b from-base-100 to-base-200 py-16 px-4 pt-20">
       <div className="max-w-7xl mx-auto">
         {/* Hero Section */}
         <div className="text-center mb-16 pt-20cd">
