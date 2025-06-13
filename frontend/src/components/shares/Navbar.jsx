@@ -454,152 +454,172 @@ const Navbar = () => {
       </div>
 
       {/* Mobile menu */}
-      <div className={`md:hidden transition-all duration-300 ease-in-out ${
-        isMenuOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'
-      } overflow-hidden`} ref={mobileMenuRef}>
-        <div className="px-4 pt-2 pb-4 space-y-2 backdrop-blur-md">
-          {activeLinks.map(link => {
-            if (link.isDropdown) {
-              const isDropdownActive = link.subMenu && link.subMenu.some(subLink => location.pathname.startsWith(subLink.to));
-              const isSubMenuOpen = openMobileSubMenu === link.label;
-              return (
-                <div key={link.label}>
-                  <button
-                    onClick={() => toggleMobileSubMenu(link.label)}
-                    className={`w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg text-base font-medium transition-all duration-200 ${
-                      isDropdownActive
-                        ? 'text-primary bg-gradient-to-r from-primary/5 to-accent/10'
-                        : 'text-base-content/100 hover:bg-base-300 hover:text-primary'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className={`transition-transform duration-200 ${isDropdownActive ? 'scale-110' : ''}`}>
-                        {isDropdownActive ? link.activeIcon : link.icon}
+      <div className={`md:hidden fixed inset-0 z-40 transition-all duration-300 ease-in-out ${
+        isMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible'
+      }`}>
+        {/* Backdrop */}
+        <div 
+          className={`absolute inset-0 bg-base-300/50 backdrop-blur-sm transition-opacity duration-300 ${
+            isMenuOpen ? 'opacity-100' : 'opacity-0'
+          }`}
+          onClick={() => setIsMenuOpen(false)}
+        />
+        
+        {/* Menu Content */}
+        <div 
+          className={`absolute right-0 top-16 w-full max-w-sm bg-base-100 shadow-xl transform transition-transform duration-300 ease-in-out ${
+            isMenuOpen ? 'translate-x-0' : 'translate-x-full'
+          }`}
+          ref={mobileMenuRef}
+        >
+          <div className="h-[calc(100vh-4rem)] overflow-y-auto">
+            <div className="px-4 pt-4 pb-6 space-y-1">
+              {activeLinks.map(link => {
+                if (link.isDropdown) {
+                  const isDropdownActive = link.subMenu && link.subMenu.some(subLink => location.pathname.startsWith(subLink.to));
+                  const isSubMenuOpen = openMobileSubMenu === link.label;
+                  return (
+                    <div key={link.label} className="border-b border-base-300/50 last:border-0">
+                      <button
+                        onClick={() => toggleMobileSubMenu(link.label)}
+                        className={`w-full flex items-center justify-between gap-3 px-4 py-3.5 rounded-lg text-base font-medium transition-all duration-200 ${
+                          isDropdownActive
+                            ? 'text-primary bg-gradient-to-r from-primary/5 to-accent/10'
+                            : 'text-base-content/100 hover:bg-base-200'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className={`transition-transform duration-200 ${isDropdownActive ? 'scale-110' : ''}`}>
+                            {isDropdownActive ? link.activeIcon : link.icon}
+                          </span>
+                          {link.label}
+                        </div>
+                        <FaChevronDown className={`w-3 h-3 transition-transform duration-200 ${isSubMenuOpen ? 'rotate-180' : ''}`} />
+                      </button>
+                      <div className={`transition-all duration-300 ease-in-out overflow-hidden ${isSubMenuOpen ? 'max-h-96' : 'max-h-0'}`}>
+                        <div className="pl-12 pt-1 pb-2 space-y-1">
+                          {link.subMenu.map(subLink => {
+                            const isSubActive = location.pathname.startsWith(subLink.to);
+                            return (
+                              <Link
+                                key={subLink.to}
+                                to={subLink.to}
+                                onClick={() => setIsMenuOpen(false)}
+                                className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+                                  isSubActive
+                                    ? 'text-primary bg-base-200'
+                                    : 'text-base-content/80 hover:bg-base-200 hover:text-primary'
+                                }`}
+                              >
+                                {isSubActive ? subLink.activeIcon : subLink.icon}
+                                {subLink.label}
+                              </Link>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                } else {
+                  const isActive = link.to === '/' ? location.pathname === '/' : location.pathname.startsWith(link.to);
+                  return (
+                    <Link
+                      key={link.to}
+                      to={link.to}
+                      onClick={() => setIsMenuOpen(false)}
+                      className={`flex items-center gap-3 px-4 py-3.5 rounded-lg text-base font-medium transition-all duration-200 ${
+                        isActive
+                          ? 'text-primary bg-gradient-to-r from-primary/5 to-accent/10'
+                          : 'text-base-content/100 hover:bg-base-200 hover:text-primary'
+                      }`}
+                    >
+                      <span className={`transition-transform duration-200 ${isActive ? 'scale-110' : ''}`}>
+                        {isActive ? link.activeIcon : link.icon}
                       </span>
                       {link.label}
-                    </div>
-                    <FaChevronDown className={`w-3 h-3 transition-transform duration-200 ${isSubMenuOpen ? 'rotate-180' : ''}`} />
-                  </button>
-                  <div className={`transition-all duration-300 ease-in-out overflow-hidden ${isSubMenuOpen ? 'max-h-96' : 'max-h-0'}`}>
-                    <div className="pl-8 pt-2 space-y-1">
-                      {link.subMenu.map(subLink => {
-                        const isSubActive = location.pathname.startsWith(subLink.to);
-                        return (
-                          <Link
-                            key={subLink.to}
-                            to={subLink.to}
-                            onClick={() => setIsMenuOpen(false)}
-                            className={`flex items-center gap-3 px-4 py-2 rounded-lg text-base font-medium transition-all duration-200 ${
-                              isSubActive
-                                ? 'text-primary bg-base-300'
-                                : 'text-base-content/80 hover:bg-base-300 hover:text-primary'
-                            }`}
-                          >
-                            {isSubActive ? subLink.activeIcon : subLink.icon}
-                            {subLink.label}
-                          </Link>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
-              );
-            } else {
-              const isActive = link.to === '/' ? location.pathname === '/' : location.pathname.startsWith(link.to);
-              return (
-                <Link
-                  key={link.to}
-                  to={link.to}
-                  onClick={() => setIsMenuOpen(false)}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-lg text-base font-medium transition-all duration-200 ${
-                    isActive
-                      ? 'text-primary bg-gradient-to-r from-primary/5 to-accent/10'
-                      : 'text-base-content/100 hover:bg-base-300 hover:text-primary'
-                  }`}
-                >
-                  <span className={`transition-transform duration-200 ${isActive ? 'scale-110' : ''}`}>
-                    {isActive ? link.activeIcon : link.icon}
-                  </span>
-                  {link.label}
-                </Link>
-              );
-            }
-          })}
-          
-          {/* Mobile Language Switcher */}
-          <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
-            <LanguageSwitcher />
-          </div>
-
-          {/* Mobile Profile Section */}
-          {profileLoading ? (
-            <div className="flex items-center space-x-3 px-4 py-3">
-              <div className="w-10 h-10 animate-pulse rounded-full" />
-              <div className="h-4 w-24 animate-pulse rounded" />
-            </div>
-          ) : profile ? (
-            <div className="border-t pt-4 mt-4 space-y-2">
-              <div className="flex items-center space-x-3 px-4 py-3">
-                <div className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-primary to-primary p-0.5">
-                  <div className="w-full h-full rounded-full overflow-hidden">
-                    {profile.profilePic ? (
-                      <img
-                        src={profile.profilePic}
-                        alt={profile.name}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          e.target.onerror = null;
-                          e.target.src = '/default-avatar.png';
-                        }}
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center ">
-                        <FaUserCircle className="w-6 h-6 text-primary" />
-                      </div>
-                    )}
-                  </div>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-base font-medium text-primary truncate">
-                    {profile.name}
-                  </p>
-                  <p className="text-sm text-primary truncate">
-                    {profile.email}
-                  </p>
+                    </Link>
+                  );
+                }
+              })}
+              
+              {/* Mobile Language Switcher */}
+              <div className="border-t border-base-300/50 pt-4 mt-4">
+                <div className="px-4">
+                  <LanguageSwitcher />
                 </div>
               </div>
-              
-              <Link
-                to="/admin/profile"
-                onClick={() => setIsMenuOpen(false)}
-                className="flex items-center gap-3 px-4 py-3 rounded-lg text-base font-medium transition-colors duration-200"
-              >
-                <HiOutlineUser className="w-5 h-5" />
-                {t('profile.settings') || 'Profile Settings'}
-              </Link>
-              
-              <button
-                onClick={() => {
-                  setIsMenuOpen(false);
-                  logout();
-                }}
-                className="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-base font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors duration-200"
-              >
-                <HiOutlineLogout className="w-5 h-5" />
-                {t('auth.logout') || 'Logout'}
-              </button>
+
+              {/* Mobile Profile Section */}
+              {profileLoading ? (
+                <div className="flex items-center space-x-3 px-4 py-3.5">
+                  <div className="w-10 h-10 animate-pulse rounded-full bg-base-300" />
+                  <div className="h-4 w-24 animate-pulse rounded bg-base-300" />
+                </div>
+              ) : profile ? (
+                <div className="border-t border-base-300/50 pt-4 mt-4 space-y-1">
+                  <div className="flex items-center space-x-3 px-4 py-3.5">
+                    <div className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-primary via-secondary to-primary p-[2px]">
+                      <div className="w-full h-full rounded-full overflow-hidden bg-base-100">
+                        {profile.profilePic ? (
+                          <img
+                            src={profile.profilePic}
+                            alt={profile.name}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src = '/default-avatar.png';
+                            }}
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10">
+                            <FaUserCircle className="w-6 h-6 text-primary" />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-base font-medium text-primary truncate">
+                        {profile.name}
+                      </p>
+                      <p className="text-sm text-base-content/60 truncate">
+                        {profile.email}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <Link
+                    to="/profile"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="flex items-center gap-3 px-4 py-3.5 rounded-lg text-base font-medium text-base-content/80 hover:bg-base-200 hover:text-primary transition-all duration-200"
+                  >
+                    <HiOutlineUser className="w-5 h-5" />
+                    {t('profile.settings') || 'Profile Settings'}
+                  </Link>
+                  
+                  <button
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      logout();
+                    }}
+                    className="flex items-center gap-3 w-full px-4 py-3.5 rounded-lg text-base font-medium text-error hover:bg-error/10 transition-all duration-200"
+                  >
+                    <HiOutlineLogout className="w-5 h-5" />
+                    {t('auth.logout') || 'Logout'}
+                  </button>
+                </div>
+              ) : (
+                <div className="border-t border-base-300/50 pt-4 mt-4 px-4">
+                  <Link
+                    to="/login"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="flex items-center justify-center px-4 py-3.5 rounded-lg text-base font-medium bg-gradient-to-r from-primary to-secondary text-white hover:shadow-lg hover:shadow-primary/20 transition-all duration-300"
+                  >
+                    {t('login') || 'Login'}
+                  </Link>
+                </div>
+              )}
             </div>
-          ) : (
-            <div className="pt-4 mt-4">
-              <Link
-                to="/login"
-                onClick={() => setIsMenuOpen(false)}
-                className="flex items-center justify-center px-4 py-3 rounded-lg text-base font-medium bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 transition-all duration-200"
-              >
-                {t('login') || 'Login'}
-              </Link>
-            </div>
-          )}
+          </div>
         </div>
       </div>
     </nav>

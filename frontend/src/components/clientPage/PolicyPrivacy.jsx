@@ -25,7 +25,7 @@ const PolicyPrivacy = () => {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="flex items-center gap-4 mb-12"
+          className="flex items-center gap-4 mb-12 pt-20"
         >
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
@@ -33,13 +33,13 @@ const PolicyPrivacy = () => {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="bg-primary/10 p-3 rounded-2xl"
           >
-            <FaFileAlt className="text-primary text-3xl" />
+            <FaFileAlt className="text-primary text-2xl" />
           </motion.div>
           <motion.h1
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.3 }}
-            className="text-4xl font-bold text-base-content"
+            className="text-2xl font-bold text-base-content"
           >
             {t('company.privacyPolicy')}
           </motion.h1>
