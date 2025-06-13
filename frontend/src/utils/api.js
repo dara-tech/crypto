@@ -256,7 +256,7 @@ export const API_COMMANDS = {
 
 // Binance API configuration
 const BINANCE_API = {
-  BASE_URL: '/api/binance',
+  BASE_URL: 'https://api.binance.com/api/v3',
   WS_URL: 'wss://stream.binance.com:9443/ws',
   
   // Market data endpoints
