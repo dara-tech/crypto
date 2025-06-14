@@ -383,21 +383,81 @@ const CompanyEdit = () => {
         formDataToSend.append('FAQs', JSON.stringify(formData.FAQs));
       }
 
-      // Append professionals data and images
-      if (formData.professionals) {
-        const professionalsData = formData.professionals.map(p => ({
-          name: p.name,
-          role: p.role,
-          email: p.email,
-          description: p.description,
-          image: p.newImageFile ? '' : p.image // Send existing image URL or empty if new one is uploaded
-        }));
+      // Handle professionals data
+      if (formData.professionals && Array.isArray(formData.professionals)) {
+        // First, collect all new image files and their indices
+        const newImageFiles = [];
+        const imageIndices = [];
+        
+        // Format professionals data for the backend
+        const professionalsData = formData.professionals.map((prof, index) => {
+          // If this professional has a new image, add it to the arrays
+          if (prof.newImageFile) {
+            newImageFiles.push(prof.newImageFile);
+            imageIndices.push(index);
+          }
+          
+          return {
+            _id: prof._id, // Preserve the existing ID if any
+            name: prof.name || '',
+            role: prof.role || '',
+            email: prof.email || '',
+            description: prof.description || '',
+            // For professionals with new images, we'll set image to empty string
+            // For others, we'll keep their existing image URL
+            image: prof.newImageFile ? '' : (prof.originalImage || prof.image || '')
+          };
+        });
+
+        // Remove any duplicate indices
+        const uniqueIndices = [...new Set(imageIndices)];
+        
+        // Validate that we have the correct number of indices
+        if (uniqueIndices.length !== newImageFiles.length) {
+          console.error('Mismatch between image files and indices:', {
+            files: newImageFiles.length,
+            indices: uniqueIndices.length,
+            files: newImageFiles.map(f => ({ name: f.name, size: f.size, type: f.type })),
+            indices: uniqueIndices
+          });
+          throw new Error('Invalid image data: number of images does not match indices');
+        }
+
+        // Append professionals data
         formDataToSend.append('professionals', JSON.stringify(professionalsData));
 
-        formData.professionals.forEach((p, index) => {
-          if (p.newImageFile) {
-            formDataToSend.append('professionalImages', p.newImageFile);
-          }
+        // Append image indices and files if there are new images
+        if (uniqueIndices.length > 0) {
+          formDataToSend.append('professionalImageIndices', uniqueIndices.join(','));
+          newImageFiles.forEach((file, index) => {
+            console.log(`Appending image ${index}:`, {
+              name: file.name,
+              size: file.size,
+              type: file.type
+            });
+            formDataToSend.append('professionalImages', file);
+          });
+        }
+
+        // Log the data being sent for debugging
+        console.log('Sending professionals data:', {
+          professionals: professionalsData.map(p => ({
+            name: p.name,
+            image: p.image,
+            hasNewImage: !!p.newImageFile
+          })),
+          imageIndices: uniqueIndices,
+          newImageFiles: newImageFiles.map(f => ({
+            name: f.name,
+            size: f.size,
+            type: f.type
+          }))
+        });
+
+        // Log the FormData contents
+        console.log('FormData contents:', {
+          professionals: JSON.stringify(professionalsData),
+          imageIndices: uniqueIndices.join(',')
         });
       }
 
@@ -537,7 +597,7 @@ const CompanyEdit = () => {
           </motion.button>
         </div>
 
-        <AnimatePresence mode="wait">
+        <AnimatePresence mode='sync'>
           {error && (
             <motion.div 
               variants={slideUp}

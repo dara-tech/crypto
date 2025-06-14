@@ -26,7 +26,8 @@ const companySchema = new mongoose.Schema({
     }
   ],
   professionals: [
-    {
+    { 
+      _id: String,
       name: String,
       role: String,
       email: String,

@@ -128,7 +128,7 @@
   },
   "settings": "Settings",
   "paymentViewer": {
-    "title": "Payment Information",
+    "title": "Payments",
     "noPaymentInfo": "No payment information available"
   },
   "company": {

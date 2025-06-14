@@ -1,32 +1,38 @@
-import React, { useEffect } from 'react'
-import { FaFacebook, FaInstagram, FaYoutube, FaLinkedin } from 'react-icons/fa'
-import { MdLocationOn, MdPhone, MdEmail } from 'react-icons/md'
+import React, { useEffect, useState } from 'react'
+import { FaFacebook, FaInstagram, FaYoutube, FaLinkedin, FaTwitter, FaTelegram, FaDiscord } from 'react-icons/fa'
+import { MdLocationOn, MdPhone, MdEmail, MdArrowForward } from 'react-icons/md'
+import { HiOutlineMail } from 'react-icons/hi'
 import useCompanies from '../../hooks/useCompanies'
 
 const Footer = () => {
   const { companies, loading, error, getCompanies } = useCompanies()
+  const [email, setEmail] = useState('')
+  const [isSubscribed, setIsSubscribed] = useState(false)
 
   useEffect(() => {
     getCompanies()
   }, [])
 
+  const handleSubscribe = (e) => {
+    e.preventDefault()
+    // TODO: Implement newsletter subscription logic
+    setIsSubscribed(true)
+    setEmail('')
+    setTimeout(() => setIsSubscribed(false), 3000)
+  }
+
   if (loading) {
     return (
-      <footer className="bg-base-200 text-base-content">
+      <footer className="bg-gradient-to-b from-base-200 to-base-300 text-base-content">
         <div className="container mx-auto p-8 animate-pulse">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="space-y-4">
-              <div className="h-8 w-48 bg-base-300 rounded"></div>
-              <div className="h-4 w-32 bg-base-300 rounded"></div>
-            </div>
-            <div className="space-y-4">
-              <div className="h-8 w-48 bg-base-300 rounded"></div>
-              <div className="h-4 w-32 bg-base-300 rounded"></div>
-            </div>
-            <div className="space-y-4">
-              <div className="h-8 w-48 bg-base-300 rounded"></div>
-              <div className="h-4 w-32 bg-base-300 rounded"></div>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="space-y-4">
+                <div className="h-8 w-48 bg-base-300 rounded"></div>
+                <div className="h-4 w-32 bg-base-300 rounded"></div>
+                <div className="h-4 w-32 bg-base-300 rounded"></div>
+              </div>
+            ))}
           </div>
         </div>
       </footer>
@@ -35,7 +41,7 @@ const Footer = () => {
 
   if (error) {
     return (
-      <footer className="bg-base-200 text-base-content p-8">
+      <footer className="bg-gradient-to-b from-base-200 to-base-300 text-base-content p-8">
         <div className="text-center text-error">
           Error loading footer content: {error}
         </div>
@@ -45,13 +51,30 @@ const Footer = () => {
 
   const company = companies[0]
 
+  const quickLinks = [
+    { name: 'About Us', href: '/about' },
+    { name: 'Services', href: '/services' },
+    { name: 'Products', href: '/products' },
+    { name: 'Blog', href: '/blog' },
+    { name: 'Careers', href: '/careers' },
+    { name: 'Contact', href: '/contact' },
+  ]
+
+  const legalLinks = [
+    { name: 'Privacy Policy', href: '/privacy' },
+    { name: 'Terms of Service', href: '/terms' },
+    { name: 'Cookie Policy', href: '/cookies' },
+    { name: 'Disclaimer', href: '/disclaimer' },
+  ]
+
   return (
-    <footer className="bg-base-200 text-base-content ">
-      <div className="container mx-auto p-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+    <footer className="bg-gradient-to-b from-base-200 to-base-300 text-base-content">
+      {/* Main Footer Content */}
+      <div className="container mx-auto px-4 py-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Company Info */}
-          <div>
-            <div className="flex items-center gap-4 mb-4">
+          <div className="space-y-4">
+            <div className="flex items-center gap-4">
               {company?.logo && (
                 <img 
                   src={company.logo} 
@@ -59,64 +82,145 @@ const Footer = () => {
                   className="w-12 h-12 object-contain"
                 />
               )}
-              <h3 className="font-bold text-lg">{company?.name}</h3>
+              <h3 className="font-bold text-xl">{company?.name}</h3>
             </div>
-            <p className="text-base-content/70">{company?.about}</p>
+            <p className="text-base-content/70 leading-relaxed">{company?.about}</p>
+            <div className="flex gap-4 pt-2">
+              {company?.socialMedia?.facebook && (
+                <a href={company.socialMedia.facebook} target="_blank" rel="noopener noreferrer" 
+                   className="hover:text-primary transition-colors">
+                  <FaFacebook size={20} />
+                </a>
+              )}
+              {company?.socialMedia?.instagram && (
+                <a href={company.socialMedia.instagram} target="_blank" rel="noopener noreferrer"
+                   className="hover:text-primary transition-colors">
+                  <FaInstagram size={20} />
+                </a>
+              )}
+              {company?.socialMedia?.youtube && (
+                <a href={company.socialMedia.youtube} target="_blank" rel="noopener noreferrer"
+                   className="hover:text-primary transition-colors">
+                  <FaYoutube size={20} />
+                </a>
+              )}
+              {company?.socialMedia?.linkedin && (
+                <a href={company.socialMedia.linkedin} target="_blank" rel="noopener noreferrer"
+                   className="hover:text-primary transition-colors">
+                  <FaLinkedin size={20} />
+                </a>
+              )}
+              {company?.socialMedia?.twitter && (
+                <a href={company.socialMedia.twitter} target="_blank" rel="noopener noreferrer"
+                   className="hover:text-primary transition-colors">
+                  <FaTwitter size={20} />
+                </a>
+              )}
+              {company?.socialMedia?.telegram && (
+                <a href={company.socialMedia.telegram} target="_blank" rel="noopener noreferrer"
+                   className="hover:text-primary transition-colors">
+                  <FaTelegram size={20} />
+                </a>
+              )}
+              {company?.socialMedia?.discord && (
+                <a href={company.socialMedia.discord} target="_blank" rel="noopener noreferrer"
+                   className="hover:text-primary transition-colors">
+                  <FaDiscord size={20} />
+                </a>
+              )}
+            </div>
+          </div>
+
+          {/* Quick Links */}
+          <div>
+            <h4 className="font-bold text-lg mb-4">Quick Links</h4>
+            <ul className="space-y-2">
+              {quickLinks.map((link) => (
+                <li key={link.name}>
+                  <a 
+                    href={link.href}
+                    className="flex items-center gap-2 text-base-content/70 hover:text-primary transition-colors"
+                  >
+                    <MdArrowForward className="w-4 h-4" />
+                    {link.name}
+                  </a>
+                </li>
+              ))}
+            </ul>
           </div>
 
           {/* Contact Info */}
           <div>
             <h4 className="font-bold text-lg mb-4">Contact Us</h4>
             <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <MdLocationOn className="text-primary" />
-                <span>{company?.contact?.address}</span>
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-primary/10">
+                  <MdLocationOn className="text-primary w-5 h-5" />
+                </div>
+                <span className="text-base-content/70">{company?.contact?.address}</span>
               </div>
-              <div className="flex items-center gap-2">
-                <MdPhone className="text-primary" />
-                <span>{company?.contact?.phone}</span>
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-primary/10">
+                  <MdPhone className="text-primary w-5 h-5" />
+                </div>
+                <span className="text-base-content/70">{company?.contact?.phone}</span>
               </div>
-              <div className="flex items-center gap-2">
-                <MdEmail className="text-primary" />
-                <span>{company?.contact?.email}</span>
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-primary/10">
+                  <MdEmail className="text-primary w-5 h-5" />
+                </div>
+                <span className="text-base-content/70">{company?.contact?.email}</span>
               </div>
             </div>
           </div>
 
-          {/* Social Media */}
+          {/* Newsletter */}
           <div>
-            <h4 className="font-bold text-lg mb-4">Follow Us</h4>
-            <div className="flex gap-4">
-              {company?.socialMedia?.facebook && (
-                <a href={company.socialMedia.facebook} target="_blank" rel="noopener noreferrer" 
-                   className="hover:text-primary transition-colors">
-                  <FaFacebook size={24} />
-                </a>
-              )}
-              {company?.socialMedia?.instagram && (
-                <a href={company.socialMedia.instagram} target="_blank" rel="noopener noreferrer"
-                   className="hover:text-primary transition-colors">
-                  <FaInstagram size={24} />
-                </a>
-              )}
-              {company?.socialMedia?.youtube && (
-                <a href={company.socialMedia.youtube} target="_blank" rel="noopener noreferrer"
-                   className="hover:text-primary transition-colors">
-                  <FaYoutube size={24} />
-                </a>
-              )}
-              {company?.socialMedia?.linkedin && (
-                <a href={company.socialMedia.linkedin} target="_blank" rel="noopener noreferrer"
-                   className="hover:text-primary transition-colors">
-                  <FaLinkedin size={24} />
-                </a>
-              )}
-            </div>
+            <h4 className="font-bold text-lg mb-4">Newsletter</h4>
+            <p className="text-base-content/70 mb-4">Subscribe to our newsletter for the latest updates and news.</p>
+            <form onSubmit={handleSubscribe} className="space-y-3">
+              <div className="relative">
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email"
+                  className="input input-bordered w-full pl-10"
+                  required
+                />
+                <HiOutlineMail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-base-content/50" />
+              </div>
+              <button 
+                type="submit"
+                className="btn btn-primary w-full"
+                disabled={isSubscribed}
+              >
+                {isSubscribed ? 'Subscribed!' : 'Subscribe'}
+              </button>
+            </form>
           </div>
         </div>
+      </div>
 
-        <div className="border-t border-base-300 mt-8 pt-8 text-center">
-          <p>© {new Date().getFullYear()} {company?.name}. All rights reserved.</p>
+      {/* Bottom Bar */}
+      <div className="border-t border-base-300">
+        <div className="container mx-auto px-4 py-6">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-base-content/70">
+              © {new Date().getFullYear()} {company?.name}. All rights reserved.
+            </p>
+            <div className="flex gap-6">
+              {legalLinks.map((link) => (
+                <a 
+                  key={link.name}
+                  href={link.href}
+                  className="text-base-content/70 hover:text-primary transition-colors text-sm"
+                >
+                  {link.name}
+                </a>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </footer>

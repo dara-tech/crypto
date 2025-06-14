@@ -351,7 +351,7 @@ const AdvancedTradingChart = () => {
   };
 
   return (
-    <div className={`card bg-base-100 shadow-xl ${isFullscreen ? 'fixed inset-4 z-50' : ''}`}>
+    <div className={`card bg-base-100  ${isFullscreen ? 'fixed inset-4 z-50' : ''}`}>
       {/* Header */}
       <div className="card-body bg-gradient-to-r from-primary/5 via-secondary/5 to-accent/5 border-b border-base-200">
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">

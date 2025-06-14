@@ -5,10 +5,10 @@ import CryptoTable from '../shared/CryptoTable';
 
 const Home = () => {
   return (
-    <div className="min-h-screen bg-base-200">
+    <div className="min-h-screen ">
       <HeroSection />
       
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto">
         {/* Main Chart */}
         <div className="mb-8">
           <TradingChart />

@@ -196,13 +196,53 @@ export const updateCompany = async (req, res) => {
             req.files.professionalImages.map(image => uploadToCloudinary(image.buffer, 'company_professionals'))
           );
 
-          let imageIndex = 0;
-          professionals = professionals.map(prof => {
-            // The marker for a new image from the frontend is an empty string for the 'image' field.
-            if (prof.image === '' && imageIndex < professionalImageUrls.length) {
-              prof.image = professionalImageUrls[imageIndex++];
+          // Get image indices from request
+          let imageIndices = [];
+          if (req.body.professionalImageIndices) {
+            try {
+              // Split the comma-separated string into an array of numbers
+              imageIndices = req.body.professionalImageIndices.split(',').map(Number);
+              
+              // Validate that all indices are valid numbers
+              if (imageIndices.some(isNaN)) {
+                console.error('Invalid indices found:', imageIndices);
+                return res.status(400).json({ 
+                  message: 'Invalid professional image indices: contains non-numeric values',
+                  received: imageIndices
+                });
+              }
+            } catch (e) {
+              console.error('Error parsing image indices:', e);
+              return res.status(400).json({ 
+                message: 'Invalid professional image indices format',
+                error: e.message
+              });
             }
-            return prof;
+          }
+
+          // If we have images but no indices, assign them sequentially
+          if (professionalImageUrls.length > 0 && imageIndices.length === 0) {
+            imageIndices = Array.from({ length: professionalImageUrls.length }, (_, i) => i);
+          }
+
+          // Validate number of images matches indices
+          if (professionalImageUrls.length !== imageIndices.length) {
+            console.error('Image count mismatch:', {
+              images: professionalImageUrls.length,
+              indices: imageIndices.length
+            });
+            return res.status(400).json({ 
+              message: 'Number of images does not match number of image indices',
+              received: professionalImageUrls.length,
+              expected: imageIndices.length
+            });
+          }
+
+          // Update professionals with new images using indices
+          imageIndices.forEach((profIndex, imageIndex) => {
+            if (professionals[profIndex]) {
+              professionals[profIndex].image = professionalImageUrls[imageIndex];
+            }
           });
         }
         

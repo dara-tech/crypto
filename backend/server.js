@@ -6,7 +6,6 @@ import mongoose from 'mongoose';
 import { fileURLToPath } from 'url';
 import https from 'https'; // Added
 import authRoutes from './routes/authRoutes.js';
-import schoolRoutes from './routes/schoolRoutes.js';
 import companyRoute from './routes/companyRoutes.js';
 import paymentRoutes from './routes/paymentRoutes.js';
 import {trackVisit} from './middleware/visitTracker.js';
@@ -41,7 +40,6 @@ app.use((req, res, next) => {
 
 // Routes
 app.use('/api/auth', authRoutes);
-app.use('/api/schools', schoolRoutes);
 app.use('/api/companies', companyRoute);
 app.use('/api/payments', paymentRoutes);
 

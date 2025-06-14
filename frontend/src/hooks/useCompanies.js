@@ -101,27 +101,7 @@ const useCompanies = () => {
     setLoading(true);
     setError("");
     try {
-      // Convert FormData to regular object
-      const formDataObj = {};
-      for(let [key, value] of companyData.entries()) {
-        try {
-          // Try to parse JSON strings
-          formDataObj[key] = JSON.parse(value);
-        } catch {
-          // If not JSON, use raw value
-          formDataObj[key] = value;
-        }
-      }
-
-      if (companyData.logo) {
-        formDataObj.logo = companyData.logo;
-      } 
-      
-      if (companyData.testimonialImages) {
-        formDataObj.testimonialImages = companyData.testimonialImages;
-      }
-      
-      const response = await API.put(`/api/companies/${id}`, formDataObj, {
+      const response = await API.put(`/api/companies/${id}`, companyData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }

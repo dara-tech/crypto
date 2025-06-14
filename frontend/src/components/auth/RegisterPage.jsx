@@ -88,7 +88,7 @@ const RegisterPage = () => {
         <div className="card-body p-8">
           <div className="text-center mb-8">
             <h2 className="crypto-heading text-4xl font-bold mb-2 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-              Registration
+              Register
             </h2>
             <p className="text-base-content/70 font-accent">Join the crypto revolution</p>
           </div>
