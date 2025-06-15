@@ -31,6 +31,7 @@ const companySchema = new mongoose.Schema({
       name: String,
       role: String,
       email: String,
+      phone: String,
       image: String,
       description: String,
     },

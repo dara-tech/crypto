@@ -16,6 +16,7 @@ const ContactInfo = ({ formData, onInputChange }) => {
   const inputClasses = (fieldName) => `
     input input-bordered w-full transition-all duration-200
     ${focusedField === fieldName ? 'input-primary' : ''}
+    focus:border-none focus:ring-0 focus:outline-primary
   `;
 
   return (

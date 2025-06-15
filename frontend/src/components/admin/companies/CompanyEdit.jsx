@@ -373,25 +373,43 @@ const CompanyEdit = () => {
         const newImageFiles = [];
         const imageIndices = [];
         
+        // Debug log for incoming professionals data
+        console.log('Raw professionals data:', formData.professionals);
+        
         // Format professionals data for the backend
         const professionalsData = formData.professionals.map((prof, index) => {
+          // Debug log for each professional
+          console.log(`Processing professional ${index}:`, {
+            name: prof.name,
+            phone: prof.phone,
+            hasPhone: !!prof.phone,
+            phoneType: typeof prof.phone
+          });
+
           // If this professional has a new image, add it to the arrays
           if (prof.newImageFile) {
             newImageFiles.push(prof.newImageFile);
             imageIndices.push(index);
           }
           
-          return {
+          const processedProf = {
             _id: prof._id, // Preserve the existing ID if any
             name: prof.name || '',
             role: prof.role || '',
             email: prof.email || '',
+            phone: prof.phone || '',
             description: prof.description || '',
-            // For professionals with new images, we'll set image to empty string
-            // For others, we'll keep their existing image URL
             image: prof.newImageFile ? '' : (prof.originalImage || prof.image || '')
           };
+
+          // Debug log for processed professional
+          console.log(`Processed professional ${index}:`, processedProf);
+          
+          return processedProf;
         });
+
+        // Debug log for final professionals data
+        console.log('Final professionals data to be sent:', professionalsData);
 
         // Remove any duplicate indices
         const uniqueIndices = [...new Set(imageIndices)];
@@ -399,9 +417,9 @@ const CompanyEdit = () => {
         // Validate that we have the correct number of indices
         if (uniqueIndices.length !== newImageFiles.length) {
           console.error('Mismatch between image files and indices:', {
-            files: newImageFiles.length,
-            indices: uniqueIndices.length,
-            files: newImageFiles.map(f => ({ name: f.name, size: f.size, type: f.type })),
+            filesCount: newImageFiles.length,
+            indicesCount: uniqueIndices.length,
+            fileDetails: newImageFiles.map(f => ({ name: f.name, size: f.size, type: f.type })),
             indices: uniqueIndices
           });
           throw new Error('Invalid image data: number of images does not match indices');
@@ -424,19 +442,22 @@ const CompanyEdit = () => {
         }
 
         // Log the data being sent for debugging
-        console.log('Sending professionals data:', {
+        const debugData = {
           professionals: professionalsData.map(p => ({
             name: p.name,
             image: p.image,
             hasNewImage: !!p.newImageFile
           })),
-          imageIndices: uniqueIndices,
-          newImageFiles: newImageFiles.map(f => ({
-            name: f.name,
-            size: f.size,
-            type: f.type
-          }))
-        });
+          imageData: {
+            files: newImageFiles.map(f => ({
+              name: f.name,
+              size: f.size,
+              type: f.type
+            })),
+            indices: uniqueIndices
+          }
+        };
+        console.log('Sending professionals data:', debugData);
 
         // Log the FormData contents
         console.log('FormData contents:', {
@@ -660,18 +681,18 @@ const CompanyEdit = () => {
               </button>
             </div>
 
-            <div className="flex gap-4">
+            <div className="flex gap-4 items-center">
               <button
                 type="button"
                 onClick={() => navigate("/admin/companies")}
-                className="btn btn-ghost hover:bg-primary/10 transition-colors duration-200"
+                className="btn btn-ghost btn-sm hover:bg-primary/10 transition-colors duration-200"
                 disabled={submitting}
               >
                 {t('company.cancel')}
               </button>
               <button
                 type="submit"
-                className="btn btn-primary relative overflow-hidden group"
+                className="btn btn-primary btn-sm relative overflow-hidden group"
                 disabled={submitting}
               >
                 <span className="relative z-10 flex items-center gap-2">

@@ -231,14 +231,30 @@ export const updateAdminProfile = async (req, res) => {
     // Return updated user data (excluding password)
     const updatedUser = await User.findById(user._id).select('-password');
 
+    // Generate new token if password was changed
+    let token = null;
+    if (currentPassword && newPassword) {
+      token = jwt.sign(
+        { 
+          id: updatedUser._id, 
+          email: updatedUser.email,
+          type: updatedUser.type 
+        }, 
+        process.env.JWT_SECRET, 
+        { expiresIn: '1h' }
+      );
+    }
+
     return res.status(200).json({
       message: 'Profile updated successfully',
       user: {
         id: updatedUser._id,
         name: updatedUser.name,
         email: updatedUser.email,
-        profilePic: updatedUser.profilePic
-      }
+        profilePic: updatedUser.profilePic,
+        type: updatedUser.type
+      },
+      ...(token && { token })
     });
   } catch (err) {
     console.error('Update profile error:', err);

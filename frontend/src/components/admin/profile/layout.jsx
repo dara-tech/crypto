@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react"
-import { AlertCircle, User, Mail, Save, Lock, Settings, Shield } from "lucide-react"
+import { AlertCircle, User, Mail, Save, Lock, Settings, Shield, Eye, EyeOff, CheckCircle2, XCircle, Loader } from "lucide-react"
 import { useTranslation } from 'react-i18next'
 import useAuth from "../../../hooks/useAuth"
 import ProfilePicture from "../../admin/profile/components/ProfilePicture"
-import ChangePassword from "./components/ChangePassword"
 import { motion, AnimatePresence } from "framer-motion"
 
 const ProfileSkeleton = () => {
@@ -37,34 +36,13 @@ const ProfileSkeleton = () => {
           {/* Main content Skeleton */}
           <div className="lg:w-3/4">
             <div className="bg-base-100/50 backdrop-blur-sm rounded-xl p-8 shadow-lg border border-primary/20">
-              {/* Profile Picture Skeleton */}
-              <div className="flex flex-col items-center mb-8">
-                <div className="w-32 h-32 rounded-full bg-gradient-to-r from-primary/20 to-secondary/20 animate-pulse relative">
-                  <div className="absolute inset-0 rounded-full bg-gradient-to-r from-primary/10 to-secondary/10 animate-pulse"></div>
+              <div className="space-y-6">
+                <div className="h-12 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-lg animate-pulse relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-secondary/10 animate-pulse"></div>
                 </div>
-                <div className="h-4 bg-primary/20 rounded-lg w-32 mt-4 animate-pulse"></div>
-              </div>
-
-              {/* Form Skeleton */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-3">
-                  <div className="h-5 bg-primary/20 rounded-lg w-1/4 animate-pulse"></div>
-                  <div className="relative">
-                    <div className="h-12 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-lg animate-pulse"></div>
-                    <div className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 bg-primary/20 rounded-full animate-pulse"></div>
-                  </div>
+                <div className="h-12 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-lg animate-pulse relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-secondary/10 animate-pulse"></div>
                 </div>
-                <div className="space-y-3">
-                  <div className="h-5 bg-primary/20 rounded-lg w-1/4 animate-pulse"></div>
-                  <div className="relative">
-                    <div className="h-12 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-lg animate-pulse"></div>
-                    <div className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 bg-primary/20 rounded-full animate-pulse"></div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Button Skeleton */}
-              <div className="form-control mt-8">
                 <div className="h-12 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-lg animate-pulse relative overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-secondary/10 animate-pulse"></div>
                 </div>
@@ -77,27 +55,53 @@ const ProfileSkeleton = () => {
   )
 }
 
+const PASSWORD_REQUIREMENTS = {
+  minLength: 8,
+  hasUpperCase: /[A-Z]/,
+  hasLowerCase: /[a-z]/,
+  hasNumber: /[0-9]/,
+  hasSpecialChar: /[!@#$%^&*(),.?":{}|<>]/
+};
+
 const Profile = () => {
-  const { profile, loading, error, updateAdminProfile, getAdminProfile } = useAuth()
+  const { t } = useTranslation();
+  const { profile, loading, error, updateAdminProfile, getAdminProfile } = useAuth();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     profilePic: null
-  })
-  const [selectedImage, setSelectedImage] = useState(null)
-  const [isSaving, setIsSaving] = useState(false)
-  const [saveError, setSaveError] = useState("")
-  const [saveSuccess, setSaveSuccess] = useState(false)
-  const [imagePreview, setImagePreview] = useState("/user.png")
-  const [showUploadOptions, setShowUploadOptions] = useState(false)
-  const [isPasswordUpdating, setIsPasswordUpdating] = useState(false)
-  const [activeTab, setActiveTab] = useState("general")
-  const { t } = useTranslation()
+  });
+  const [passwordFormData, setPasswordFormData] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: ""
+  });
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
+  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [imagePreview, setImagePreview] = useState("/user.png");
+  const [showUploadOptions, setShowUploadOptions] = useState(false);
+  const [isPasswordUpdating, setIsPasswordUpdating] = useState(false);
+  const [activeTab, setActiveTab] = useState("general");
+  const [showPassword, setShowPassword] = useState({
+    currentPassword: false,
+    newPassword: false,
+    confirmPassword: false
+  });
+  const [passwordStrength, setPasswordStrength] = useState(0);
+  const [passwordChecks, setPasswordChecks] = useState({
+    minLength: false,
+    hasUpperCase: false,
+    hasLowerCase: false,
+    hasNumber: false,
+    hasSpecialChar: false
+  });
 
   // Fetch user profile on component mount
   useEffect(() => {
-    getAdminProfile()
-  }, [])
+    getAdminProfile();
+  }, [getAdminProfile]);
 
   // Update form data when profile is loaded
   useEffect(() => {
@@ -106,24 +110,23 @@ const Profile = () => {
         name: profile.name || "",
         email: profile.email || "",
         profilePic: profile.profilePic || null
-      })
-      setImagePreview(profile.profilePic || "/user.png")
+      });
+      setImagePreview(profile.profilePic || "/user.png");
     }
-  }, [profile])
-
+  }, [profile]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target
+    const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: value
-    }))
-  }
+    }));
+  };
 
   const handleFileChange = (file) => {
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
-        setSaveError("File size should be less than 5MB");
+        setSaveError(t('profile.imageSizeError'));
         return;
       }
       const previewUrl = URL.createObjectURL(file);
@@ -138,79 +141,140 @@ const Profile = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setIsSaving(true)
-    setSaveError("")
-    setSaveSuccess(false)
+    e.preventDefault();
+    setIsSaving(true);
+    setSaveError("");
+    setSaveSuccess(false);
 
     try {
-      const formDataToSend = new FormData()
-      formDataToSend.append('name', formData.name)
-      formDataToSend.append('email', formData.email)
+      const formDataToSend = new FormData();
+      formDataToSend.append('name', formData.name);
+      formDataToSend.append('email', formData.email);
       
-      // Always append the profile picture if selectedImage exists
       if (selectedImage) {
-        formDataToSend.append('profilePic', selectedImage)
-      } else if (formData.profilePic) {
-        // If selectedImage is null but formData.profilePic exists (might be a string URL)
-        // Only append if it's a File object
-        if (formData.profilePic instanceof File) {
-          formDataToSend.append('profilePic', formData.profilePic)
-        }
+        formDataToSend.append('profilePic', selectedImage);
+      } else if (formData.profilePic instanceof File) {
+        formDataToSend.append('profilePic', formData.profilePic);
       }
 
-      const response = await updateAdminProfile(formDataToSend)
-      setSaveSuccess(true)
+      const response = await updateAdminProfile(formDataToSend);
       
-      // Refresh profile data after update
-      await getAdminProfile()
-      
-      // Reset the selectedImage to null after successful update
-      setSelectedImage(null)
-      
-      // Show success message for 3 seconds
-      setTimeout(() => setSaveSuccess(false), 3000)
+      if (response.success) {
+        setSaveSuccess(t('profile.updateSuccess'));
+        await getAdminProfile();
+        setSelectedImage(null);
+        setTimeout(() => setSaveSuccess(false), 3000);
+      } else {
+        setSaveError(response.message || t('profile.updateError'));
+      }
     } catch (err) {
       console.error('Error updating profile:', err);
-      setSaveError(err.response?.data?.message || "Failed to update profile")
+      setSaveError(err.response?.data?.message || t('profile.updateError'));
     } finally {
-      setIsSaving(false)
+      setIsSaving(false);
     }
-  }
+  };
 
-  const handlePasswordUpdate = async (passwordData) => {
-    try {
-      setIsPasswordUpdating(true)
-      setSaveError("")
-      
-      const formDataToSend = new FormData()
-      formDataToSend.append('currentPassword', passwordData.currentPassword)
-      formDataToSend.append('newPassword', passwordData.newPassword)
-      
-      await updateAdminProfile(formDataToSend)
-      setSaveSuccess(true)
-      return true
-    } catch (err) {
-      setSaveError(err.response?.data?.message || "Failed to update password")
-      throw err
-    } finally {
-      setIsPasswordUpdating(false)
+  const handlePasswordChange = (e) => {
+    const { name, value } = e.target;
+    setPasswordFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+
+    if (name === 'newPassword') {
+      const checks = {
+        minLength: value.length >= PASSWORD_REQUIREMENTS.minLength,
+        hasUpperCase: PASSWORD_REQUIREMENTS.hasUpperCase.test(value),
+        hasLowerCase: PASSWORD_REQUIREMENTS.hasLowerCase.test(value),
+        hasNumber: PASSWORD_REQUIREMENTS.hasNumber.test(value),
+        hasSpecialChar: PASSWORD_REQUIREMENTS.hasSpecialChar.test(value)
+      };
+
+      setPasswordChecks(checks);
+
+      // Calculate password strength
+      const strength = Object.values(checks).reduce((acc, check) => acc + (check ? 20 : 0), 0);
+      setPasswordStrength(strength);
     }
-  }
+  };
+
+  const handlePasswordSubmit = async (e) => {
+    e.preventDefault();
+    setSaveError('');
+    setSaveSuccess('');
+
+    const { currentPassword, newPassword, confirmPassword } = passwordFormData;
+
+    if (newPassword !== confirmPassword) {
+      setSaveError(t('validation.passwordsDontMatch'));
+      return;
+    }
+
+    if (passwordStrength < 60) {
+      setSaveError(t('validation.passwordTooWeak'));
+      return;
+    }
+
+    try {
+      setIsPasswordUpdating(true);
+      setSaveError('');
+      
+      const formData = new FormData();
+      formData.append('currentPassword', currentPassword);
+      formData.append('newPassword', newPassword);
+      
+      const response = await updateAdminProfile(formData);
+      
+      if (response.success) {
+        // Reset form
+        setPasswordFormData({
+          currentPassword: "",
+          newPassword: "",
+          confirmPassword: ""
+        });
+        setPasswordStrength(0);
+        setPasswordChecks({
+          minLength: false,
+          hasUpperCase: false,
+          hasLowerCase: false,
+          hasNumber: false,
+          hasSpecialChar: false
+        });
+        
+        // Refresh profile data
+        await getAdminProfile();
+        
+        setSaveSuccess(t('profile.passwordChangedSuccess'));
+      } else {
+        setSaveError(response.message || t('profile.passwordChangeError'));
+      }
+    } catch (error) {
+      setSaveError(error.response?.data?.message || t('profile.passwordChangeError'));
+    } finally {
+      setIsPasswordUpdating(false);
+    }
+  };
+
+  const getStrengthColor = (strength) => {
+    if (strength >= 80) return 'bg-success';
+    if (strength >= 60) return 'bg-warning';
+    return 'bg-error';
+  };
 
   if (loading && !profile) {
-    return <ProfileSkeleton />
+    return <ProfileSkeleton />;
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 min-h-screen bg-gradient-to-br from-base-100 via-base-200 to-base-300 pt-20">
+    <div className="container mx-auto px-4 py-8 min-h-screen pt-20">
       <div className="max-w-5xl mx-auto">
         <motion.h1 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-3xl font-bold mb-8 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent"
+          className="text-3xl font-bold mb-8 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent p-2"
         >
-          {t('update_profile')}
+          {t('profile.title')}
         </motion.h1>
         
         <AnimatePresence mode="wait">
@@ -245,7 +309,7 @@ const Profile = () => {
               exit={{ opacity: 0, y: -10 }}
               className="alert alert-success mb-6 shadow-lg"
             >
-              <span>Profile updated successfully!</span>
+              <span>{saveSuccess}</span>
             </motion.div>
           )}
         </AnimatePresence>
@@ -265,7 +329,7 @@ const Profile = () => {
                     onClick={() => setActiveTab("general")}
                   >
                     <User className="w-5 h-5" />
-                    {t('General Info')}
+                    {t('profile.generalInfo')}
                   </button>
                 </li>
                 <li className={activeTab === "security" ? "bordered" : ""}>
@@ -274,7 +338,7 @@ const Profile = () => {
                     onClick={() => setActiveTab("security")}
                   >
                     <Shield className="w-5 h-5" />
-                    {t('Security')}
+                    {t('profile.security')}
                   </button>
                 </li>
               </ul>
@@ -300,103 +364,247 @@ const Profile = () => {
                     <div className="flex flex-col items-center">
                       <ProfilePicture
                         imagePreview={imagePreview}
-                        handleFileChange={(file) => {
-                          if (file) {
-                            const previewUrl = URL.createObjectURL(file);
-                            setImagePreview(previewUrl);
-                            setSelectedImage(file);
-                            setFormData(prev => ({
-                              ...prev,
-                              profilePic: file
-                            }));
-                          }
-                        }}
+                        handleFileChange={handleFileChange}
                         error={saveError}
                         setError={setSaveError}
                       />
-                      {saveError && (
-                        <p className="mt-2 text-sm text-error">{saveError}</p>
-                      )}
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="form-control">
-                      <label className="label">
-                        <span className="label-text text-base font-medium">{t('form.name')}</span>
-                      </label>
-                      <div className="relative group">
-                        <input
-                          type="text"
-                          name="name"
-                          value={formData.name}
-                          onChange={handleChange}
-                          className="input input-bordered focus:outline-none w-full pl-10 bg-base-200/50 focus:bg-base-100 transition-all duration-300"
-                          placeholder={t('form.enterName')}
-                          required
-                        />
-                        <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-base-content/50 group-focus-within:text-primary transition-colors duration-300 w-5 h-5" />
-                      </div>
-                    </div>
-
-                    <div className="form-control">
-                      <label className="label">
-                        <span className="label-text text-base font-medium">{t('form.email')}</span>
-                      </label>
-                      <div className="relative group">
-                        <input
-                          type="email"
-                          name="email"
-                          value={formData.email}
-                          onChange={handleChange}
-                          className="input input-bordered focus:outline-none w-full pl-10 bg-base-200/50 focus:bg-base-100 transition-all duration-300"
-                          placeholder={t('form.enterEmail')}
-                          required
-                        />
-                        <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-base-content/50 group-focus-within:text-primary transition-colors duration-300 w-5 h-5" />
-                      </div>
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text">{t('profile.name')}</span>
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        name="name"
+                        value={formData.name}
+                        onChange={handleChange}
+                        className="input input-bordered w-full pl-10"
+                        placeholder={t('profile.namePlaceholder')}
+                      />
+                      <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-primary/50 w-5 h-5" />
                     </div>
                   </div>
 
-                  <div className="form-control mt-6">
-                    <button 
-                      type="submit" 
-                      className={`btn btn-primary w-full relative overflow-hidden ${isSaving ? "loading" : ""}`}
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text">{t('profile.email')}</span>
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        className="input input-bordered w-full pl-10"
+                        placeholder={t('profile.emailPlaceholder')}
+                      />
+                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-primary/50 w-5 h-5" />
+                    </div>
+                  </div>
+
+                  <div className="form-control mt-8">
+                    <button
+                      type="submit"
+                      className="btn btn-primary w-full"
                       disabled={isSaving}
                     >
-                      <span className="relative z-10">
-                        {isSaving ? (
-                          t('saving')
-                        ) : (
-                          <>
-                            <Save className="w-5 h-5 mr-2 inline" />
-                            {t('saveChanges')}
-                          </>
-                        )}
-                      </span>
+                      {isSaving ? (
+                        <Loader className="w-5 h-5 animate-spin" />
+                      ) : (
+                        <>
+                          <Save className="w-5 h-5" />
+                          {t('profile.saveChanges')}
+                        </>
+                      )}
                     </button>
                   </div>
                 </motion.form>
               )}
 
               {activeTab === "security" && (
-                <motion.div
+                <motion.form
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
+                  onSubmit={handlePasswordSubmit}
+                  className="space-y-6"
                 >
-                  <h2 className="text-xl font-semibold mb-6 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                    {t('profile.changePassword')}
-                  </h2>
-                  <ChangePassword onPasswordChange={handlePasswordUpdate} />
-                </motion.div>
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text">{t('profile.currentPassword')}</span>
+                    </label>
+                    <div className="relative">
+                      <input
+                        type={showPassword.currentPassword ? "text" : "password"}
+                        name="currentPassword"
+                        value={passwordFormData.currentPassword}
+                        onChange={handlePasswordChange}
+                        className="input input-bordered w-full pl-10"
+                        placeholder={t('profile.currentPasswordPlaceholder')}
+                      />
+                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-primary/50 w-5 h-5" />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(prev => ({ ...prev, currentPassword: !prev.currentPassword }))}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-primary/50 hover:text-primary"
+                      >
+                        {showPassword.currentPassword ? (
+                          <EyeOff className="w-5 h-5" />
+                        ) : (
+                          <Eye className="w-5 h-5" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text">{t('profile.newPassword')}</span>
+                    </label>
+                    <div className="relative">
+                      <input
+                        type={showPassword.newPassword ? "text" : "password"}
+                        name="newPassword"
+                        value={passwordFormData.newPassword}
+                        onChange={handlePasswordChange}
+                        className="input input-bordered w-full pl-10"
+                        placeholder={t('profile.newPasswordPlaceholder')}
+                      />
+                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-primary/50 w-5 h-5" />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(prev => ({ ...prev, newPassword: !prev.newPassword }))}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-primary/50 hover:text-primary"
+                      >
+                        {showPassword.newPassword ? (
+                          <EyeOff className="w-5 h-5" />
+                        ) : (
+                          <Eye className="w-5 h-5" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text">{t('profile.confirmPassword')}</span>
+                    </label>
+                    <div className="relative">
+                      <input
+                        type={showPassword.confirmPassword ? "text" : "password"}
+                        name="confirmPassword"
+                        value={passwordFormData.confirmPassword}
+                        onChange={handlePasswordChange}
+                        className="input input-bordered w-full pl-10"
+                        placeholder={t('profile.confirmPasswordPlaceholder')}
+                      />
+                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-primary/50 w-5 h-5" />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(prev => ({ ...prev, confirmPassword: !prev.confirmPassword }))}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-primary/50 hover:text-primary"
+                      >
+                        {showPassword.confirmPassword ? (
+                          <EyeOff className="w-5 h-5" />
+                        ) : (
+                          <Eye className="w-5 h-5" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Password Strength Indicator */}
+                  {passwordFormData.newPassword && (
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1 h-2 bg-base-300 rounded-full overflow-hidden">
+                          <div
+                            className={`h-full transition-all duration-300 ${getStrengthColor(passwordStrength)}`}
+                            style={{ width: `${passwordStrength}%` }}
+                          />
+                        </div>
+                        <span className="text-sm font-medium">
+                          {passwordStrength < 40 && t('profile.passwordStrength.weak')}
+                          {passwordStrength >= 40 && passwordStrength < 80 && t('profile.passwordStrength.medium')}
+                          {passwordStrength >= 80 && t('profile.passwordStrength.strong')}
+                        </span>
+                      </div>
+
+                      <div className="space-y-2">
+                        <h4 className="text-sm font-medium">{t('profile.passwordRequirements')}</h4>
+                        <ul className="space-y-2">
+                          <li className="flex items-center gap-2 text-sm">
+                            {passwordChecks.minLength ? (
+                              <CheckCircle2 className="w-4 h-4 text-success" />
+                            ) : (
+                              <XCircle className="w-4 h-4 text-error" />
+                            )}
+                            <span>{t('profile.passwordRequirements.minLength')}</span>
+                          </li>
+                          <li className="flex items-center gap-2 text-sm">
+                            {passwordChecks.hasUpperCase ? (
+                              <CheckCircle2 className="w-4 h-4 text-success" />
+                            ) : (
+                              <XCircle className="w-4 h-4 text-error" />
+                            )}
+                            <span>{t('profile.passwordRequirements.uppercase')}</span>
+                          </li>
+                          <li className="flex items-center gap-2 text-sm">
+                            {passwordChecks.hasLowerCase ? (
+                              <CheckCircle2 className="w-4 h-4 text-success" />
+                            ) : (
+                              <XCircle className="w-4 h-4 text-error" />
+                            )}
+                            <span>{t('profile.passwordRequirements.lowercase')}</span>
+                          </li>
+                          <li className="flex items-center gap-2 text-sm">
+                            {passwordChecks.hasNumber ? (
+                              <CheckCircle2 className="w-4 h-4 text-success" />
+                            ) : (
+                              <XCircle className="w-4 h-4 text-error" />
+                            )}
+                            <span>{t('profile.passwordRequirements.number')}</span>
+                          </li>
+                          <li className="flex items-center gap-2 text-sm">
+                            {passwordChecks.hasSpecialChar ? (
+                              <CheckCircle2 className="w-4 h-4 text-success" />
+                            ) : (
+                              <XCircle className="w-4 h-4 text-error" />
+                            )}
+                            <span>{t('profile.passwordRequirements.special')}</span>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="form-control mt-8">
+                    <button
+                      type="submit"
+                      className="btn btn-primary w-full"
+                      disabled={isPasswordUpdating}
+                    >
+                      {isPasswordUpdating ? (
+                        <Loader className="w-5 h-5 animate-spin" />
+                      ) : (
+                        <>
+                          <Save className="w-5 h-5" />
+                          {t('profile.updatePassword')}
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </motion.form>
               )}
             </div>
           </motion.div>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Profile
+export default Profile;

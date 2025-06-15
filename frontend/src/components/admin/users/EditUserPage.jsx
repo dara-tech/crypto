@@ -174,7 +174,7 @@ const EditUserPage = () => {
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
-                className="input input-bordered w-full focus:border-primary focus:ring-1 focus:ring-primary transition-all duration-300"
+                className="input input-bordered w-full focus:border-none focus:ring-0 focus:outline-primary"
                 required
               />
             </div>
@@ -191,7 +191,7 @@ const EditUserPage = () => {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                className="input input-bordered w-full focus:border-primary focus:ring-1 focus:ring-primary transition-all duration-300"
+                className="input input-bordered w-full focus:border-none focus:ring-0 focus:outline-primary"
                 required
               />
             </div>
@@ -207,7 +207,7 @@ const EditUserPage = () => {
                 name="type"
                 value={formData.type}
                 onChange={handleChange}
-                className="select select-bordered w-full focus:border-primary focus:ring-1 focus:ring-primary transition-all duration-300"
+                className="select select-bordered w-full focus:border-none focus:ring-0 focus:outline-primary"
               >
                 <option value="user">User</option>
                 <option value="payment_viewer">Payment Viewer</option>

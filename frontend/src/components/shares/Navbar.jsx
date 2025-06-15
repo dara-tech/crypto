@@ -185,9 +185,9 @@ const Navbar = () => {
           {/* Logo Section */}
           <div className="flex items-center">
             <Link to="/" className="flex-shrink-0 flex items-center group">
-              <div className="relative w-12 h-12 rounded-2xl bg-gradient-to-br from-base-200 to-base-300 flex items-center justify-center shadow-lg ring-1 ring-base-300/20">
+              <div className="relative items-center">
                 {companiesLoading ? (
-                  <div className="w-10 h-10 rounded-xl bg-base-300/50" />
+                  <div className="w-10 h-10 rounded-xl bg-base-300/50 " />
                 ) : currentCompany?.logo ? (
                   <img
                     className="object-cover w-10 h-10 rounded-xl"
@@ -199,7 +199,7 @@ const Navbar = () => {
                     }}
                   />
                 ) : (
-                  <div className="w-8 h-8 rounded-xl flex items-center justify-center font-bold text-lg bg-gradient-to-br from-primary to-secondary text-white shadow-lg">
+                  <div className="w-8 h-8 rounded-xl flex items-center justify-center font-bold text-lg bg-gradient-to-br from-primary/10 to-secondary/10 text-white shadow-lg">
                     {currentCompany?.name.charAt(0).toUpperCase()}
                   </div>
                 )}

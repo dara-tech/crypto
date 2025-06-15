@@ -57,7 +57,7 @@ const BasicInfo = ({ formData, onInputChange, onImageChange, imagePreview }) => 
           onBlur={handleBlur}
           className={`textarea w-full textarea-bordered h-32 transition-all duration-200 ${
             focusedField === field ? 'textarea-primary' : ''
-          }`}
+          } focus:border-none focus:ring-0 focus:outline-primary`}
           placeholder={placeholder}
           maxLength={maxLength}
         />
@@ -85,7 +85,7 @@ const BasicInfo = ({ formData, onInputChange, onImageChange, imagePreview }) => 
           onBlur={handleBlur}
           className={`input input-bordered w-full transition-all duration-200 ${
             focusedField === 'name' ? 'input-primary' : ''
-          }`}
+          } focus:border-none focus:ring-0 focus:outline-primary`}
           placeholder={t('company.companyNamePlaceholder')} 
           required 
         />

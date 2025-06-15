@@ -67,7 +67,7 @@ const SocialMedia = ({ formData, onInputChange }) => {
               onBlur={handleBlur}
               className={`input input-bordered w-full pl-10 transition-all duration-200 hover:border-[${platform.color}] ${
                 focusedField === platform.name ? `border-[${platform.color}] ring-1 ring-[${platform.color}]` : ''
-              }`}
+              } focus:border-none focus:ring-0 focus:outline-primary`}
               placeholder={platform.placeholder}
             />
           </div>

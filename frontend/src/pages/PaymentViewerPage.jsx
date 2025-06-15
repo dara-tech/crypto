@@ -196,7 +196,7 @@ const PaymentViewerPage = () => {
       <div className="max-w-4xl mx-auto">
         <div className="bg-base-100/95 backdrop-blur-sm rounded-xl shadow-xl p-6 mb-6">
           <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent p-2">
               {t('paymentViewer.title')}
             </h1>
             <button

@@ -14,6 +14,10 @@ const professionalSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
+  phone: {
+    type: String,
+    required: true,
+  },
   image: {
     type: String,
     default: "",

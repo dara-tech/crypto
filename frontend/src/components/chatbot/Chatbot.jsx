@@ -290,7 +290,7 @@ const Chatbot = () => {
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder={t('chat.placeholder', 'Type a message...')}
-                  className="input input-bordered w-full pr-12 bg-base-100 focus:border-primary focus:ring-1 focus:ring-primary"
+                  className="input input-bordered w-full pr-12 focus:border-none focus:ring-0 focus:outline-primary"
                   disabled={isLoading}
                 />
                 <button

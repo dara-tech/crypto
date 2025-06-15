@@ -96,12 +96,26 @@ export const AuthProvider = ({ children }) => {
       const { data } = await API.put('/api/auth/profile', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
-      if (data.user) setProfile(data.user);
-      return data;
+      
+      if (data.token) {
+        localStorage.setItem('token', data.token);
+      }
+      
+      if (data.user) {
+        setProfile(data.user);
+      }
+      
+      return {
+        success: true,
+        data
+      };
     } catch (error) {
       const errorMessage = error.response?.data?.message || 'Error updating profile';
       setError(errorMessage);
-      throw new Error(errorMessage);
+      return {
+        success: false,
+        message: errorMessage
+      };
     }
   }, []);
 

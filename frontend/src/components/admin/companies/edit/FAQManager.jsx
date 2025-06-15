@@ -93,7 +93,7 @@ const FAQManager = ({ faqs, onFaqChange, loading = false }) => {
                   onChange={(e) =>
                     handleFaqInputChange(index, 'question', e.target.value)
                   }
-                  className="input input-bordered w-full focus:border-primary focus:ring-1 focus:ring-primary transition-all duration-300"
+                  className="input input-bordered w-full focus:border-none focus:ring-0 focus:outline-primary transition-all duration-300"
                   placeholder={t('company.faqs.questionPlaceholder')}
                 />
               </div>
@@ -110,7 +110,7 @@ const FAQManager = ({ faqs, onFaqChange, loading = false }) => {
                   onChange={(e) =>
                     handleFaqInputChange(index, 'answer', e.target.value)
                   }
-                  className="textarea textarea-bordered w-full h-32 focus:border-primary focus:ring-1 focus:ring-primary transition-all duration-300"
+                  className="textarea textarea-bordered w-full h-32 focus:border-none focus:ring-0 focus:outline-primary transition-all duration-300"
                   placeholder={t('company.faqs.answerPlaceholder')}
                 ></textarea>
               </div>

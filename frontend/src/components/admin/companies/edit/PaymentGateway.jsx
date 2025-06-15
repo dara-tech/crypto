@@ -37,7 +37,7 @@ const PaymentGateway = ({ formData, onInputChange, onImageChange }) => {
             onBlur={handleBlur}
             className={`input input-bordered w-full pl-10 transition-all duration-200 hover:border-primary ${
               focusedField === 'paymentGateway' ? 'border-primary ring-1 ring-primary' : ''
-            }`}
+            } focus:border-none focus:ring-0 focus:outline-primary`}
             placeholder={t('company.paymentGateway.linkPlaceholder')}
           />
         </div>

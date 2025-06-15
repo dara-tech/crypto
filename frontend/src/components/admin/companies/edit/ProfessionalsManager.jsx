@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
-import { FaPlus, FaTrash, FaUserCog, FaUser, FaBriefcase, FaEnvelope, FaAlignLeft } from 'react-icons/fa';
+import { FaPlus, FaTrash, FaUserCog, FaUser, FaBriefcase, FaEnvelope, FaAlignLeft, FaPhone } from 'react-icons/fa';
 import ImageUpload from './ImageUpload';
 
 const ProfessionalsManager = ({ professionals = [], onProfessionalsChange, loading = false }) => {
@@ -12,6 +12,7 @@ const ProfessionalsManager = ({ professionals = [], onProfessionalsChange, loadi
     name: '',
     role: '',
     email: '',
+    phone: '',
     description: '',
     image: null,
     newImageFile: null,
@@ -304,7 +305,7 @@ const ProfessionalsManager = ({ professionals = [], onProfessionalsChange, loadi
                     type="text"
                     value={safeProfessional.name || ''}
                     onChange={(e) => handleInputChange(index, 'name', e.target.value)}
-                    className="input input-bordered w-full focus:border-primary focus:ring-1 focus:ring-primary transition-all duration-300"
+                    className="input input-bordered w-full focus:border-none focus:ring-0 focus:outline-primary transition-all duration-300"
                     placeholder={t('professionalsManager.namePlaceholder')}
                   />
                 </div>
@@ -320,7 +321,7 @@ const ProfessionalsManager = ({ professionals = [], onProfessionalsChange, loadi
                     type="text"
                     value={safeProfessional.role || ''}
                     onChange={(e) => handleInputChange(index, 'role', e.target.value)}
-                    className="input input-bordered w-full focus:border-primary focus:ring-1 focus:ring-primary transition-all duration-300"
+                    className="input input-bordered w-full focus:border-none focus:ring-0 focus:outline-primary transition-all duration-300"
                     placeholder={t('professionalsManager.rolePlaceholder')}
                   />
                 </div>
@@ -336,8 +337,29 @@ const ProfessionalsManager = ({ professionals = [], onProfessionalsChange, loadi
                     type="email"
                     value={safeProfessional.email || ''}
                     onChange={(e) => handleInputChange(index, 'email', e.target.value)}
-                    className="input input-bordered w-full focus:border-primary focus:ring-1 focus:ring-primary transition-all duration-300"
+                    className="input input-bordered w-full focus:border-none focus:ring-0 focus:outline-primary transition-all duration-300"
                     placeholder={t('professionalsManager.emailPlaceholder')}
+                  />
+                </div>
+
+                <div className="form-control">
+                  <label className="label">
+                    <span className="label-text font-medium flex items-center gap-2">
+                      <FaPhone className="text-primary" />
+                      {t('professionalsManager.phone')}
+                    </span>
+                  </label>
+                  <input
+                    type="tel"
+                    value={safeProfessional.phone || ''}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/[^\d+()\s-]/g, '');
+                      handleInputChange(index, 'phone', value);
+                    }}
+                    className="input input-bordered w-full focus:border-none focus:ring-0 focus:outline-primary transition-all duration-300"
+                    placeholder={t('professionalsManager.phonePlaceholder', '+1 (555) 123-4567')}
+                    pattern="[0-9\s+\-()]*"
+                    maxLength="20"
                   />
                 </div>
 
@@ -351,7 +373,7 @@ const ProfessionalsManager = ({ professionals = [], onProfessionalsChange, loadi
                   <textarea
                     value={safeProfessional.description || ''}
                     onChange={(e) => handleInputChange(index, 'description', e.target.value)}
-                    className="textarea textarea-bordered w-full h-32 focus:border-primary focus:ring-1 focus:ring-primary transition-all duration-300"
+                    className="textarea textarea-bordered w-full h-32 focus:border-none focus:ring-0 focus:outline-primary transition-all duration-300"
                     placeholder={t('professionalsManager.descriptionPlaceholder')}
                   ></textarea>
                 </div>

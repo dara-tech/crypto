@@ -1,7 +1,7 @@
 import React from 'react';
 
 export const TableSkeleton = () => (
-  <div className="animate-pulse">
+  <div>
     <div className="space-y-4">
       {/* Header skeleton */}
       <div className="h-12 bg-base-200 rounded-lg"></div>

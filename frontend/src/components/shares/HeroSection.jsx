@@ -203,7 +203,7 @@ const HeroSection = () => {
               className="relative z-10"
             >
               {overallLoading ? (
-                <div className="w-full h-48 sm:h-64 bg-base-300 rounded-lg animate-pulse"></div>
+                <div className="w-full h-48 sm:h-64 bg-base-300 rounded-lg"></div>
               ) : (
                 <div className="relative">
                   <motion.img

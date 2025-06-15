@@ -60,8 +60,8 @@ const PolicyPrivacy = () => {
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.3, delay: item * 0.1 }}
                 >
-                  <div className="h-5 bg-base-300 animate-pulse rounded-lg w-3/4 mb-3"></div>
-                  <div className="h-4 bg-base-300 animate-pulse rounded-lg w-full"></div>
+                  <div className="h-5 bg-base-300 rounded-lg w-3/4 mb-3"></div>
+                  <div className="h-4 bg-base-300 rounded-lg w-full"></div>
                 </motion.div>
               ))}
             </div>

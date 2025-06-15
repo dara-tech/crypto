@@ -32,5 +32,6 @@ export const THEMES = [
     "nord",
     "sunset",
     "crypto",
+    "test",
   ];
   
