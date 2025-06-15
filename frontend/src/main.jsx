@@ -44,7 +44,7 @@ const LoadingScreen = () => {
             <div className="absolute inset-0 bg-gradient-to-br from-emerald-500 to-cyan-500 opacity-20 clip-hexagon"></div>
             <div className="absolute inset-2 bg-zinc-900 clip-hexagon flex items-center justify-center">
               <span className="text-2xl font-bold text-emerald-400">
-                Crypto
+                KH HARA
               </span>
             </div>
           </div>

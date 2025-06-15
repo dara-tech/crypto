@@ -6,11 +6,11 @@ const MainLayout = ({ children }) => {
   const commandPalette = useCommandPalette();
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-base-100 via-base-200 to-base-300">
       {/* Add a floating button to open command palette */}
       <button
         onClick={commandPalette.open}
-        className="fixed bottom-4 right-4 p-3 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-colors"
+        className="fixed bottom-4 right-4 p-3 bg-primary text-white rounded-full shadow-lg hover:shadow-primary/20 hover:scale-110 transition-all duration-300"
         title="Open Command Palette (⌘K)"
       >
         <svg
@@ -36,7 +36,7 @@ const MainLayout = ({ children }) => {
       />
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {children}
       </main>
     </div>

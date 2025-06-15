@@ -189,6 +189,8 @@
     "removeImage": "Remove image",
     "download": "Download ",
     "copy": "Copy",
+    "clickToCopy": "Click to copy",
+    "copied": "Copied",
     "dragAndDrop": "Drag and drop an image here, or",
     "browse": "browse",
     "or": "or",

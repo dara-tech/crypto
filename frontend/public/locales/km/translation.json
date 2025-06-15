@@ -192,6 +192,8 @@
     "changeImage": "ផ្លាស់ប្ដូររូបភាព",
     "removeImage": "លុបរូបភាពចេញ",
     "copy": "ចម្លង",
+    "clickToCopy": "ចុចដើម្បីចម្លង",
+    "copied": "ចម្លងដោយជោគជ័យ",
     "download": "ទាញយក",
     "dragAndDrop": "អូសរូបភាពមកទីនេះ ឬ",
     "browse": "រកមើល",

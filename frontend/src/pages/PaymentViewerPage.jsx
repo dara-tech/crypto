@@ -1,9 +1,56 @@
-import { useEffect, memo } from 'react';
+import { useEffect, memo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaLink, FaSignOutAlt, FaDownload, FaCopy, FaQrcode } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-hot-toast';
 import usePaymentGateways from '../hooks/usePaymentGateways';
+
+// Memoized Loading Skeleton Component
+const LoadingSkeleton = memo(() => (
+  <div className="min-h-screen bg-gradient-to-br from-base-100 via-base-200 to-base-300 p-4 pt-20">
+    <div className="max-w-4xl mx-auto">
+      {/* Header Skeleton */}
+      <div className="bg-base-100/95 backdrop-blur-sm rounded-xl shadow-xl p-6 mb-6">
+        <div className="flex justify-between items-center">
+          <div className="h-10 bg-primary/10 rounded-xl w-64"></div>
+          <div className="h-10 bg-primary/10 rounded-xl w-32"></div>
+        </div>
+      </div>
+
+      {/* Payment Sections Skeleton */}
+      <div className="space-y-6">
+        {/* Payment Link Section Skeleton */}
+        <div className="p-6 bg-base-100/50 backdrop-blur-sm border border-primary/20 rounded-xl shadow-lg">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="w-6 h-6 bg-primary/10 rounded-full"></div>
+            <div className="h-6 bg-primary/10 rounded-lg w-48"></div>
+          </div>
+          <div className="flex items-center justify-between gap-4 bg-base-200/50 p-3 rounded-lg">
+            <div className="h-6 bg-primary/10 rounded-lg flex-1"></div>
+            <div className="h-10 bg-primary/10 rounded-lg w-32"></div>
+          </div>
+        </div>
+
+        {/* QR Code Section Skeleton */}
+        <div className="p-6 bg-base-100/50 backdrop-blur-sm border border-primary/20 rounded-xl shadow-lg">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="w-6 h-6 bg-primary/10 rounded-full"></div>
+            <div className="h-6 bg-primary/10 rounded-lg w-48"></div>
+          </div>
+          <div className="flex justify-center">
+            <div className="w-64 h-64 bg-primary/10 rounded-lg"></div>
+          </div>
+          <div className="mt-4 text-center">
+            <div className="h-10 bg-primary/10 rounded-lg w-32 mx-auto"></div>
+          </div>
+          <div className="mt-3">
+            <div className="h-4 bg-primary/10 rounded-lg w-3/4 mx-auto"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+));
 
 // Memoized QR Code component
 const QRCodeSection = memo(({ paymentQR, onDownload, t }) => (
@@ -38,31 +85,66 @@ const QRCodeSection = memo(({ paymentQR, onDownload, t }) => (
 ));
 
 // Memoized Payment Link component
-const PaymentLinkSection = memo(({ paymentGateway, onCopy, t }) => (
-  <div className="p-6 bg-base-100/50 backdrop-blur-sm border border-primary/20 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
-    <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-      <FaLink className="text-primary" />
-      {t('company.paymentGateway.link')}
-    </h2>
-    <div className="flex items-center justify-between gap-4 flex-wrap bg-base-200/50 p-3 rounded-lg">
-      <a
-        href={paymentGateway}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-primary hover:text-primary/80 break-all text-sm transition-colors duration-300"
-      >
-        {paymentGateway}
-      </a>
-      <button
-        onClick={onCopy}
-        className="btn btn-primary btn-sm gap-2"
-      >
-        <FaCopy />
-        {t('common.copy')}
-      </button>
+const PaymentLinkSection = memo(({ paymentGateway, onCopy, t }) => {
+  const [isCopied, setIsCopied] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+
+  const handleCopy = () => {
+    onCopy();
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2000);
+  };
+
+  return (
+    <div className="p-6 bg-base-100/50 backdrop-blur-sm border border-primary/20 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
+      <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+        <FaLink className="text-primary" />
+        {t('company.paymentGateway.link')}
+      </h2>
+      <div className="flex items-center justify-between gap-4 flex-wrap bg-base-200/50 p-3 rounded-lg group">
+        <a
+          href={paymentGateway}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-primary hover:text-primary/80 break-all text-sm transition-colors duration-300 flex-1"
+        >
+          {paymentGateway}
+        </a>
+        <div className="relative">
+          <button
+            onClick={handleCopy}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+            className={`btn btn-sm gap-2 transition-all duration-300 ${
+              isCopied 
+                ? 'btn-success' 
+                : 'btn-primary hover:scale-105'
+            }`}
+          >
+            {isCopied ? (
+              <>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                </svg>
+                {t('common.copied')}
+              </>
+            ) : (
+              <>
+                <FaCopy className={`transition-transform duration-300 ${isHovered ? 'scale-110' : ''}`} />
+                {t('common.copy')}
+              </>
+            )}
+          </button>
+          {isHovered && !isCopied && (
+            <div className="absolute -top-8 right-0 bg-base-300 text-base-content text-xs px-2 py-1 rounded shadow-lg whitespace-nowrap">
+              {t('common.clickToCopy')}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
-  </div>
-));
+  );
+});
 
 const PaymentViewerPage = () => {
   const { t } = useTranslation();
@@ -106,14 +188,7 @@ const PaymentViewerPage = () => {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-base-100 via-base-200 to-base-300 pt-20">
-        <div className="flex flex-col items-center gap-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-          <p className="text-base-content/70">Loading payment information...</p>
-        </div>
-      </div>
-    );
+    return <LoadingSkeleton />;
   }
 
   return (

@@ -66,7 +66,7 @@ const UserManagementPage = () => {
       </div>
 
       {loading && (
-        <div className="overflow-x-auto bg-base-100 rounded-xl shadow-lg border border-base-300">
+        <div className="overflow-x-auto bg-base-100 rounded-xl shadow-lg border border-primary/20">
           <table className="table w-full">
             <thead>
               <tr className="bg-base-200/50">
@@ -78,23 +78,23 @@ const UserManagementPage = () => {
             </thead>
             <tbody>
               {Array.from({ length: 5 }).map((_, index) => (
-                <tr key={index} className="border-b border-base-300 animate-pulse">
+                <tr key={index} className="border-b border-primary/20">
                   <td className="p-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-base-300 rounded-full"></div>
-                      <div className="h-4 bg-base-300 rounded w-32"></div>
+                      <div className="w-8 h-8 bg-primary/10 rounded-full"></div>
+                      <div className="h-4 bg-primary/10 rounded w-32"></div>
                     </div>
                   </td>
                   <td className="p-4">
-                    <div className="h-4 bg-base-300 rounded w-48"></div>
+                    <div className="h-4 bg-primary/10 rounded w-48"></div>
                   </td>
                   <td className="p-4">
-                    <div className="h-6 w-20 bg-base-300 rounded-full"></div>
+                    <div className="h-6 w-20 bg-primary/10 rounded-full"></div>
                   </td>
                   <td className="p-4 text-center">
                     <div className="flex justify-center space-x-2">
-                      <div className="h-8 w-8 bg-base-300 rounded-full"></div>
-                      <div className="h-8 w-8 bg-base-300 rounded-full"></div>
+                      <div className="h-8 w-8 bg-primary/10 rounded-full"></div>
+                      <div className="h-8 w-8 bg-primary/10 rounded-full"></div>
                     </div>
                   </td>
                 </tr>

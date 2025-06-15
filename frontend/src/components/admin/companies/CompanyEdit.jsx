@@ -1,7 +1,6 @@
 import { useState, useEffect, memo, useCallback, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { FaBuilding, FaPen, FaPhoneAlt, FaGlobe, FaFile, FaCreditCard, FaChevronDown, FaQuestionCircle, FaUserTie } from "react-icons/fa";
-import { motion, AnimatePresence } from "framer-motion";
 import useCompanies from "../../../hooks/useCompanies";
 import LogoUpload from "./edit/LogoUpload";
 import BasicInfo from "./edit/BasicInfo";
@@ -15,24 +14,9 @@ import FAQManager from "./edit/FAQManager";
 import ProfessionalsManager from './edit/ProfessionalsManager';
 import { useTranslation } from "react-i18next";
 
-// Optimized animation variants
-const fadeIn = {
-  initial: { opacity: 0 },
-  animate: { opacity: 1 },
-  exit: { opacity: 0 }
-};
-
-const slideUp = {
-  initial: { opacity: 0, y: 10 },
-  animate: { opacity: 1, y: 0 },
-  exit: { opacity: 0, y: -10 }
-};
-
 // Memoized Tab Button Component
 const TabButton = memo(({ tab, isActive, onClick }) => (
-  <motion.button
-    initial={{ opacity: 0, x: -10 }}
-    animate={{ opacity: 1, x: 0 }}
+  <button
     type="button"
     onClick={onClick}
     className={`tab tab-lg gap-2 transition-all duration-200 ${
@@ -43,38 +27,38 @@ const TabButton = memo(({ tab, isActive, onClick }) => (
   >
     {tab.icon}
     <span className="hidden sm:inline">{tab.label}</span>
-  </motion.button>
+  </button>
 ));
 
 // Memoized Loading Skeleton Component
 const LoadingSkeleton = memo(() => (
-  <div className="container mx-auto p-6 max-w-6xl min-h-screen bg-gradient-to-br from-base-100 via-base-200 to-base-300 pt-20">
+  <div className="container mx-auto p-6 max-w-6xl min-h-screen bg-base-100 pt-20">
     <div className="max-w-6xl mx-auto">
       {/* Header Skeleton */}
       <div className="flex items-center justify-between mb-8">
-        <div className="h-10 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-xl w-64 animate-pulse"></div>
-        <div className="h-12 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-xl w-32 animate-pulse"></div>
+        <div className="h-10 bg-primary/10 rounded-xl w-64"></div>
+        <div className="h-12 bg-primary/10 rounded-xl w-32"></div>
       </div>
 
       {/* Tabs Skeleton */}
       <div className="flex space-x-2 mb-8 overflow-x-auto pb-2">
         {[1, 2, 3, 4, 5].map(i => (
-          <div key={i} className="flex-shrink-0 h-14 w-40 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-xl animate-pulse"></div>
+          <div key={i} className="flex-shrink-0 h-14 w-40 bg-primary/10 rounded-xl"></div>
         ))}
       </div>
       
       {/* Content Skeleton */}
-      <div className="bg-base-100/50 backdrop-blur-sm border border-primary/20 rounded-xl p-8 shadow-lg">
+      <div className="bg-base-100 border border-primary/20 rounded-xl p-8 shadow-sm">
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-8 h-8 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-full animate-pulse"></div>
-          <div className="h-8 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-xl w-48 animate-pulse"></div>
+          <div className="w-8 h-8 bg-primary/10 rounded-full"></div>
+          <div className="h-8 bg-primary/10 rounded-xl w-48"></div>
         </div>
         
         <div className="space-y-6">
           {[1, 2, 3].map(i => (
             <div key={i} className="space-y-3">
-              <div className="h-6 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-lg w-1/4 animate-pulse"></div>
-              <div className="h-12 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-lg animate-pulse"></div>
+              <div className="h-6 bg-primary/10 rounded-lg w-1/4"></div>
+              <div className="h-12 bg-primary/10 rounded-lg"></div>
             </div>
           ))}
         </div>
@@ -574,42 +558,28 @@ const CompanyEdit = () => {
   }
 
   return (
-    <div className="container mx-auto p-6 max-w-6xl min-h-screen  pt-20">
-      <motion.div 
-        variants={fadeIn}
-        initial="initial"
-        animate="animate"
-        className="max-w-6xl mx-auto"
-      >
+    <div className="container mx-auto p-6 max-w-6xl min-h-screen pt-20">
+      <div className="max-w-6xl mx-auto">
         <div className="flex items-center justify-between mb-8">
-          <motion.h2 
-            variants={slideUp}
-            className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent"
-          >
+          <h2 className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
             {t('company.editTitle')}
-          </motion.h2>
-          <motion.button 
-            variants={slideUp}
+          </h2>
+          <button 
             onClick={() => navigate("/admin/companies")}
             className="btn btn-ghost hover:bg-primary/10 transition-colors duration-200"
           >
             {t('company.backToCompanies')}
-          </motion.button>
+          </button>
         </div>
 
-        <AnimatePresence mode='sync'>
-          {error && (
-            <motion.div 
-              variants={slideUp}
-              className="alert alert-error mb-6 shadow-lg"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span>{error}</span>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {error && (
+          <div className="alert alert-error mb-6 shadow-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>{error}</span>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* Desktop Tabs */}
@@ -627,10 +597,7 @@ const CompanyEdit = () => {
           </div>
 
           {/* Mobile Dropdown */}
-          <motion.div 
-            variants={slideUp}
-            className="lg:hidden mb-8"
-          >
+          <div className="lg:hidden mb-8">
             <div className="dropdown dropdown-bottom w-full">
               <div tabIndex={0} role="button" className="btn btn-outline w-full justify-between bg-base-100/50 backdrop-blur-sm border-primary/20 hover:bg-primary/5 transition-colors duration-200">
                 <div className="flex items-center gap-2">
@@ -656,13 +623,10 @@ const CompanyEdit = () => {
                 ))}
               </ul>
             </div>
-          </motion.div>
+          </div>
 
           {/* Tab Content */}
-          <motion.div 
-            variants={fadeIn}
-            className="bg-base-100/50 backdrop-blur-sm border border-primary/20 rounded-xl p-8 shadow-lg min-h-[400px]"
-          >
+          <div className="bg-base-100/50 backdrop-blur-sm border border-primary/20 rounded-xl p-8 shadow-lg min-h-[400px]">
             <div className="flex items-center gap-2 mb-6">
               {tabs.find(tab => tab.id === activeTab)?.icon}
               <h3 className="text-2xl font-semibold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
@@ -670,22 +634,13 @@ const CompanyEdit = () => {
               </h3>
             </div>
             
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeTab}
-                variants={slideUp}
-                className="relative"
-              >
-                {tabContent}
-              </motion.div>
-            </AnimatePresence>
-          </motion.div>
+            <div className="relative">
+              {tabContent}
+            </div>
+          </div>
 
           {/* Navigation Buttons */}
-          <motion.div 
-            variants={slideUp}
-            className="flex justify-between items-center"
-          >
+          <div className="flex justify-between items-center">
             <div className="flex gap-2">
               <button
                 type="button"
@@ -736,9 +691,9 @@ const CompanyEdit = () => {
                 <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/20 to-primary/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500"></div>
               </button>
             </div>
-          </motion.div>
+          </div>
         </form>
-      </motion.div>
+      </div>
     </div>
   );
 };
