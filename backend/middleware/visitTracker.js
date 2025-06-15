@@ -7,7 +7,10 @@ export const trackVisit = async (req, res, next) => {
     const referrer = req.headers['referer'] || '';
     const isFrontendVisit =
         referrer.includes('localhost:5173') ||
+        referrer.includes('khhara.com') ||
+        referrer.includes('www.khhara.com') ||
         referrer.includes('crypto-nmz7.onrender.com');
+
         // referrer.includes('daracheol.com')
     const isAssetRequest = req.path.match(/\.(js|css|png|jpg|jpeg|svg|ico|woff|ttf|map)$/i);
 

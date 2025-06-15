@@ -25,6 +25,8 @@ app.use(cors({
     "http://localhost:5173",
     "http://localhost:5001",
     "https://crypto-nmz7.onrender.com",
+    "https://khhara.com",
+    "https://www.khhara.com",
   ],
   credentials: true
 }));
