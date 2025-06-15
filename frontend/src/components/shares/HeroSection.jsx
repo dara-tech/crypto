@@ -127,7 +127,7 @@ const HeroSection = () => {
 
               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-base-content leading-tight">
                 {company?.name || t('hero.title')}
-                <span className="text-primary block mt-1 sm:mt-2">Advanced Analytics</span>
+                <span className="text-primary block mt-1 sm:mt-2"> Your Trusted escrow service</span>
               </h1>
 
               <p className="text-base sm:text-lg text-base-content/70 max-w-lg">

@@ -11,6 +11,8 @@
   "faq": "FAQ",
   "professionalsManager": {
     "title": "Our Professionals",
+    "phone": "Phone",
+    "phonePlaceholder": "Enter phone number",
     "allProfessionals": "All Professionals",
     "subtitle": "Meet the talented individuals driving our success.",
     "fetchError": "Failed to fetch professionals.",
