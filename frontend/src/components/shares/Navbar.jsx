@@ -82,6 +82,11 @@ const Navbar = () => {
     }
   }, [companies]);
 
+  const isSuperAdminRoute = location.pathname.startsWith('/admin') && userRole === 'super_admin';
+  if (isSuperAdminRoute) {
+    return null;
+  }
+
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const toggleProfileMenu = (e) => {
     e.stopPropagation();
@@ -144,10 +149,22 @@ const Navbar = () => {
   const linksForAuthenticatedUser = useMemo(() => {
     // A declarative map for role-based links. Easier to read and scale.
     const roleConfig = {
-      admin: [
+      super_admin: [
         { to: '/dashboard', label: t('dashboard'), icon: <RiDashboardLine />, activeIcon: <RiDashboardFill /> },
         commonLinks.payments,
-        // For dynamic links, we can use a function that resolves the URL
+        () => ({ 
+          to: currentCompany ? `/companies/${currentCompany._id}` : '/companies', 
+          label: t('companies'), 
+          icon: <FaBuilding />, 
+          activeIcon: <FaBuilding /> 
+        }),
+        { to: '/users', label: t('users'), icon: <FaUserFriends />, activeIcon: <FaUserFriends /> },
+        // { to: '/admin/settings', label: t('admin.settings'), icon: <HiOutlineCog />, activeIcon: <HiOutlineCog /> },
+        commonLinks.profile,
+      ],
+      admin: [
+        // { to: '/dashboard', label: t('dashboard'), icon: <RiDashboardLine />, activeIcon: <RiDashboardFill /> },
+        commonLinks.payments,
         () => ({ 
           to: currentCompany ? `/companies/${currentCompany._id}` : '/companies', 
           label: t('companies'), 
@@ -369,9 +386,9 @@ const Navbar = () => {
                     </div>
                     
                     <div className="py-2">
-                      {userRole === 'admin' && (
+                      {(userRole === 'super_admin') && (
                         <Link
-                          to="/admin/dashboard"
+                          to="/dashboard"
                           onClick={() => setIsProfileMenuOpen(false)}
                           className="flex items-center px-5 py-3 text-sm text-base-content/70 hover:bg-base-200/80"
                         >
@@ -379,6 +396,18 @@ const Navbar = () => {
                             <HiOutlineCog className="w-5 h-5 text-primary" />
                           </div>
                           <span>{t('menu.admin') || 'Admin Panel'}</span>
+                        </Link>
+                      )}
+                      {userRole === 'super_admin' && (
+                        <Link
+                          to="/setting"
+                          onClick={() => setIsProfileMenuOpen(false)}
+                          className="flex items-center px-5 py-3 text-sm text-base-content/70 hover:bg-base-200/80"
+                        >
+                          <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-primary/10 to-secondary/10 flex items-center justify-center mr-3 shadow-sm">
+                            <HiOutlineCog className="w-5 h-5 text-primary" />
+                          </div>
+                          <span>{t('admin.settings') || 'Admin Settings'}</span>
                         </Link>
                       )}
                       <Link
@@ -564,7 +593,7 @@ const Navbar = () => {
                       <HiOutlineCog className="w-6 h-6 text-primary" />
                       {t('settings') || 'Settings'}
                     </Link>
-                    {userRole === 'admin' && (
+                    {(userRole === 'admin' || userRole === 'super_admin') && (
                       <Link
                         to="/admin/dashboard"
                         onClick={() => setIsMenuOpen(false)}
@@ -572,6 +601,16 @@ const Navbar = () => {
                       >
                         <HiOutlineCog className="w-6 h-6 text-primary" />
                         {t('menu.admin') || 'Admin Panel'}
+                      </Link>
+                    )}
+                    {userRole === 'super_admin' && (
+                      <Link
+                        to="/admin/settings"
+                        onClick={() => setIsMenuOpen(false)}
+                        className="flex items-center gap-3 px-5 py-4 text-base font-medium text-base-content hover:bg-base-200/60"
+                      >
+                        <HiOutlineCog className="w-6 h-6 text-primary" />
+                        {t('admin.settings') || 'Admin Settings'}
                       </Link>
                     )}
                     <button

@@ -19,7 +19,7 @@ const ProtectedRoute = ({ allowedRoles }) => {
   }
 
   const userHasRequiredRole = profile && allowedRoles?.includes(profile.type);
-
+  
   if (!userHasRequiredRole) {
     // User is authenticated but does not have the required role, redirect to home.
     return <Navigate to="/" replace />;

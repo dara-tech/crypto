@@ -183,6 +183,7 @@
     },
     "faqs": {
       "add": "បន្ថែមសំណួរ",
+      "addFirstFaq": "បន្ថែមសំណួរដំបូង",
       "question": "សំណួរ",
       "answer": "ចម្លើយ",
       "questionPlaceholder": "បញ្ចូលសំណួរ",

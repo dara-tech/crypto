@@ -1,32 +1,37 @@
-import { Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import './App.css';
+import { Toaster } from 'react-hot-toast';
+import { HelmetProvider } from 'react-helmet-async';
+import MainLayout from './components/layouts/MainLayout';
 import LoginPage from './components/auth/loginPage';
 import RegisterPage from './components/auth/RegisterPage';
-import Profile from './components/admin/profile/layout';
-import Navbar from './components/shares/Navbar';
-import SettingPage from './components/shares/SettingPage';
+import useAuth from './hooks/useAuth';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { AuthProvider } from './context/AuthProvider';
 import { useThemeStore } from './store/useThemeStore';
+import UserManagementPage from './components/admin/users/UserManagementPage';
+import Profile from './components/admin/profile/layout';
+import PaymentViewerPage from './pages/PaymentViewerPage';
+import CompanyList from './components/admin/companies/CompanyList';
+import CompanyEdit from './components/admin/companies/CompanyEdit';
+import SettingPage from './components/shares/SettingPage';
 import About from './components/clientPage/About';
-import Footer from './components/shares/Footer';
 import Mission from './components/clientPage/Mission';
 import Vision from './components/clientPage/Vision';
-import CompanyEdit from './components/admin/companies/CompanyEdit';
-import CompanyList from './components/admin/companies/CompanyList';
 import Contact from './components/clientPage/Contact';
 import PolicyPrivacy from './components/clientPage/PolicyPrivacy';
 import TermsAndConditions from './components/clientPage/TermsAndConditions';
 import Home from './components/clientPage/Home';
-import ProtectedRoute from './components/auth/ProtectedRoute';
-import PaymentViewerPage from "./pages/PaymentViewerPage";
 import FaqPage from './components/clientPage/FaqPage';
 import ProfessionalPage from './components/clientPage/ProfessionalPage';
 import Chatbot from './components/chatbot/Chatbot';
-import UserManagementPage from './components/admin/users/UserManagementPage';
-import EditUserPage from './components/admin/users/EditUserPage';
+import Navbar from './components/shares/Navbar';
+import Footer from './components/shares/Footer';
+import SuperAdminLayout from './components/admin/layouts/SuperAdminLayout';
+import SuperAdminDashboard from './components/admin/dashboard/SuperAdminDashboard';
+import SEO from './components/SEO';
+import { routesMetadata } from './config/metadata';
+import './App.css';
 
-// Create a client
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -37,55 +42,195 @@ const queryClient = new QueryClient({
   },
 });
 
-function App() {
-  const { theme } = useThemeStore()
+const PrivateRoute = ({ children, roles }) => {
+  const { profile, loading } = useAuth();
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!profile) {
+    return <Navigate to="/login" />;
+  }
+
+  if (roles && !roles.includes(profile.type)) {
+    return <Navigate to="/" />;
+  }
+
+  return children;
+};
+
+const App = () => {
+  const { isAuthenticated, profile } = useAuth();
+  const { theme } = useThemeStore();
+  const isSuperAdmin = profile?.type === 'super_admin';
+
   return (
     <QueryClientProvider client={queryClient}>
-      <div data-theme={theme}>
-        <Navbar />
-        <Routes>
-            {/* Public routes */}
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/mission" element={<Mission />} />
-            <Route path="/vision" element={<Vision />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/privacy-policy" element={<PolicyPrivacy />} />
-            <Route path="/terms-conditions" element={<TermsAndConditions />} />
-            <Route path="/faq" element={<FaqPage />} />
-            <Route path="/" element={<Home />} />
-            <Route path="/setting" element={<SettingPage />} />
-            <Route path="/professional" element={<ProfessionalPage />} />
-            
-            {/* Protected routes - only accessible when authenticated */}
-            {/* Generic Protected routes */}
-            <Route element={<ProtectedRoute allowedRoles={['admin', 'user', 'payment_viewer']} />}>
-              <Route path="/profile" element={<Profile />} />
-            </Route>
+      <AuthProvider>
+        <HelmetProvider>
+          <Toaster position="top-right" />
+          <div data-theme={theme}>
+            <Navbar />
+            <Routes>
+              {/* Public Routes */}
+              <Route 
+                path="/login" 
+                element={
+                  <>
+                    <SEO {...routesMetadata.login} />
+                    {!isAuthenticated ? <LoginPage /> : <Navigate to="/dashboard" />}
+                  </>
+                } 
+              />
+              <Route 
+                path="/register" 
+                element={
+                  <>
+                    <SEO {...routesMetadata.register} />
+                    {!isAuthenticated ? <RegisterPage /> : <Navigate to="/dashboard" />}
+                  </>
+                } 
+              />
+              <Route 
+                path="/about" 
+                element={
+                  <>
+                    <SEO {...routesMetadata.about} />
+                    <About />
+                  </>
+                } 
+              />
+              <Route 
+                path="/mission" 
+                element={
+                  <>
+                    <SEO {...routesMetadata.mission} />
+                    <Mission />
+                  </>
+                } 
+              />
+              <Route 
+                path="/vision" 
+                element={
+                  <>
+                    <SEO {...routesMetadata.vision} />
+                    <Vision />
+                  </>
+                } 
+              />
+              <Route 
+                path="/contact" 
+                element={
+                  <>
+                    <SEO {...routesMetadata.contact} />
+                    <Contact />
+                  </>
+                } 
+              />
+              <Route 
+                path="/privacy-policy" 
+                element={
+                  <>
+                    <SEO {...routesMetadata.privacyPolicy} />
+                    <PolicyPrivacy />
+                  </>
+                } 
+              />
+              <Route 
+                path="/terms-conditions" 
+                element={
+                  <>
+                    <SEO {...routesMetadata.termsAndConditions} />
+                    <TermsAndConditions />
+                  </>
+                } 
+              />
+              <Route 
+                path="/faq" 
+                element={
+                  <>
+                    <SEO {...routesMetadata.faq} />
+                    <FaqPage />
+                  </>
+                } 
+              />
+              <Route 
+                path="/setting" 
+                element={
+                  <>
+                    <SEO {...routesMetadata.settings} />
+                    <SettingPage />
+                  </>
+                } 
+              />
+              <Route 
+                path="/professional" 
+                element={
+                  <>
+                    <SEO {...routesMetadata.professional} />
+                    <ProfessionalPage />
+                  </>
+                } 
+              />
 
-            {/* Admin-only routes */}
-            <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
-              <Route path="/dashboard" element={<UserManagementPage />} /> 
-              <Route path="/users" element={<UserManagementPage />} />
-              <Route path="/users/:userId/edit" element={<EditUserPage />} />
-              <Route path="/companies/:id" element={<CompanyEdit />} />
-              <Route path="/companies" element={<CompanyList />} />
-            </Route>
-            
-            {/* Payment viewer route - accessible to payment_viewer and admin roles */}
-            <Route element={<ProtectedRoute allowedRoles={['admin', 'payment_viewer']} />}>
-              <Route path="/payments" element={<PaymentViewerPage />} />
-            </Route>
+              {/* Protected Routes */}
+              <Route element={<MainLayout />}>
+                <Route path="/dashboard" element={<SuperAdminDashboard />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/payments" element={<PaymentViewerPage />} />
+                <Route path="/companies" element={<CompanyList />} />
+                <Route path="/companies/:id" element={<CompanyEdit />} />
+                <Route path="/users" element={<UserManagementPage />} />
+                <Route path="/admin/settings" element={<SettingPage />} />
+              </Route>
 
-            {/* Redirect to home for any unknown routes */}
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-          <Footer />
-          <Chatbot />
-      </div>
+              {/* Root Route - Conditional rendering based on authentication */}
+              <Route 
+                path="/" 
+                element={
+                  isSuperAdmin ? (
+                    <PrivateRoute roles={['super_admin']}>
+                      <SuperAdminLayout />
+                    </PrivateRoute>
+                  ) : (
+                    <>
+                      <SEO {...routesMetadata.home} />
+                      <Home />
+                    </>
+                  )
+                }
+              >
+                {isSuperAdmin && (
+                  <>
+                    <Route index element={<Navigate to="/dashboard" replace />} />
+                    <Route path="dashboard" element={<SuperAdminDashboard />} />
+                  </>
+                )}
+              </Route>
+
+              {/* 404 Route */}
+              <Route 
+                path="*" 
+                element={
+                  <>
+                    <SEO 
+                      title="404 - Page Not Found"
+                      description="The page you are looking for does not exist."
+                    />
+                    <Navigate to="/" />
+                  </>
+                } 
+              />
+            </Routes>
+            {/* Only show Footer if not super admin */}
+            {!isSuperAdmin && <Footer />}
+            <Chatbot />
+          </div>
+        </HelmetProvider>
+      </AuthProvider>
     </QueryClientProvider>
-  )
-}
+  );
+};
 
-export default App
+export default App;

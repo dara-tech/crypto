@@ -10,7 +10,7 @@ export const registerUser = async (req, res) => {
     const { name, email, password, type = 'user' } = req.body;
     
     // Validate role
-    const validRoles = ['admin', 'user', 'payment_viewer'];
+    const validRoles = ['super_admin', 'admin', 'user', 'payment_viewer'];
     if (!validRoles.includes(type)) {
       return res.status(400).json({ message: 'Invalid user role' });
     }
@@ -98,6 +98,25 @@ export const loginUser = async (req, res) => {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
+    // Get IP address
+    const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+
+    // Get geolocation info (using ip-api.com)
+    let location = null;
+    try {
+      const fetch = (await import('node-fetch')).default;
+      const geoRes = await fetch(`http://ip-api.com/json/${ip}`);
+      location = await geoRes.json();
+    } catch (geoErr) {
+      location = null;
+    }
+
+    // Update lastLogin, lastLoginIp, lastLoginLocation
+    user.lastLogin = new Date();
+    user.lastLoginIp = ip;
+    user.lastLoginLocation = location;
+    await user.save();
+
     // Generate JWT with user type
     const token = jwt.sign(
       { 
@@ -117,7 +136,10 @@ export const loginUser = async (req, res) => {
         name: user.name,
         email: user.email,
         profilePic: user.profilePic,
-        type: user.type
+        type: user.type,
+        lastLogin: user.lastLogin,
+        lastLoginIp: user.lastLoginIp,
+        lastLoginLocation: user.lastLoginLocation
       }
     });
   } catch (err) {
@@ -288,8 +310,8 @@ export const getCurrentUser = async (req, res) => {
 
 export const getUsers = async (req, res) => {
   try {
-    // Check if the authenticated user is an admin
-    if (req.user.type !== 'admin') {
+    // Check if the authenticated user is an admin or super_admin
+    if (req.user.type !== 'admin' && req.user.type !== 'super_admin') {
       return res.status(403).json({ message: 'Forbidden: This action requires admin privileges.' });
     }
 
@@ -306,8 +328,8 @@ export const getUsers = async (req, res) => {
 
 export const getUserById = async (req, res) => {
   try {
-    // An admin should be able to fetch any user's details
-    if (req.user.type !== 'admin') {
+    // An admin or super_admin should be able to fetch any user's details
+    if (req.user.type !== 'admin' && req.user.type !== 'super_admin') {
       return res.status(403).json({ message: 'Forbidden: Admin access required.' });
     }
 
@@ -327,8 +349,8 @@ export const getUserById = async (req, res) => {
 
 export const updateUserByAdmin = async (req, res) => {
   try {
-    // Ensure the requester is an admin
-    if (req.user.type !== 'admin') {
+    // Ensure the requester is an admin or super_admin
+    if (req.user.type !== 'admin' && req.user.type !== 'super_admin') {
       return res.status(403).json({ message: 'Forbidden: Admin access required.' });
     }
 
@@ -376,8 +398,8 @@ export const updateUserByAdmin = async (req, res) => {
 
 export const deleteUser = async (req, res) => {
   try {
-    // Check if the authenticated user is an admin. The user object is attached by the auth middleware.
-    if (req.user.type !== 'admin') {
+    // Check if the authenticated user is an admin or super_admin
+    if (req.user.type !== 'admin' && req.user.type !== 'super_admin') {
       return res.status(403).json({ message: 'Forbidden: This action requires admin privileges.' });
     }
 
@@ -389,9 +411,14 @@ export const deleteUser = async (req, res) => {
       return res.status(404).json({ message: 'User not found.' });
     }
 
-    // Optional: Prevent admins from deleting other admins or themselves for safety
-    if (userToDelete.type === 'admin') {
-      return res.status(400).json({ message: 'Admins cannot be deleted through this endpoint.' });
+    // Prevent regular admins from deleting other admins or super_admins
+    if (req.user.type === 'admin' && (userToDelete.type === 'admin' || userToDelete.type === 'super_admin')) {
+      return res.status(400).json({ message: 'Regular admins cannot delete admin or super admin users.' });
+    }
+
+    // Prevent users from deleting themselves
+    if (req.user.id === id) {
+      return res.status(400).json({ message: 'Users cannot delete their own account.' });
     }
 
     // Delete the user

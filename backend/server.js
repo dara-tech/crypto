@@ -8,11 +8,13 @@ import https from 'https'; // Added
 import authRoutes from './routes/authRoutes.js';
 import companyRoute from './routes/companyRoutes.js';
 import paymentRoutes from './routes/paymentRoutes.js';
+import viewerRoutes from './routes/viewerRoutes.js';
 import {trackVisit} from './middleware/visitTracker.js';
 
 dotenv.config();
 
 const app = express();
+app.set('trust proxy', true); // Trust proxy for correct client IP
 const PORT = process.env.PORT || 5001;
 const AUTO_RELOAD_INTERVAL = 10 * 60 * 1000; // 10 minutes
 
@@ -44,11 +46,12 @@ app.use((req, res, next) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/companies', companyRoute);
 app.use('/api/payments', paymentRoutes);
+app.use('/api/viewers', viewerRoutes);
 
-// // Health check
-// app.get('/health', (req, res) => {
-//   res.status(200).json({ status: 'OK' });
-// });
+// Health check
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'OK' });
+});
 
 // Fallback to frontend
 app.get(/^\/(?!api).*/, (req, res) => {

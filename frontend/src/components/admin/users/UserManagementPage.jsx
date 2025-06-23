@@ -1,16 +1,27 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import useUserManagement from '../../../hooks/useUserManagement';
-import { Edit, Trash2, Search, Plus } from 'lucide-react';
-import { FaUser, FaEnvelope, FaUserShield, FaUserCog } from 'react-icons/fa';
+import { Edit, Trash2, Search, Plus, Filter, ChevronDown, AlertCircle } from 'lucide-react';
+import { FaUser, FaEnvelope, FaUserShield, FaUserCog, FaClock, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import AdvancedPagination from '../../common/AdvancedPagination';
+import useAuth from '../../../hooks/useAuth';
 
 const UserManagementPage = () => {
   const { users, loading, error, fetchUsers, deleteUser } = useUserManagement();
+  const { profile } = useAuth();
   const [userToDelete, setUserToDelete] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [showFilters, setShowFilters] = useState(false);
+  const [filters, setFilters] = useState({
+    role: 'all',
+    status: 'all',
+    lastLogin: 'all'
+  });
+
+  const isSuperAdmin = profile?.type === 'super_admin';
+  const isAdmin = profile?.type === 'admin';
 
   useEffect(() => {
     fetchUsers();
@@ -30,11 +41,134 @@ const UserManagementPage = () => {
     }
   };
 
-  const filteredUsers = users?.filter(user => 
-    user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    user.type.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const canDeleteUser = (user) => {
+    // No one can delete themselves
+    if (user._id === profile._id) {
+      return false;
+    }
+
+    // Super admin can delete anyone except themselves
+    if (isSuperAdmin) {
+      return true;
+    }
+
+    // Regular admin can only delete non-admin users
+    if (isAdmin) {
+      return user.type !== 'admin' && user.type !== 'super_admin';
+    }
+
+    return false;
+  };
+
+  const canEditUser = (user) => {
+    // No one can edit themselves through this interface
+    if (user._id === profile._id) {
+      return false;
+    }
+
+    // Super admin can edit anyone
+    if (isSuperAdmin) {
+      return true;
+    }
+
+    // Regular admin can only edit non-admin users
+    if (isAdmin) {
+      return user.type !== 'admin' && user.type !== 'super_admin';
+    }
+
+    return false;
+  };
+
+  const getRoleBadge = (type) => {
+    const roleStyles = {
+      super_admin: {
+        bg: 'bg-purple-500/10',
+        text: 'text-purple-500',
+        icon: <FaUserShield className="w-3 h-3" />,
+        label: 'Super Admin'
+      },
+      admin: {
+        bg: 'bg-error/10',
+        text: 'text-error',
+        icon: <FaUserShield className="w-3 h-3" />,
+        label: 'Admin'
+      },
+      payment_viewer: {
+        bg: 'bg-primary/10',
+        text: 'text-primary',
+        icon: <FaUserCog className="w-3 h-3" />,
+        label: 'Payment Viewer'
+      },
+      user: {
+        bg: 'bg-base-300/10',
+        text: 'text-base-content/70',
+        icon: <FaUser className="w-3 h-3" />,
+        label: 'User'
+      }
+    };
+
+    const style = roleStyles[type] || roleStyles.user;
+
+    return (
+      <span className={`px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1.5 ${style.bg} ${style.text}`}>
+        {style.icon}
+        {style.label}
+      </span>
+    );
+  };
+
+  const getStatusBadge = (user) => {
+    const isActive = user.lastLogin && new Date(user.lastLogin) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    
+    return (
+      <span className={`px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1.5 ${
+        isActive ? 'bg-success/10 text-success' : 'bg-warning/10 text-warning'
+      }`}>
+        {isActive ? <FaCheckCircle className="w-3 h-3" /> : <FaTimesCircle className="w-3 h-3" />}
+        {isActive ? 'Active' : 'Inactive'}
+      </span>
+    );
+  };
+
+  const getLastLoginTime = (lastLogin) => {
+    if (!lastLogin) return 'Never';
+    
+    const date = new Date(lastLogin);
+    const now = new Date();
+    const diff = now - date;
+    
+    if (diff < 60 * 1000) return 'Just now';
+    if (diff < 60 * 60 * 1000) return `${Math.floor(diff / (60 * 1000))}m ago`;
+    if (diff < 24 * 60 * 60 * 1000) return `${Math.floor(diff / (60 * 60 * 1000))}h ago`;
+    if (diff < 30 * 24 * 60 * 60 * 1000) return `${Math.floor(diff / (24 * 60 * 60 * 1000))}d ago`;
+    
+    return date.toLocaleDateString();
+  };
+
+  const filteredUsers = users?.filter(user => {
+    // If the logged-in user is admin, hide super_admin users
+    if (isAdmin && user.type === 'super_admin') {
+      return false;
+    }
+
+    const matchesSearch = 
+      user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.type.toLowerCase().includes(searchQuery.toLowerCase());
+
+    const matchesRole = filters.role === 'all' || user.type === filters.role;
+    
+    const isActive = user.lastLogin && new Date(user.lastLogin) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const matchesStatus = filters.status === 'all' || 
+      (filters.status === 'active' && isActive) || 
+      (filters.status === 'inactive' && !isActive);
+
+    const matchesLastLogin = filters.lastLogin === 'all' || 
+      (filters.lastLogin === 'recent' && isActive) ||
+      (filters.lastLogin === 'old' && !isActive);
+
+    return matchesSearch && matchesRole && matchesStatus && matchesLastLogin;
+  });
 
   // Pagination calculations
   const totalItems = filteredUsers?.length || 0;
@@ -74,15 +208,68 @@ const UserManagementPage = () => {
             />
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-base-content/40" />
           </div>
-          {/* <Link
-            to="/users/new"
-            className="btn btn-primary btn-sm gap-2 shadow-lg hover:shadow-primary/20 transition-all duration-300"
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className="btn btn-ghost btn-sm gap-2"
           >
-            <Plus className="w-4 h-4" />
-            Add User
-          </Link> */}
+            <Filter className="w-4 h-4" />
+            Filters
+            <ChevronDown className={`w-4 h-4 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
+          </button>
         </div>
       </div>
+
+      {/* Advanced Filters */}
+      {showFilters && (
+        <div className="bg-base-100 rounded-xl shadow-lg border border-base-300 p-4 space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text">Role</span>
+              </label>
+              <select
+                className="select select-bordered w-full"
+                value={filters.role}
+                onChange={(e) => setFilters(prev => ({ ...prev, role: e.target.value }))}
+              >
+                <option value="all">All Roles</option>
+                <option value="super_admin">Super Admin</option>
+                <option value="admin">Admin</option>
+                <option value="payment_viewer">Payment Viewer</option>
+                <option value="user">User</option>
+              </select>
+            </div>
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text">Status</span>
+              </label>
+              <select
+                className="select select-bordered w-full"
+                value={filters.status}
+                onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
+              >
+                <option value="all">All Status</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            </div>
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text">Last Login</span>
+              </label>
+              <select
+                className="select select-bordered w-full"
+                value={filters.lastLogin}
+                onChange={(e) => setFilters(prev => ({ ...prev, lastLogin: e.target.value }))}
+              >
+                <option value="all">All Time</option>
+                <option value="recent">Recent (30 days)</option>
+                <option value="old">Older</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      )}
 
       {loading && (
         <div className="overflow-x-auto bg-base-100 rounded-xl shadow-lg border border-primary/20">
@@ -92,6 +279,8 @@ const UserManagementPage = () => {
                 <th className="p-4 font-semibold text-left">Name</th>
                 <th className="p-4 font-semibold text-left">Email</th>
                 <th className="p-4 font-semibold text-left">Role</th>
+                <th className="p-4 font-semibold text-left">Status</th>
+                <th className="p-4 font-semibold text-left">Last Login</th>
                 <th className="p-4 font-semibold text-center">Actions</th>
               </tr>
             </thead>
@@ -110,6 +299,12 @@ const UserManagementPage = () => {
                   <td className="p-4">
                     <div className="h-6 w-20 bg-primary/10 rounded-full"></div>
                   </td>
+                  <td className="p-4">
+                    <div className="h-6 w-20 bg-primary/10 rounded-full"></div>
+                  </td>
+                  <td className="p-4">
+                    <div className="h-4 bg-primary/10 rounded w-32"></div>
+                  </td>
                   <td className="p-4 text-center">
                     <div className="flex justify-center space-x-2">
                       <div className="h-8 w-8 bg-primary/10 rounded-full"></div>
@@ -126,7 +321,7 @@ const UserManagementPage = () => {
       {error && (
         <div className="alert alert-error shadow-lg">
           <div className="flex items-center gap-2">
-            <FaUserShield className="w-5 h-5" />
+            <AlertCircle className="w-5 h-5" />
             <span>Error: {error}</span>
           </div>
         </div>
@@ -141,6 +336,8 @@ const UserManagementPage = () => {
                   <th className="p-4 font-semibold text-left">Name</th>
                   <th className="p-4 font-semibold text-left">Email</th>
                   <th className="p-4 font-semibold text-left">Role</th>
+                  <th className="p-4 font-semibold text-left">Status</th>
+                  <th className="p-4 font-semibold text-left">Last Login</th>
                   <th className="p-4 font-semibold text-center">Actions</th>
                 </tr>
               </thead>
@@ -170,39 +367,39 @@ const UserManagementPage = () => {
                       </div>
                     </td>
                     <td className="p-4">
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1.5 ${
-                          user.type === 'admin'
-                            ? 'bg-error/10 text-error'
-                            : 'bg-primary/10 text-primary'
-                        }`}>
-                        {user.type === 'admin' ? (
-                          <FaUserShield className="w-3 h-3" />
-                        ) : (
-                          <FaUserCog className="w-3 h-3" />
-                        )}
-                        {user.type}
-                      </span>
+                      {getRoleBadge(user.type)}
+                    </td>
+                    <td className="p-4">
+                      {getStatusBadge(user)}
+                    </td>
+                    <td className="p-4">
+                      <div className="flex items-center gap-2 text-base-content/70">
+                        <FaClock className="w-4 h-4" />
+                        {getLastLoginTime(user.lastLogin)}
+                      </div>
                     </td>
                     <td className="p-4 text-center">
                       <div className="flex justify-center space-x-2">
-                        <Link
-                          to={`/users/${user._id}/edit`}
-                          className="btn btn-ghost btn-sm text-primary hover:bg-primary/10 transition-colors duration-200"
-                          title="Edit user"
-                        >
-                          <Edit className="w-4 h-4" />
-                          <span className="sr-only">Edit</span>
-                        </Link>
-                        <button
-                          onClick={() => handleDeleteClick(user)}
-                          className="btn btn-ghost btn-sm text-error hover:bg-error/10 transition-colors duration-200"
-                          disabled={user.type === 'admin'}
-                          title={user.type === 'admin' ? 'Cannot delete admin' : 'Delete user'}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                          <span className="sr-only">Delete</span>
-                        </button>
+                        {canEditUser(user) && (
+                          <Link
+                            to={`/users/${user._id}/edit`}
+                            className="btn btn-ghost btn-sm text-primary hover:bg-primary/10 transition-colors duration-200"
+                            title="Edit user"
+                          >
+                            <Edit className="w-4 h-4" />
+                            <span className="sr-only">Edit</span>
+                          </Link>
+                        )}
+                        {canDeleteUser(user) && (
+                          <button
+                            onClick={() => handleDeleteClick(user)}
+                            className="btn btn-ghost btn-sm text-error hover:bg-error/10 transition-colors duration-200"
+                            title="Delete user"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                            <span className="sr-only">Delete</span>
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>

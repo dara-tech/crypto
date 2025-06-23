@@ -7,7 +7,7 @@ const router = express.Router();
 // Only allow authenticated users with payment_viewer or admin role
 router.get('/', protect, (req, res, next) => {
   
-  if (req.user.type !== 'admin' && req.user.type !== 'payment_viewer') {
+  if (req.user.type !== 'admin' && req.user.type !== 'payment_viewer' && req.user.type !== 'super_admin') {
     return res.status(403).json({ 
       message: 'Not authorized for payment access',
       userType: req.user.type // Include user type in response for debugging

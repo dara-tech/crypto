@@ -120,7 +120,7 @@ const Contact = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-base-200/50 to-base-100 py-12 px-4">
+      <div className="min-h-screen bg-gradient-to-b from-base-200/50 to-base-100 py-12 px-4 my-20">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-20">
             <div className="h-12 w-3/4 mx-auto bg-base-300 rounded-xl"></div>

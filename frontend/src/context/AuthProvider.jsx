@@ -42,7 +42,7 @@ export const AuthProvider = ({ children }) => {
         throw new Error('Unexpected API response format.');
       }
 
-      setProfile(userData);
+      setProfile({ ...userData, lastLogin: userData.lastLogin });
       setIsAuthenticated(true);
     } catch (error) {
       console.error('Error fetching profile:', error);
@@ -61,7 +61,7 @@ export const AuthProvider = ({ children }) => {
       const { data } = await API.post('/api/auth/login', credentials);
       localStorage.setItem('token', data.token);
       const userData = data?.user || data;
-      setProfile(userData);
+      setProfile({ ...userData, lastLogin: userData.lastLogin });
       setIsAuthenticated(true);
       const from = new URLSearchParams(window.location.search).get('from') || '/';
       navigate(from, { replace: true });

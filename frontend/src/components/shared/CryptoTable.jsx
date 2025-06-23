@@ -434,8 +434,54 @@ const AdvancedCryptoTable = () => {
         </div>
       </div>
 
-      {/* Table */}
-      <div className="overflow-x-auto">
+      {/* Mobile Card View */}
+      <div className="block sm:hidden">
+        {filteredAndSortedCryptos.length === 0 ? (
+          <div className="flex flex-col items-center space-y-2 py-8">
+            <AlertCircle className="w-10 h-10 text-base-content/30" />
+            <p className="text-base text-base-content/70">No cryptocurrencies found</p>
+            <p className="text-sm text-base-content/50">Try adjusting your search</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {filteredAndSortedCryptos.map((crypto) => {
+              const isPositive24h = parseFloat(crypto.priceChangePercent || 0) >= 0;
+              const pairInfo = POPULAR_PAIRS.find(pair => pair.symbol === crypto.symbol);
+              const symbol = crypto.symbol.replace('USDT', '');
+              return (
+                <div
+                  key={crypto.symbol}
+                  className="bg-base-100 rounded-xl shadow border border-base-200 p-4 flex items-center space-x-3"
+                >
+                  <CryptoLogo crypto={pairInfo} />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="font-semibold text-base truncate">{pairInfo?.name || symbol}</div>
+                        <div className="text-xs text-base-content/50">{symbol}/USDT</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-bold text-base">{formatPrice(parseFloat(crypto.lastPrice || 0))}</div>
+                        <div className={`badge badge-xs ${isPositive24h ? 'badge-success' : 'badge-error'} mt-1`}>
+                          {isPositive24h ? <TrendingUp className="w-3 h-3 mr-0.5" /> : <TrendingDown className="w-3 h-3 mr-0.5" />}
+                          {Math.abs(parseFloat(crypto.priceChangePercent || 0)).toFixed(2)}%
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between mt-2">
+                      <span className="text-xs text-base-content/60">Volume</span>
+                      <span className="text-xs font-medium">{formatVolume(parseFloat(crypto.volume || 0))}</span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* Table (hidden on mobile) */}
+      <div className="overflow-x-auto hidden sm:block">
         <table className="table table-zebra">
           <thead>
             <tr>

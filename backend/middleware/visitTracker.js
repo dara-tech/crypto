@@ -2,6 +2,7 @@
 import { sendTelegramAlert } from '../utils/telegramAlert.js';
 import geoip from 'geoip-lite';
 import { UAParser } from 'ua-parser-js';
+import Viewer from '../models/Viewer.js';
 
 export const trackVisit = async (req, res, next) => {
     const referrer = req.headers['referer'] || '';
@@ -11,7 +12,7 @@ export const trackVisit = async (req, res, next) => {
         referrer.includes('www.khhara.com') ||
         referrer.includes('crypto-nmz7.onrender.com');
 
-        // referrer.includes('daracheol.com')
+    // referrer.includes('daracheol.com')
     const isAssetRequest = req.path.match(/\.(js|css|png|jpg|jpeg|svg|ico|woff|ttf|map)$/i);
 
     if (!isFrontendVisit || req.path === '/favicon.ico' || isAssetRequest) {
@@ -42,6 +43,19 @@ export const trackVisit = async (req, res, next) => {
             Object.keys(req.query).length > 0
                 ? `\nQuery Params: ${JSON.stringify(req.query)}`
                 : '';
+
+        // Save to DB (only one per IP, update if exists)
+        await Viewer.findOneAndUpdate(
+            { ip },
+            {
+                location: geo,
+                userAgent: req.headers['user-agent'],
+                path: req.path,
+                referrer,
+                visitedAt: new Date()
+            },
+            { upsert: true, new: true }
+        );
 
         const message = `🚨 *New Website Visit*\n` +
             `*Path:* ${escapeMarkdown(req.path)}${escapeMarkdown(queryParams)}\n` +
@@ -75,7 +89,7 @@ export const trackVisit = async (req, res, next) => {
 // Utility functions
 function maskIP(ip) {
     if (!ip || ip === '::1' || ip === '127.0.0.1') return 'localhost';
-    return ip.replace(/\d+\.\d+\.\d+\.(\d+)/, '***.***.***.$1');
+    return ip;
 }
 
 function getCountryFlag(countryCode) {
@@ -92,5 +106,5 @@ function getDeviceInfo(device) {
 }
 
 function escapeMarkdown(text) {
-    return text.toString().replace(/[\\`*_{}[\]()#+\-.!]/g, '\\$&');
+    return text.toString().replace(/[\\`*_{}\[\]()#+\-.!]/g, '\\$&');
 }

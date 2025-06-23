@@ -409,7 +409,51 @@ const AdvancedTradingChart = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="card-body border-b border-base-200">
+      {/* Mobile Card View for Stats */}
+      <div className="block sm:hidden card-body border-b border-base-200">
+        {isLoading ? (
+          <div className="space-y-3">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="card bg-base-200">
+                <div className="card-body p-4">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <div className="w-8 h-8 bg-base-300 rounded-lg"></div>
+                    <div className="h-4 bg-base-300 rounded w-20"></div>
+                  </div>
+                  <div className="h-6 bg-base-300 rounded w-24"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <StatCard
+              icon={DollarSign}
+              label="Current Price"
+              value={`${priceStats.currentPrice.toLocaleString()}`}
+              change={priceStats.priceChange}
+              isPositive={priceStats.priceChange >= 0}
+            />
+            <StatCard
+              icon={Activity}
+              label="24h Volume"
+              value={`${(priceStats.volume24h / 1000000).toFixed(2)}M`}
+            />
+            <StatCard
+              icon={TrendingUp}
+              label="Market Cap"
+              value={`${(priceStats.marketCap / 1000000000).toFixed(2)}B`}
+            />
+            <StatCard
+              icon={Calendar}
+              label="Period"
+              value={TIME_RANGES.find(r => r.value === timeRange)?.description}
+            />
+          </div>
+        )}
+      </div>
+      {/* Desktop Stats Grid (hidden on mobile) */}
+      <div className="hidden sm:block card-body border-b border-base-200">
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {[...Array(4)].map((_, i) => (

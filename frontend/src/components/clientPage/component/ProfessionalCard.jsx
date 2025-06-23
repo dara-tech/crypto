@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { FaUserCircle, FaEnvelope, FaBuilding } from 'react-icons/fa';
+import { FaUserCircle, FaEnvelope, FaBuilding, FaPhone } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 
 const ProfessionalCard = ({ professional }) => {
-  const { name, role, description, image, email, companyName } = professional;
+  const { name, role, description, image, email, companyName, phone } = professional;
   const [isHovered, setIsHovered] = useState(false);
 
   return (
@@ -43,9 +43,9 @@ const ProfessionalCard = ({ professional }) => {
         </motion.h2>
         
         <div className="flex flex-col items-center gap-2 mb-2">
-          <div className="badge badge-primary badge-lg">{role}</div>
+          <div className="badge badge-primary badge-lg text-xs">{role}</div>
           {companyName && (
-            <div className="flex items-center gap-1 text-sm text-base-content/70">
+            <div className="flex items-center gap-1 text-xs text-base-content/70">
               <FaBuilding className="text-primary" />
               <span>{companyName}</span>
             </div>
@@ -55,13 +55,13 @@ const ProfessionalCard = ({ professional }) => {
         <div className="divider my-2"></div>
         
         <motion.p 
-          className="text-base-content/80 text-sm flex-grow"
+          className="text-base-content/80 text-xs flex-grow"
           animate={{ opacity: isHovered ? 1 : 0.8 }}
         >
           {description}
         </motion.p>
 
-        <div className="card-actions justify-center mt-4 w-full">
+        <div className="card-actions justify-center mt-4 w-full flex flex-col gap-2">
           {email && (
             <motion.a 
               href={`mailto:${email}`}
@@ -70,6 +70,16 @@ const ProfessionalCard = ({ professional }) => {
               whileTap={{ scale: 0.95 }}
             >
               <FaEnvelope /> <span>Contact</span>
+            </motion.a>
+          )}
+          {phone && (
+            <motion.a
+              href={`tel:${phone}`}
+              className="btn btn-outline btn-primary btn-sm gap-2 w-full"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <FaPhone /> <span>{phone}</span>
             </motion.a>
           )}
         </div>

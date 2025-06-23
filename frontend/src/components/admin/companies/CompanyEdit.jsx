@@ -13,6 +13,7 @@ import TermsAndConditions from "./edit/TermCondition";
 import FAQManager from "./edit/FAQManager";
 import ProfessionalsManager from './edit/ProfessionalsManager';
 import { useTranslation } from "react-i18next";
+import { toast } from 'react-hot-toast';
 
 // Memoized Tab Button Component
 const TabButton = memo(({ tab, isActive, onClick }) => (
@@ -469,7 +470,7 @@ const CompanyEdit = () => {
       const updated = await updateCompany(id, formDataToSend);
       if (!updated) throw new Error(t('company.errors.updateFailed'));
 
-      navigate("/admin/companies");
+      toast.success(t('company.updateSuccess', 'Company updated successfully!'));
     } catch (err) {   
       console.error("Update error:", err);
       setError(err.message || "Failed to update company");

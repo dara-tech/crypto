@@ -182,6 +182,7 @@
     },
     "faqs": {
       "add": "Add FAQ",
+      "addFirstFaq": "Add First Section",
       "question": "Question",
       "answer": "Answer",
       "questionPlaceholder": "Enter the question",
