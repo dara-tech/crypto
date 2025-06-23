@@ -1,6 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
-import { HelmetProvider } from 'react-helmet-async';
 import MainLayout from './components/layouts/MainLayout';
 import LoginPage from './components/auth/loginPage';
 import RegisterPage from './components/auth/RegisterPage';
@@ -67,150 +66,148 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <HelmetProvider>
-          <Toaster position="top-right" />
-          <div data-theme={theme}>
-            <Navbar />
-            <Routes>
-              {/* Public Routes */}
-              <Route 
-                path="/login" 
-                element={
-                  <>
-                    {!isAuthenticated ? <LoginPage /> : <Navigate to="/dashboard" />}
-                  </>
-                } 
-              />
-              <Route 
-                path="/register" 
-                element={
-                  <>
-                    {!isAuthenticated ? <RegisterPage /> : <Navigate to="/dashboard" />}
-                  </>
-                } 
-              />
-              <Route 
-                path="/about" 
-                element={
-                  <>
-                    <About />
-                  </>
-                } 
-              />
-              <Route 
-                path="/mission" 
-                element={
-                  <>
-                    <Mission />
-                  </>
-                } 
-              />
-              <Route 
-                path="/vision" 
-                element={
-                  <>
-                    <Vision />
-                  </>
-                } 
-              />
-              <Route 
-                path="/contact" 
-                element={
-                  <>
-                    <Contact />
-                  </>
-                } 
-              />
-              <Route 
-                path="/privacy-policy" 
-                element={
-                  <>
-                    <PolicyPrivacy />
-                  </>
-                } 
-              />
-              <Route 
-                path="/terms-conditions" 
-                element={
-                  <>
-                    <TermsAndConditions />
-                  </>
-                } 
-              />
-              <Route 
-                path="/faq" 
-                element={
-                  <>
-                    <FaqPage />
-                  </>
-                } 
-              />
-              <Route 
-                path="/setting" 
-                element={
-                  <>
-                    <SettingPage />
-                  </>
-                } 
-              />
-              <Route 
-                path="/professional" 
-                element={
-                  <>
-                    <ProfessionalPage />
-                  </>
-                } 
-              />
+        <Toaster position="top-right" />
+        <div data-theme={theme}>
+          <Navbar />
+          <Routes>
+            {/* Public Routes */}
+            <Route 
+              path="/login" 
+              element={
+                <>
+                  {!isAuthenticated ? <LoginPage /> : <Navigate to="/dashboard" />}
+                </>
+              } 
+            />
+            <Route 
+              path="/register" 
+              element={
+                <>
+                  {!isAuthenticated ? <RegisterPage /> : <Navigate to="/dashboard" />}
+                </>
+              } 
+            />
+            <Route 
+              path="/about" 
+              element={
+                <>
+                  <About />
+                </>
+              } 
+            />
+            <Route 
+              path="/mission" 
+              element={
+                <>
+                  <Mission />
+                </>
+              } 
+            />
+            <Route 
+              path="/vision" 
+              element={
+                <>
+                  <Vision />
+                </>
+              } 
+            />
+            <Route 
+              path="/contact" 
+              element={
+                <>
+                  <Contact />
+                </>
+              } 
+            />
+            <Route 
+              path="/privacy-policy" 
+              element={
+                <>
+                  <PolicyPrivacy />
+                </>
+              } 
+            />
+            <Route 
+              path="/terms-conditions" 
+              element={
+                <>
+                  <TermsAndConditions />
+                </>
+              } 
+            />
+            <Route 
+              path="/faq" 
+              element={
+                <>
+                  <FaqPage />
+                </>
+              } 
+            />
+            <Route 
+              path="/setting" 
+              element={
+                <>
+                  <SettingPage />
+                </>
+              } 
+            />
+            <Route 
+              path="/professional" 
+              element={
+                <>
+                  <ProfessionalPage />
+                </>
+              } 
+            />
 
-              {/* Protected Routes */}
-              <Route element={<MainLayout />}>
-                <Route path="/dashboard" element={<SuperAdminDashboard />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/payments" element={<PaymentViewerPage />} />
-                <Route path="/companies" element={<CompanyList />} />
-                <Route path="/companies/:id" element={<CompanyEdit />} />
-                <Route path="/users" element={<UserManagementPage />} />
-                <Route path="/admin/settings" element={<SettingPage />} />
-              </Route>
+            {/* Protected Routes */}
+            <Route element={<MainLayout />}>
+              <Route path="/dashboard" element={<SuperAdminDashboard />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/payments" element={<PaymentViewerPage />} />
+              <Route path="/companies" element={<CompanyList />} />
+              <Route path="/companies/:id" element={<CompanyEdit />} />
+              <Route path="/users" element={<UserManagementPage />} />
+              <Route path="/admin/settings" element={<SettingPage />} />
+            </Route>
 
-              {/* Root Route - Conditional rendering based on authentication */}
-              <Route 
-                path="/" 
-                element={
-                  isSuperAdmin ? (
-                    <PrivateRoute roles={['super_admin']}>
-                      <SuperAdminLayout />
-                    </PrivateRoute>
-                  ) : (
-                    <>
-                      <Home />
-                    </>
-                  )
-                }
-              >
-                {isSuperAdmin && (
+            {/* Root Route - Conditional rendering based on authentication */}
+            <Route 
+              path="/" 
+              element={
+                isSuperAdmin ? (
+                  <PrivateRoute roles={['super_admin']}>
+                    <SuperAdminLayout />
+                  </PrivateRoute>
+                ) : (
                   <>
-                    <Route index element={<Navigate to="/dashboard" replace />} />
-                    <Route path="dashboard" element={<SuperAdminDashboard />} />
+                    <Home />
                   </>
-                )}
-              </Route>
+                )
+              }
+            >
+              {isSuperAdmin && (
+                <>
+                  <Route index element={<Navigate to="/dashboard" replace />} />
+                  <Route path="dashboard" element={<SuperAdminDashboard />} />
+                </>
+              )}
+            </Route>
 
-              {/* 404 Route */}
-              <Route 
-                path="*" 
-                element={
-                  <>
-                    <Navigate to="/" />
-                  </>
-                } 
-              />
-            </Routes>
-            {/* Only show Footer if not super admin */}
-            {!isSuperAdmin && <Footer />}
-            <Chatbot />
-          </div>
-        </HelmetProvider>
+            {/* 404 Route */}
+            <Route 
+              path="*" 
+              element={
+                <>
+                  <Navigate to="/" />
+                </>
+              } 
+            />
+          </Routes>
+          {/* Only show Footer if not super admin */}
+          {!isSuperAdmin && <Footer />}
+          <Chatbot />
+        </div>
       </AuthProvider>
     </QueryClientProvider>
   );
