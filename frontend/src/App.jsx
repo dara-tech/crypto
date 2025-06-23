@@ -28,7 +28,6 @@ import Navbar from './components/shares/Navbar';
 import Footer from './components/shares/Footer';
 import SuperAdminLayout from './components/admin/layouts/SuperAdminLayout';
 import SuperAdminDashboard from './components/admin/dashboard/SuperAdminDashboard';
-import SEO from './components/SEO';
 import { routesMetadata } from './config/metadata';
 import './App.css';
 
@@ -78,7 +77,6 @@ const App = () => {
                 path="/login" 
                 element={
                   <>
-                    <SEO {...routesMetadata.login} />
                     {!isAuthenticated ? <LoginPage /> : <Navigate to="/dashboard" />}
                   </>
                 } 
@@ -87,7 +85,6 @@ const App = () => {
                 path="/register" 
                 element={
                   <>
-                    <SEO {...routesMetadata.register} />
                     {!isAuthenticated ? <RegisterPage /> : <Navigate to="/dashboard" />}
                   </>
                 } 
@@ -96,7 +93,6 @@ const App = () => {
                 path="/about" 
                 element={
                   <>
-                    <SEO {...routesMetadata.about} />
                     <About />
                   </>
                 } 
@@ -105,7 +101,6 @@ const App = () => {
                 path="/mission" 
                 element={
                   <>
-                    <SEO {...routesMetadata.mission} />
                     <Mission />
                   </>
                 } 
@@ -114,7 +109,6 @@ const App = () => {
                 path="/vision" 
                 element={
                   <>
-                    <SEO {...routesMetadata.vision} />
                     <Vision />
                   </>
                 } 
@@ -123,7 +117,6 @@ const App = () => {
                 path="/contact" 
                 element={
                   <>
-                    <SEO {...routesMetadata.contact} />
                     <Contact />
                   </>
                 } 
@@ -132,7 +125,6 @@ const App = () => {
                 path="/privacy-policy" 
                 element={
                   <>
-                    <SEO {...routesMetadata.privacyPolicy} />
                     <PolicyPrivacy />
                   </>
                 } 
@@ -141,7 +133,6 @@ const App = () => {
                 path="/terms-conditions" 
                 element={
                   <>
-                    <SEO {...routesMetadata.termsAndConditions} />
                     <TermsAndConditions />
                   </>
                 } 
@@ -150,7 +141,6 @@ const App = () => {
                 path="/faq" 
                 element={
                   <>
-                    <SEO {...routesMetadata.faq} />
                     <FaqPage />
                   </>
                 } 
@@ -159,7 +149,6 @@ const App = () => {
                 path="/setting" 
                 element={
                   <>
-                    <SEO {...routesMetadata.settings} />
                     <SettingPage />
                   </>
                 } 
@@ -168,7 +157,6 @@ const App = () => {
                 path="/professional" 
                 element={
                   <>
-                    <SEO {...routesMetadata.professional} />
                     <ProfessionalPage />
                   </>
                 } 
@@ -195,7 +183,6 @@ const App = () => {
                     </PrivateRoute>
                   ) : (
                     <>
-                      <SEO {...routesMetadata.home} />
                       <Home />
                     </>
                   )
@@ -214,10 +201,6 @@ const App = () => {
                 path="*" 
                 element={
                   <>
-                    <SEO 
-                      title="404 - Page Not Found"
-                      description="The page you are looking for does not exist."
-                    />
                     <Navigate to="/" />
                   </>
                 } 
