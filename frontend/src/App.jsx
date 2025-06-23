@@ -161,7 +161,7 @@ const App = () => {
             />
 
             {/* Protected Routes */}
-            <Route element={<MainLayout />}>
+            <Route element={<PrivateRoute roles={['super_admin']}><MainLayout /></PrivateRoute>}>
               <Route path="/dashboard" element={<SuperAdminDashboard />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/payments" element={<PaymentViewerPage />} />
